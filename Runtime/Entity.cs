@@ -74,38 +74,22 @@ namespace CZToolKit.ECS
 
         public static bool HasComponent<T>(this in Entity entity) where T : struct, IComponent
         {
-            var componentPool = entity.World.GetComponentPool<T>();
-            if (null != componentPool && componentPool.Contains(entity.ID))
-                return true;
-            return false;
+            return entity.World.HasComponent<T>(entity.ID);
         }
 
         public static bool HasComponent(this in Entity entity, Type componentType)
         {
-            var componentPool = entity.World.GetComponentPool(componentType);
-            if (null != componentPool && componentPool.Contains(entity.ID))
-                return true;
-            return false;
+            return entity.World.HasComponent(entity.ID, componentType);
         }
 
         public static void AddComponent<T>(this in Entity entity, T component) where T : struct, IComponent
         {
-            var componentPool = entity.World.GetComponentPool<T>();
-            if (componentPool == null)
-                componentPool = entity.World.NewComponentPool<T>();
-            else if (componentPool.Contains(entity.ID))
-                throw new Exception($"Alreay had {nameof(T)} component!");
-            componentPool.Set(entity.ID, component);
+            entity.World.AddComponent<T>(entity.ID, in component);
         }
 
         public static void AddComponent(this in Entity entity, Type type, object component)
         {
-            var componentPool = entity.World.GetComponentPool(type);
-            if (componentPool == null)
-                componentPool = entity.World.NewComponentPool(type);
-            else if (componentPool.Contains(entity.ID))
-                throw new Exception($"Alreay had type component!");
-            componentPool.Set(entity.ID, component);
+            entity.World.AddComponent(entity.ID, type, component);
         }
 
         public static T GetComponent<T>(this in Entity entity) where T : struct, IComponent
@@ -115,22 +99,17 @@ namespace CZToolKit.ECS
 
         public static ref T RefComponent<T>(this in Entity entity) where T : struct, IComponent
         {
-            return ref entity.World.GetComponentPool<T>().Ref(entity.ID);
+            return ref entity.World.RefComponent<T>(entity.ID);
         }
 
         public static void SetComponent<T>(this in Entity entity, T component) where T : struct, IComponent
         {
-            var entityID = entity.ID;
-            var world = entity.World;
-            var componentPool = world.GetComponentPool<T>();
-            if (componentPool == null)
-                componentPool = world.NewComponentPool<T>();
-            componentPool.Set(entityID, component);
+            entity.World.SetComponent(entity.ID, in component);
         }
 
         public static void RemoveComponent<T>(this in Entity entity)
         {
-            entity.World.GetComponentPool(typeof(T)).Del(entity.ID);
+            entity.World.RemoveComponent<T>(entity.ID);
         }
     }
 }

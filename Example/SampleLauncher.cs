@@ -15,8 +15,6 @@
 #endregion
 using UnityEngine;
 using CZToolKit.ECS;
-using System.Collections.Generic;
-using CZToolKit.ECS.ConvertToEntity;
 
 public class SampleLauncher : MonoBehaviour
 {
@@ -41,7 +39,7 @@ public class SampleLauncher : MonoBehaviour
     {
         DontDestroyOnLoad(gameObject);
 
-        world = WorldManager.Instance.mainWorld;
+        world = WorldManager.MainWorld;
         startTime = UnityEngine.Time.time;
         fixedUpdateCount = 0;
 
@@ -63,11 +61,6 @@ public class SampleLauncher : MonoBehaviour
 public struct RotateSpeedComponent : IComponent
 {
     public float value;
-}
-
-public struct GameObjectComponent : IComponent
-{
-    public GameObject value;
 }
 
 public class SampleSystem : IUpdateSystem
@@ -92,7 +85,7 @@ public class SampleSystem : IUpdateSystem
     {
         public void Execute(ref GameObjectComponent arg0, ref RotateSpeedComponent arg1)
         {
-            arg0.value.transform.eulerAngles += Vector3.up * arg1.value * Time.deltaTime;
+            arg0.gameObject.transform.eulerAngles += Vector3.up * arg1.value * Time.deltaTime;
         }
     }
 }

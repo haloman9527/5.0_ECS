@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace CZToolKit.ECS.ConvertToEntity
+namespace CZToolKit.ECS
 {
     public class ConvertToEntity : MonoBehaviour
     {
@@ -10,7 +10,7 @@ namespace CZToolKit.ECS.ConvertToEntity
 
         private void Awake()
         {
-            WorldManager.Instance.mainWorld.NewEntity(out var entity);
+            WorldManager.MainWorld.NewEntity(out var entity);
             foreach (var component in components)
             {
                 entity.AddComponent(component.GetType(), component);

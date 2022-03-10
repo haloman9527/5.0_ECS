@@ -5,7 +5,7 @@ using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
 
-namespace CZToolKit.ECS.ConvertToEntity
+namespace CZToolKit.ECS
 {
     [CustomEditor(typeof(ConvertToEntity))]
     public class ConvertToEntityEditor : BasicEditor

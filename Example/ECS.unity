@@ -451,9 +451,9 @@ MonoBehaviour:
   references:
     version: 1
     00000000:
-      type: {class: GameObjectComponent, ns: , asm: Assembly-CSharp}
+      type: {class: GameObjectComponent, ns: CZToolKit.ECS, asm: Assembly-CSharp}
       data:
-        value: {fileID: 1646022988}
+        gameObject: {fileID: 1646022988}
     00000001:
       type: {class: RotateSpeedComponent, ns: , asm: Assembly-CSharp}
       data:

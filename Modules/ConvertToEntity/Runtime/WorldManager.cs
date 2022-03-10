@@ -1,14 +1,13 @@
-﻿using CZToolKit.Core.Singletons;
-
-namespace CZToolKit.ECS.ConvertToEntity
+﻿
+namespace CZToolKit.ECS
 {
-    public class WorldManager : CZNormalSingleton<WorldManager>
+    public class WorldManager
     {
-        public readonly World mainWorld;
+        public static readonly World MainWorld;
 
-        public WorldManager()
+        static WorldManager()
         {
-            mainWorld = new World();
+            MainWorld = new World();
         }
     }
 }

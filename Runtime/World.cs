@@ -20,9 +20,15 @@ namespace CZToolKit.ECS
 {
     public sealed class World
     {
+        public World()
+        {
+            NewComponentPool<DestroyComponent>(16);
+        }
+
         #region Entity
         private readonly IDGenerator entityIDGenerator = new IDGenerator();
         private readonly Dictionary<int, Entity> entities = new Dictionary<int, Entity>();
+        private readonly HashSet<int> willDeleteEntities = new HashSet<int>();
 
         public IEnumerable<Entity> Entities
         {
@@ -58,6 +64,13 @@ namespace CZToolKit.ECS
         }
 
         public void DelEntity(int entityID)
+        {
+            willDeleteEntities.Add(entityID);
+            if (!HasComponent<DestroyComponent>(entityID))
+                AddComponent(entityID, new DestroyComponent());
+        }
+
+        public void DelEntityImmediate(int entityID)
         {
             if (!entities.Remove(entityID))
                 return;
@@ -132,6 +145,60 @@ namespace CZToolKit.ECS
             componentPools.TryGetValue(typeof(T), out var componentPool);
             return componentPool as IComponentPool<T>;
         }
+
+        public bool HasComponent<T>(int entityID) where T : struct, IComponent
+        {
+            var componentPool = GetComponentPool<T>();
+            if (null != componentPool && componentPool.Contains(entityID))
+                return true;
+            return false;
+        }
+
+        public bool HasComponent(int entityID, Type componentType)
+        {
+            var componentPool = GetComponentPool(componentType);
+            if (null != componentPool && componentPool.Contains(entityID))
+                return true;
+            return false;
+        }
+
+        public void AddComponent<T>(int entityID, in T component) where T : struct, IComponent
+        {
+            var componentPool = GetComponentPool<T>();
+            if (componentPool == null)
+                componentPool = NewComponentPool<T>();
+            else if (componentPool.Contains(entityID))
+                throw new Exception($"Alreay had {nameof(T)} component!");
+            componentPool.Set(entityID, component);
+        }
+
+        public void AddComponent(int entityID, Type type, object component)
+        {
+            var componentPool = GetComponentPool(type);
+            if (componentPool == null)
+                componentPool = NewComponentPool(type);
+            else if (componentPool.Contains(entityID))
+                throw new Exception($"Alreay had type component!");
+            componentPool.Set(entityID, component);
+        }
+
+        public ref T RefComponent<T>(int entityID) where T : struct, IComponent
+        {
+            return ref GetComponentPool<T>().Ref(entityID);
+        }
+
+        public void SetComponent<T>(int entityID, in T component) where T : struct, IComponent
+        {
+            var componentPool = GetComponentPool<T>();
+            if (componentPool == null)
+                componentPool = NewComponentPool<T>();
+            componentPool.Set(entityID, component);
+        }
+
+        public void RemoveComponent<T>(int entityID)
+        {
+            GetComponentPool(typeof(T)).Del(entityID);
+        }
         #endregion
 
         #region System
@@ -167,6 +234,13 @@ namespace CZToolKit.ECS
             {
                 if (system is ILateUpdateSystem sys)
                     sys.OnLateUpdate();
+            }
+            if (willDeleteEntities.Count > 0)
+            {
+                foreach (var entityID in willDeleteEntities)
+                {
+                    DelEntityImmediate(entityID);
+                }
             }
         }
 
