@@ -63,14 +63,12 @@ namespace CZToolKit.ECS
             return entities.TryGetValue(entityID, out entity);
         }
 
-        public void DelEntity(int entityID)
+        public void DestroyEntity(int entityID)
         {
             willDeleteEntities.Add(entityID);
-            if (!HasComponent<DestroyComponent>(entityID))
-                AddComponent(entityID, new DestroyComponent());
         }
 
-        public void DelEntityImmediate(int entityID)
+        public void DestroyEntityImmediate(int entityID)
         {
             if (!entities.Remove(entityID))
                 return;
@@ -209,7 +207,6 @@ namespace CZToolKit.ECS
             get { return systems; }
         }
 
-
         public void FixedUpdate()
         {
             foreach (var system in systems)
@@ -239,7 +236,7 @@ namespace CZToolKit.ECS
             {
                 foreach (var entityID in willDeleteEntities)
                 {
-                    DelEntityImmediate(entityID);
+                    DestroyEntityImmediate(entityID);
                 }
             }
         }

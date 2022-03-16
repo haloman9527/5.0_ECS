@@ -5,6 +5,7 @@ namespace CZToolKit.ECS
 {
     public class ConvertToEntity : MonoBehaviour
     {
+        public bool destroyOnAwake;
         [SerializeReference]
         public List<IComponent> components = new List<IComponent>();
 
@@ -15,7 +16,8 @@ namespace CZToolKit.ECS
             {
                 entity.AddComponent(component.GetType(), component);
             }
-            GameObject.Destroy(this);
+            if (destroyOnAwake)
+                GameObject.Destroy(this);
         }
     }
 }
