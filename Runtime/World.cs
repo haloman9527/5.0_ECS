@@ -20,11 +20,6 @@ namespace CZToolKit.ECS
 {
     public sealed class World
     {
-        public World()
-        {
-            NewComponentPool<DestroyComponent>(16);
-        }
-
         #region Entity
         private readonly IDGenerator entityIDGenerator = new IDGenerator();
         private readonly Dictionary<int, Entity> entities = new Dictionary<int, Entity>();
@@ -75,6 +70,18 @@ namespace CZToolKit.ECS
             foreach (var componentPool in componentPools.Values)
             {
                 componentPool.Del(entityID);
+            }
+        }
+
+        public void CheckDestroyEntities()
+        {
+            if (willDeleteEntities.Count > 0)
+            {
+                foreach (var entityID in willDeleteEntities)
+                {
+                    DestroyEntityImmediate(entityID);
+                }
+                willDeleteEntities.Clear();
             }
         }
         #endregion
@@ -207,40 +214,6 @@ namespace CZToolKit.ECS
             get { return systems; }
         }
 
-        public void FixedUpdate()
-        {
-            foreach (var system in systems)
-            {
-                if (system is IFixedUpdateSystem sys)
-                    sys.OnFixedUpdate();
-            }
-        }
-
-        public void Update()
-        {
-            foreach (var system in systems)
-            {
-                if (system is IUpdateSystem sys)
-                    sys.OnUpdate();
-            }
-        }
-
-        public void LateUpdate()
-        {
-            foreach (var system in systems)
-            {
-                if (system is ILateUpdateSystem sys)
-                    sys.OnLateUpdate();
-            }
-            if (willDeleteEntities.Count > 0)
-            {
-                foreach (var entityID in willDeleteEntities)
-                {
-                    DestroyEntityImmediate(entityID);
-                }
-            }
-        }
-
         public void AddSystem(ISystem system)
         {
             systems.Add(system);
@@ -268,5 +241,36 @@ namespace CZToolKit.ECS
             }
         }
         #endregion
+    }
+
+    public static class WorldExtension
+    {
+        public static void FixedUpdate(this World world)
+        {
+            foreach (var system in world.Systems)
+            {
+                if (system is IFixedUpdateSystem sys)
+                    sys.OnFixedUpdate();
+            }
+        }
+
+        public static void Update(this World world)
+        {
+            foreach (var system in world.Systems)
+            {
+                if (system is IUpdateSystem sys)
+                    sys.OnUpdate();
+            }
+        }
+
+        public static void LateUpdate(this World world)
+        {
+            foreach (var system in world.Systems)
+            {
+                if (system is ILateUpdateSystem sys)
+                    sys.OnLateUpdate();
+            }
+            world.CheckDestroyEntities();
+        }
     }
 }
