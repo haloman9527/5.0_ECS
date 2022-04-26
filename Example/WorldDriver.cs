@@ -23,14 +23,8 @@ public class WorldDriver : MonoBehaviour
     public int entityCount = 100;
     World world;
 
-    public List<int> a = new List<int>();
-    public Dictionary<int, int> b = new Dictionary<int, int>();
-
-    // Start is called before the first frame update
     void Start()
     {
-        a = new List<int>();
-        b = new Dictionary<int, int>();
         world = World.NewWorld();
         Entity entity = default;
         for (int i = 0; i < entityCount; i++)
@@ -50,9 +44,9 @@ public class WorldDriver : MonoBehaviour
 
     private void Update()
     {
-        //Profiler.BeginSample("NormalUpdateAAA");
-        //world.Update();
-        //Profiler.EndSample();
+        Profiler.BeginSample("NormalUpdateAAA");
+        world.Update();
+        Profiler.EndSample();
 
         Profiler.BeginSample("JobsUpdateAAA");
         world.JobsUpdate();

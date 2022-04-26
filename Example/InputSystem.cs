@@ -22,7 +22,7 @@ public class InputSystem : ISystem, IJobsUpdate, IUpdate
 {
     public readonly World world;
     public readonly Filter filter;
-
+    NativeArray<Entity> entities;
     public InputSystem(World world)
     {
         this.world = world;
@@ -31,12 +31,15 @@ public class InputSystem : ISystem, IJobsUpdate, IUpdate
 
     public JobHandle OnUpdate()
     {
-        var entities = filter.Query<InputComponent>();
+        entities = filter.Query<InputComponent>();
         var input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
         return new InputJob() { entities = entities, input = input }.Schedule(entities.Length, 64);
     }
 
-    public void OnAfterUpdate() { }
+    public void OnAfterUpdate()
+    {
+        entities.Dispose();
+    }
 
     void IUpdate.OnUpdate()
     {
