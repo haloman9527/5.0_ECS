@@ -16,5 +16,13 @@
 
 namespace CZToolKit.ECS
 {
-    public interface ISystem { }
+    public class IDGenerator
+    {
+        int id = 1;
+
+        public int GenerateID()
+        {
+            return id++;
+        }
+    }
 }

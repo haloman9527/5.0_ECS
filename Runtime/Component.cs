@@ -16,6 +16,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Collections;
 
 namespace CZToolKit.ECS
 {
@@ -23,24 +24,24 @@ namespace CZToolKit.ECS
 
     public interface IComponentPool
     {
-        bool Contains(int entityID);
+        bool Contains(Entity entity);
 
-        void Del(int entityID);
+        void Del(Entity entity);
 
-        void Set(int entityID, object value);
+        void Set(Entity entity, object value);
 
         void Clear();
 
-        IEnumerable<int> GetEntityIDs();
+        NativeArray<Entity> GetEntities();
     }
 
     public interface IComponentPool<T> : IComponentPool where T : struct, IComponent
     {
-        T Get(int entityID);
+        T Get(Entity entity);
 
-        ref T Ref(int entityID);
+        ref T Ref(Entity entity);
 
-        void Set(int entityID, T value);
+        void Set(Entity entity, T value);
     }
 
     public class ComponentPool<T> : IComponentPool, IComponentPool<T> where T : struct, IComponent
@@ -49,16 +50,12 @@ namespace CZToolKit.ECS
 
         private T[] components;
         private HashSet<int> unusedIndexs;
-        private readonly Dictionary<int, int> componentsIndexMap = new Dictionary<int, int>();
-
-        public int Count
-        {
-            get { return componentsIndexMap.Count; }
-        }
+        private NativeHashMap<Entity, int> componentsIndexMap;
 
         public ComponentPool(int defaultSize)
         {
             this.components = new T[defaultSize];
+            this.componentsIndexMap = new NativeHashMap<Entity, int>(defaultSize, Allocator.Persistent);
             unusedIndexs = new HashSet<int>();
             for (int i = 0; i < components.Length; i++)
             {
@@ -68,22 +65,22 @@ namespace CZToolKit.ECS
 
         public ComponentPool() : this(DEFAULT_SIZE) { }
 
-        public bool Contains(int entityID)
+        public bool Contains(Entity entity)
         {
-            return componentsIndexMap.ContainsKey(entityID);
+            return componentsIndexMap.ContainsKey(entity);
         }
 
-        public T Get(int entityID)
+        public T Get(Entity entity)
         {
-            return components[componentsIndexMap[entityID]];
+            return components[componentsIndexMap[entity]];
         }
 
-        public ref T Ref(int entityID)
+        public ref T Ref(Entity entity)
         {
-            return ref components[componentsIndexMap[entityID]];
+            return ref components[componentsIndexMap[entity]];
         }
 
-        public void Set(int entity, object value)
+        public void Set(Entity entity, object value)
         {
             if (value is T tValue)
                 Set(entity, tValue);
@@ -91,10 +88,10 @@ namespace CZToolKit.ECS
                 throw new Exception($"The value is not [{typeof(T).Name}]");
         }
 
-        public void Set(int entityID, T value)
+        public void Set(Entity entity, T value)
         {
-            // 如果没有与entityID对应的组件
-            if (!componentsIndexMap.TryGetValue(entityID, out int index))
+            // 如果没有与entity对应的组件
+            if (!componentsIndexMap.TryGetValue(entity, out int index))
             {
                 // 查找未使用的Index
                 bool foundUnsedIndex = false;
@@ -119,14 +116,14 @@ namespace CZToolKit.ECS
             }
 
             components[index] = value;
-            componentsIndexMap[entityID] = index;
+            componentsIndexMap[entity] = index;
         }
 
-        public void Del(int entityID)
+        public void Del(Entity entity)
         {
-            if (componentsIndexMap.TryGetValue(entityID, out var index))
+            if (componentsIndexMap.TryGetValue(entity, out var index))
             {
-                componentsIndexMap.Remove(entityID);
+                componentsIndexMap.Remove(entity);
                 unusedIndexs.Add(index);
             }
         }
@@ -140,12 +137,9 @@ namespace CZToolKit.ECS
             }
         }
 
-        public IEnumerable<int> GetEntityIDs()
+        public NativeArray<Entity> GetEntities()
         {
-            foreach (var key in componentsIndexMap.Keys)
-            {
-                yield return key;
-            }
+            return componentsIndexMap.GetKeyArray(Allocator.Temp);
         }
     }
 }

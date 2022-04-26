@@ -13,8 +13,10 @@
  *
  */
 #endregion
+using CZToolKit.ECS;
+using UnityEngine;
 
-namespace CZToolKit.ECS
+public struct InputComponent : IComponent
 {
-    public interface ISystem { }
+    public Vector2 input;
 }

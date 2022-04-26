@@ -7,7 +7,7 @@ namespace CZToolKit.ECS
 
         static WorldManager()
         {
-            MainWorld = new World();
+            MainWorld = World.NewWorld();
         }
     }
 }
