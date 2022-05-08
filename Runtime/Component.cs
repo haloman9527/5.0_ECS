@@ -22,35 +22,59 @@ namespace CZToolKit.ECS
 {
     public interface IComponent { }
 
-    public interface IComponentPool
+    public interface IComponentPool : IDisposable
     {
-        bool Contains(Entity entity);
+        Type ComponentType { get; }
 
-        void Del(Entity entity);
+        unsafe bool Contains(Entity* entityPtr);
 
-        void Set(Entity entity, object value);
+        unsafe object Get(Entity* entityPtr);
+
+        unsafe void Set(Entity* entityPtr, object value);
+
+        unsafe void Del(Entity* entityPtr);
 
         void Clear();
 
-        NativeArray<Entity> GetEntities();
+        NativeArray<Entity> GetEntities(Allocator allocator);
     }
 
-    public interface IComponentPool<T> : IComponentPool where T : struct, IComponent
+    public interface IComponentPool<T> : IDisposable where T : struct
     {
-        T Get(Entity entity);
+        Type ComponentType { get; }
 
-        ref T Ref(Entity entity);
+        unsafe bool Contains(Entity* entityPtr);
 
-        void Set(Entity entity, T value);
+        unsafe T Get(Entity* entityPtr);
+
+        unsafe bool TryGet(Entity* entityPtr, out T component);
+
+        unsafe ref T Ref(Entity* entityPtr);
+
+        unsafe void Set(Entity* entityPtr, T value);
+
+        unsafe void Del(Entity* entityPtr);
+
+        void Clear();
+
+        NativeArray<Entity> GetEntities(Allocator allocator);
     }
 
-    public class ComponentPool<T> : IComponentPool, IComponentPool<T> where T : struct, IComponent
+    public class ComponentPool<T> : IComponentPool, IComponentPool<T>, IDisposable where T : struct
     {
         private const int DEFAULT_SIZE = 128;
 
         private T[] components;
         private HashSet<int> unusedIndexs;
         private NativeHashMap<Entity, int> componentsIndexMap;
+
+        public Type ComponentType
+        {
+            get
+            {
+                return typeof(T);
+            }
+        }
 
         public ComponentPool(int defaultSize)
         {
@@ -63,35 +87,58 @@ namespace CZToolKit.ECS
             }
         }
 
+        ~ComponentPool()
+        {
+            Dispose();
+        }
+
+        public void Dispose()
+        {
+            componentsIndexMap.Dispose();
+        }
+
         public ComponentPool() : this(DEFAULT_SIZE) { }
 
-        public bool Contains(Entity entity)
+        public unsafe bool Contains(Entity* entityPtr)
         {
-            return componentsIndexMap.ContainsKey(entity);
+            return componentsIndexMap.ContainsKey(*entityPtr);
         }
 
-        public T Get(Entity entity)
+        unsafe object IComponentPool.Get(Entity* entityPtr)
         {
-            return components[componentsIndexMap[entity]];
+            return Get(entityPtr);
         }
 
-        public ref T Ref(Entity entity)
+        public unsafe T Get(Entity* entityPtr)
         {
-            return ref components[componentsIndexMap[entity]];
+            return components[componentsIndexMap[*entityPtr]];
         }
 
-        public void Set(Entity entity, object value)
+        public unsafe bool TryGet(Entity* entityPtr, out T component)
         {
-            if (value is T tValue)
-                Set(entity, tValue);
-            else
-                throw new Exception($"The value is not [{typeof(T).Name}]");
+            if (!componentsIndexMap.TryGetValue(*entityPtr, out int index))
+            {
+                component = default;
+                return false;
+            }
+            component = components[index];
+            return true;
         }
 
-        public void Set(Entity entity, T value)
+        public unsafe ref T Ref(Entity* entityPtr)
+        {
+            return ref components[componentsIndexMap[*entityPtr]];
+        }
+
+        public unsafe void Set(Entity* entityPtr, object value)
+        {
+            Set(entityPtr, (T)value);
+        }
+
+        public unsafe void Set(Entity* entityPtr, T value)
         {
             // 如果没有与entity对应的组件
-            if (!componentsIndexMap.TryGetValue(entity, out int index))
+            if (!componentsIndexMap.TryGetValue(*entityPtr, out int index))
             {
                 // 查找未使用的Index
                 bool foundUnsedIndex = false;
@@ -116,14 +163,14 @@ namespace CZToolKit.ECS
             }
 
             components[index] = value;
-            componentsIndexMap[entity] = index;
+            componentsIndexMap[*entityPtr] = index;
         }
 
-        public void Del(Entity entity)
+        public unsafe void Del(Entity* entityPtr)
         {
-            if (componentsIndexMap.TryGetValue(entity, out var index))
+            if (componentsIndexMap.TryGetValue(*entityPtr, out var index))
             {
-                componentsIndexMap.Remove(entity);
+                componentsIndexMap.Remove(*entityPtr);
                 unusedIndexs.Add(index);
             }
         }
@@ -137,9 +184,9 @@ namespace CZToolKit.ECS
             }
         }
 
-        public NativeArray<Entity> GetEntities()
+        public NativeArray<Entity> GetEntities(Allocator allocator)
         {
-            return componentsIndexMap.GetKeyArray(Allocator.Temp);
+            return componentsIndexMap.GetKeyArray(allocator);
         }
     }
 }

@@ -19,94 +19,79 @@ using Unity.Collections;
 
 namespace CZToolKit.ECS
 {
-    public sealed class World
+    public sealed class World : IDisposable
     {
         public readonly int id;
+        public readonly string name;
+        public readonly Entity global;
 
-        private World(int id)
+        public World(string name)
         {
-            this.id = id;
+            this.id = worldIDGenerator.GenerateID();
+            this.name = name;
+            this.global = NewEntity(-1);
+            worlds[id] = this;
+        }
+
+        public void Dispose()
+        {
+            DisposeWorld(this);
         }
 
         #region Entity
-        private readonly IDGenerator EntityIDGenerator = new IDGenerator();
-        private readonly NativeHashMap<int, Entity> entities = new NativeHashMap<int, Entity>(64, Allocator.Persistent);
-        private readonly HashSet<int> willDeleteEntities = new HashSet<int>();
+        private IDGenerator entityIDGenerator = new IDGenerator();
+        private NativeHashMap<int, Entity> entities = new NativeHashMap<int, Entity>(64, Allocator.Persistent);
 
-        public Entity NewEntity()
+        public ref readonly NativeHashMap<int, Entity> Entities
         {
-            var id = EntityIDGenerator.GenerateID();
+            get { return ref entities; }
+        }
+
+        private Entity NewEntity(int id)
+        {
             var entity = new Entity(id, this);
             entities.Add(id, entity);
             return entity;
         }
 
-        public void NewEntity(out Entity entity)
+        public Entity NewEntity()
         {
-            var id = EntityIDGenerator.GenerateID();
-            entity = new Entity(id, this);
+            var id = entityIDGenerator.GenerateID();
+            var entity = new Entity(id, this);
             entities.Add(id, entity);
+            return entity;
         }
 
-        public NativeArray<Entity> GetEntities()
+        public void NewEntity(out Entity entityPtr)
         {
-            return entities.GetValueArray(Allocator.Temp);
+            var id = entityIDGenerator.GenerateID();
+            entityPtr = new Entity(id, this);
+            entities.Add(id, entityPtr);
         }
 
-        public bool ContainsEntity(int entityID)
+        public bool IsValid(int entityID)
         {
             return entities.ContainsKey(entityID);
         }
 
-        public Entity GetEntity(int entityID)
+        public unsafe bool IsValid(Entity* entityPtr)
         {
-            return entities[entityID];
+            return entityPtr->WorldID == id && entities.ContainsKey(entityPtr->ID);
         }
 
-        public bool TryGetEntity(int entityID, out Entity entity)
+        public unsafe void DestroyEntityImmediate(int entityID)
         {
-            return entities.TryGetValue(entityID, out entity);
+            DestroyEntityImmediate(entities[entityID]);
         }
 
-        public void DestroyEntity(int entityID)
+        public unsafe void DestroyEntityImmediate(Entity entity)
         {
-            willDeleteEntities.Add(entityID);
-        }
-
-        public void DestroyEntity(Entity entity)
-        {
-            willDeleteEntities.Add(entity.ID);
-        }
-
-        public void DestroyEntityImmediate(int entityID)
-        {
-            if (!entities.Remove(entityID))
+            if (!IsValid(&entity))
                 return;
+            entities.Remove(entity.ID);
             foreach (var componentPool in componentPools.Values)
             {
-                componentPool.Del(entities[entityID]);
-            }
-        }
-
-        public void DestroyEntityImmediate(Entity entity)
-        {
-            if (!entities.Remove(entity.ID))
-                return;
-            foreach (var componentPool in componentPools.Values)
-            {
-                componentPool.Del(entities[entity.ID]);
-            }
-        }
-
-        public void CheckDestroyEntities()
-        {
-            if (willDeleteEntities.Count > 0)
-            {
-                foreach (var entityID in willDeleteEntities)
-                {
-                    DestroyEntityImmediate(entityID);
-                }
-                willDeleteEntities.Clear();
+                componentPool.Del(&entity);
             }
         }
         #endregion
@@ -119,16 +104,16 @@ namespace CZToolKit.ECS
             get { return componentPools; }
         }
 
-        public IComponentPool<T> NewComponentPool<T>() where T : struct, IComponent
+        public ComponentPool<T> NewComponentPool<T>() where T : struct, IComponent
         {
-            IComponentPool<T> componentPool = new ComponentPool<T>();
+            ComponentPool<T> componentPool = new ComponentPool<T>();
             componentPools[typeof(T)] = componentPool;
             return componentPool;
         }
 
-        public IComponentPool<T> NewComponentPool<T>(int defaultSize) where T : struct, IComponent
+        public ComponentPool<T> NewComponentPool<T>(int defaultSize) where T : struct, IComponent
         {
-            IComponentPool<T> componentPool = new ComponentPool<T>(defaultSize);
+            ComponentPool<T> componentPool = new ComponentPool<T>(defaultSize);
             componentPools[typeof(T)] = componentPool;
             return componentPool;
         }
@@ -170,64 +155,74 @@ namespace CZToolKit.ECS
             return componentPool;
         }
 
-        public IComponentPool<T> GetComponentPool<T>() where T : struct, IComponent
+        public ComponentPool<T> GetComponentPool<T>() where T : struct, IComponent
         {
             componentPools.TryGetValue(typeof(T), out var componentPool);
-            return componentPool as IComponentPool<T>;
+            return componentPool as ComponentPool<T>;
         }
 
-        public bool HasComponent<T>(Entity entity) where T : struct, IComponent
-        {
-            var componentPool = GetComponentPool<T>();
-            if (null != componentPool && componentPool.Contains(entity))
-                return true;
-            return false;
-        }
-
-        public bool HasComponent(Entity entity, Type componentType)
+        public unsafe bool HasComponent(Entity* entityPtr, Type componentType)
         {
             var componentPool = GetComponentPool(componentType);
-            if (null != componentPool && componentPool.Contains(entity))
+            if (null != componentPool && componentPool.Contains(entityPtr))
                 return true;
             return false;
         }
 
-        public void AddComponent<T>(Entity entity, in T component) where T : struct, IComponent
+        public unsafe bool HasComponent<T>(Entity* entityPtr) where T : struct, IComponent
+        {
+            var componentPool = GetComponentPool<T>();
+            if (null != componentPool && componentPool.Contains(entityPtr))
+                return true;
+            return false;
+        }
+
+        public unsafe T GetComponent<T>(Entity* entityPtr) where T : struct, IComponent
+        {
+            return GetComponentPool<T>().Get(entityPtr);
+        }
+
+        public unsafe bool TryGetComponent<T>(Entity* entityPtr, out T component) where T : struct, IComponent
+        {
+            component = default;
+            var componentPool = GetComponentPool<T>();
+            if (componentPool == null)
+                return false;
+            return componentPool.TryGet(entityPtr, out component);
+        }
+
+        public unsafe ref T RefComponent<T>(Entity* entityPtr) where T : struct, IComponent
+        {
+            return ref GetComponentPool<T>().Ref(entityPtr);
+        }
+
+        public unsafe void AddComponent<T>(Entity* entityPtr, in T component) where T : struct, IComponent
         {
             var componentPool = GetComponentPool<T>();
             if (componentPool == null)
                 componentPool = NewComponentPool<T>();
-            else if (componentPool.Contains(entity))
-                throw new Exception($"Alreay had {nameof(T)} component!");
-            componentPool.Set(entity, component);
+            componentPool.Set(entityPtr, component);
         }
 
-        public void AddComponent(Entity entity, Type type, object component)
+        public unsafe void AddComponent(Entity* entityPtr, Type type, object component)
         {
             var componentPool = GetComponentPool(type);
             if (componentPool == null)
                 componentPool = NewComponentPool(type);
-            else if (componentPool.Contains(entity))
-                throw new Exception($"Alreay had type component!");
-            componentPool.Set(entity, component);
+            componentPool.Set(entityPtr, component);
         }
 
-        public ref T RefComponent<T>(Entity entity) where T : struct, IComponent
-        {
-            return ref GetComponentPool<T>().Ref(entity);
-        }
-
-        public void SetComponent<T>(Entity entity, in T component) where T : struct, IComponent
+        public unsafe void SetComponent<T>(Entity* entityPtr, in T component) where T : struct, IComponent
         {
             var componentPool = GetComponentPool<T>();
             if (componentPool == null)
                 componentPool = NewComponentPool<T>();
-            componentPool.Set(entity, component);
+            componentPool.Set(entityPtr, component);
         }
 
-        public void RemoveComponent<T>(Entity entity)
+        public unsafe void RemoveComponent<T>(Entity* entityPtr)
         {
-            GetComponentPool(typeof(T)).Del(entity);
+            GetComponentPool(typeof(T)).Del(entityPtr);
         }
         #endregion
 
@@ -256,15 +251,40 @@ namespace CZToolKit.ECS
         #endregion
 
         #region Static
-        private static readonly IDGenerator WorldIDGenerator = new IDGenerator();
-        public static readonly Dictionary<int, World> Worlds = new Dictionary<int, World>();
+        private static readonly IDGenerator worldIDGenerator = new IDGenerator();
+        private static readonly Dictionary<int, World> worlds = new Dictionary<int, World>();
 
-        public static World NewWorld()
+        public static IReadOnlyDictionary<int, World> Worlds
         {
-            var id = WorldIDGenerator.GenerateID();
-            var world = new World(id);
-            Worlds[id] = world;
-            return world;
+            get { return worlds; }
+        }
+        public static World DefaultWorld
+        {
+            get;
+            set;
+        }
+
+        public static void DisposeWorld(World world)
+        {
+            foreach (var componentPool in world.componentPools.Values)
+            {
+                componentPool.Dispose();
+            }
+            world.entities.Dispose();
+            worlds.Remove(world.id);
+        }
+
+        public static void DisposeAllWorld()
+        {
+            foreach (var world in Worlds.Values)
+            {
+                foreach (var componentPool in world.componentPools.Values)
+                {
+                    componentPool.Dispose();
+                }
+                world.entities.Dispose();
+            }
+            worlds.Clear();
         }
         #endregion
     }

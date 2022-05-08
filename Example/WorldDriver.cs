@@ -20,41 +20,68 @@ using UnityEngine.Profiling;
 
 public class WorldDriver : MonoBehaviour
 {
-    public int entityCount = 100;
     World world;
+    public bool isAsync;
 
     void Start()
     {
-        world = World.NewWorld();
-        Entity entity = default;
-        for (int i = 0; i < entityCount; i++)
+        world = new World("Default World");
+        world.global.SetComponent(new InputInfoComponent()
         {
-            world.NewEntity(out entity);
-            entity.SetComponent(new InputComponent() { input = Vector2.zero });
+            axis = new Dictionary<int, float>(),
+            axisRaw = new Dictionary<int, float>()
+        });
+        for (int i = 0; i < transform.childCount; i++)
+        {
+            world.NewEntity(out var entity);
+            entity.SetComponent(new TransformComponent() { transform = transform.GetChild(i) });
+            entity.SetComponent(new RotateSpeedComponent() { rotateSpeed = Vector3.up * 50 });
+            entity.SetComponent(new EulerAngleComponent() { eulerAngle = Vector3.zero });
+            entity.SetComponent(new Role());
         }
-        world.AddSystem(new InputSystem(world));
-        var e = entity;
-        Debug.Log(world.GetComponentPool<InputComponent>().Contains(e));
+        // ----- LogicSystems -----
+        world.AddSystem(new FrameSystem(world));
+        world.AddSystem(new ExampleLogicSystem(world));
+
+        // ----- RenderSystems -----
+        world.AddSystem(new ExampleRenderSystem(world));
+        world.AddSystem(new InputCollectionSystem(world));
     }
 
     private void FixedUpdate()
     {
-        world.FixedUpdate();
+        ExampleLogicSystem.isAsync = isAsync;
+        foreach (var world in World.Worlds.Values)
+        {
+            Profiler.BeginSample("ECS LogicUpdate");
+            world.FixedUpdate();
+            Profiler.EndSample();
+        }
     }
 
     private void Update()
     {
-        Profiler.BeginSample("NormalUpdateAAA");
-        world.Update();
-        Profiler.EndSample();
-
-        Profiler.BeginSample("JobsUpdateAAA");
-        world.JobsUpdate();
-        Profiler.EndSample();
+        foreach (var world in World.Worlds.Values)
+        {
+            Profiler.BeginSample("ECS RenderUpdate");
+            world.Update();
+            Profiler.EndSample();
+        }
     }
 
     private void LateUpdate()
     {
-        world.LateUpdate();
+        foreach (var world in World.Worlds.Values)
+        {
+            world.LateUpdate();
+        }
+    }
+
+    private void OnDestroy()
+    {
+        foreach (var world in World.Worlds.Values)
+        {
+            world.Dispose();
+        }
     }
 }

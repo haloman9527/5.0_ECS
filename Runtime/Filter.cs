@@ -36,13 +36,13 @@ namespace CZToolKit.ECS
             var componentPool = world.GetComponentPool<ComponentType0>();
             if (null == componentPool)
                 return;
-            foreach (var entity in componentPool.GetEntities())
+            foreach (var entity in componentPool.GetEntities(Allocator.Temp))
             {
                 action.Execute(ref entity.RefComponent<ComponentType0>());
             }
         }
 
-        public void RefForeach<ForeachJobType, ComponentType0, ComponentType1>(ForeachJobType action)
+        public unsafe void RefForeach<ForeachJobType, ComponentType0, ComponentType1>(ForeachJobType action)
             where ComponentType0 : struct, IComponent
             where ComponentType1 : struct, IComponent
             where ForeachJobType : struct, IRefForeach<ComponentType0, ComponentType1>
@@ -53,18 +53,19 @@ namespace CZToolKit.ECS
             var componentPool1 = world.GetComponentPool<ComponentType1>();
             if (null == componentPool1)
                 return;
-            foreach (var entity in world.GetEntities())
+            foreach (var entity in world.Entities.GetValueArray(Allocator.Temp))
             {
-                if (!componentPool0.Contains(entity))
+                var entityPtr = &entity;
+                if (!componentPool0.Contains(entityPtr))
                     continue;
-                if (!componentPool1.Contains(entity))
+                if (!componentPool1.Contains(entityPtr))
                     continue;
-                action.Execute(ref componentPool0.Ref(entity)
-                    , ref componentPool1.Ref(entity));
+                action.Execute(ref componentPool0.Ref(entityPtr)
+                    , ref componentPool1.Ref(entityPtr));
             }
         }
 
-        public void RefForeach<ForeachJobType, ComponentType0, ComponentType1, ComponentType2>(ForeachJobType action)
+        public unsafe void RefForeach<ForeachJobType, ComponentType0, ComponentType1, ComponentType2>(ForeachJobType action)
             where ComponentType0 : struct, IComponent
             where ComponentType1 : struct, IComponent
             where ComponentType2 : struct, IComponent
@@ -79,21 +80,22 @@ namespace CZToolKit.ECS
             var componentPool2 = world.GetComponentPool<ComponentType2>();
             if (null == componentPool2)
                 return;
-            foreach (var entity in world.GetEntities())
+            foreach (var entity in world.Entities.GetValueArray(Allocator.Temp))
             {
-                if (!componentPool0.Contains(entity))
+                var entityPtr = &entity;
+                if (!componentPool0.Contains(entityPtr))
                     continue;
-                if (!componentPool1.Contains(entity))
+                if (!componentPool1.Contains(entityPtr))
                     continue;
-                if (!componentPool2.Contains(entity))
+                if (!componentPool2.Contains(entityPtr))
                     continue;
-                action.Execute(ref componentPool0.Ref(entity)
-                    , ref componentPool1.Ref(entity)
-                    , ref componentPool2.Ref(entity));
+                action.Execute(ref componentPool0.Ref(entityPtr)
+                    , ref componentPool1.Ref(entityPtr)
+                    , ref componentPool2.Ref(entityPtr));
             }
         }
 
-        public void RefForeach<ForeachJobType, ComponentType0, ComponentType1, ComponentType2, ComponentType3>(ForeachJobType action)
+        public unsafe void RefForeach<ForeachJobType, ComponentType0, ComponentType1, ComponentType2, ComponentType3>(ForeachJobType action)
             where ComponentType0 : struct, IComponent
             where ComponentType1 : struct, IComponent
             where ComponentType2 : struct, IComponent
@@ -112,61 +114,67 @@ namespace CZToolKit.ECS
             var componentPool3 = world.GetComponentPool<ComponentType3>();
             if (null == componentPool3)
                 return;
-            foreach (var entity in world.GetEntities())
+            foreach (var entity in world.Entities.GetValueArray(Allocator.Temp))
             {
-                if (!componentPool0.Contains(entity))
+                var entityPtr = &entity;
+                if (!componentPool0.Contains(entityPtr))
                     continue;
-                if (!componentPool1.Contains(entity))
+                if (!componentPool1.Contains(entityPtr))
                     continue;
-                if (!componentPool2.Contains(entity))
+                if (!componentPool2.Contains(entityPtr))
                     continue;
-                if (!componentPool3.Contains(entity))
+                if (!componentPool3.Contains(entityPtr))
                     continue;
-                action.Execute(ref componentPool0.Ref(entity)
-                    , ref componentPool1.Ref(entity)
-                    , ref componentPool2.Ref(entity)
-                    , ref componentPool3.Ref(entity));
+                action.Execute(ref componentPool0.Ref(entityPtr)
+                    , ref componentPool1.Ref(entityPtr)
+                    , ref componentPool2.Ref(entityPtr)
+                    , ref componentPool3.Ref(entityPtr));
             }
         }
         #endregion
 
-        public NativeArray<Entity> Query<T>() where T : struct, IComponent
+        public NativeArray<Entity> Query<T>(Allocator allocator) where T : struct, IComponent
         {
             var componentPool = world.GetComponentPool<T>();
             if (null != componentPool)
-                return componentPool.GetEntities();
+                return componentPool.GetEntities(allocator);
             return default;
         }
 
-        public IEnumerable<Entity> Query(params Type[] componentTypes)
+        public unsafe NativeList<Entity> Query(Allocator allocator, params Type[] componentTypes)
         {
-            foreach (var entity in world.GetEntities())
+            NativeList<Entity> entities = new NativeList<Entity>(allocator);
+            foreach (var entity in world.Entities.GetValueArray(Allocator.Temp))
             {
+                var entityPtr = &entity;
                 bool all = true;
-                foreach (var componentType in componentTypes)
+                for (int i = 0; i < componentTypes.Length; i++)
                 {
-                    if (!entity.HasComponent(componentType))
+                    if (!world.ComponentPools.TryGetValue(componentTypes[i], out var pool) || !pool.Contains(entityPtr))
                     {
                         all = false;
                         break;
                     }
                 }
                 if (all)
-                    yield return entity;
+                    entities.Add(entity);
             }
+            return entities;
         }
 
-        public IEnumerable<Entity> Query(Query query)
+        public unsafe NativeList<Entity> Query(Allocator allocator, Query query)
         {
-            foreach (var entity in world.GetEntities())
+            NativeList<Entity> entities = new NativeList<Entity>(allocator);
+            foreach (var entity in world.Entities.GetValueArray(Allocator.Temp))
             {
+                var entityPtr = &entity;
                 bool none = true;
                 if (query.none != null)
                 {
                     foreach (var componentType in query.none)
                     {
                         var componentPool = world.GetComponentPool(componentType);
-                        if (null != componentPool && componentPool.Contains(entity))
+                        if (null != componentPool && componentPool.Contains(entityPtr))
                         {
                             none = false;
                             break;
@@ -183,7 +191,7 @@ namespace CZToolKit.ECS
                     foreach (var componentType in query.any)
                     {
                         var componentPool = world.GetComponentPool(componentType);
-                        if (null != componentPool && componentPool.Contains(entity))
+                        if (null != componentPool && componentPool.Contains(entityPtr))
                         {
                             any = true;
                             break;
@@ -198,7 +206,7 @@ namespace CZToolKit.ECS
                     {
                         var componentPool = world.GetComponentPool(componentType);
 
-                        if (null != componentPool && !componentPool.Contains(entity))
+                        if (null != componentPool && !componentPool.Contains(entityPtr))
                         {
                             all = false;
                             break;
@@ -206,8 +214,9 @@ namespace CZToolKit.ECS
                     }
                 }
                 if (any && all)
-                    yield return entity;
+                    entities.Add(entity);
             }
+            return entities;
         }
     }
 

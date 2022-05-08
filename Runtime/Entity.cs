@@ -21,7 +21,15 @@ namespace CZToolKit.ECS
     {
         public int ID { get; }
         public int WorldID { get; }
-        public World World { get { return World.Worlds[WorldID]; } }
+        public World World
+        {
+            get
+            {
+                if (World.Worlds.TryGetValue(WorldID, out var world) && world.IsValid(ID))
+                    return world;
+                return null;
+            }
+        }
 
         internal Entity(int id, World world)
         {
@@ -59,7 +67,7 @@ namespace CZToolKit.ECS
         {
             unchecked
             {
-                return (ID * 397) ^ (World == null ? 0 : WorldID.GetHashCode());
+                return (ID * 397) ^ WorldID.GetHashCode();
             }
         }
 
@@ -73,50 +81,55 @@ namespace CZToolKit.ECS
     {
         public static bool IsValid(this in Entity entity)
         {
-            var world = entity.World;
-            if (null == world)
+            if (entity.WorldID == 0)
                 return false;
-            return world.ContainsEntity(entity.ID);
+            var world = entity.World;
+            return world != null;
         }
 
-        public static bool HasComponent<T>(this in Entity entity) where T : struct, IComponent
+        public unsafe static bool HasComponent<T>(this Entity entity) where T : struct, IComponent
         {
-            return entity.World.HasComponent<T>(entity);
+            return entity.World.HasComponent<T>(&entity);
         }
 
-        public static bool HasComponent(this in Entity entity, Type componentType)
+        public unsafe static bool HasComponent(this Entity entity, Type componentType)
         {
-            return entity.World.HasComponent(entity, componentType);
+            return entity.World.HasComponent(&entity, componentType);
         }
 
-        public static void AddComponent<T>(this in Entity entity, T component) where T : struct, IComponent
+        public unsafe static T GetComponent<T>(this Entity entity) where T : struct, IComponent
         {
-            entity.World.AddComponent<T>(entity, in component);
+            return entity.World.GetComponent<T>(&entity);
         }
 
-        public static void AddComponent(this in Entity entity, Type type, object component)
+        public unsafe static bool TryGetComponent<T>(this Entity entity, out T component) where T : struct, IComponent
         {
-            entity.World.AddComponent(entity, type, component);
+            return entity.World.TryGetComponent<T>(&entity, out component);
         }
 
-        public static T GetComponent<T>(this in Entity entity) where T : struct, IComponent
+        public unsafe static ref T RefComponent<T>(this Entity entity) where T : struct, IComponent
         {
-            return entity.World.GetComponentPool<T>().Get(entity);
+            return ref entity.World.RefComponent<T>(&entity);
         }
 
-        public static ref T RefComponent<T>(this in Entity entity) where T : struct, IComponent
+        public unsafe static void AddComponent<T>(this Entity entity, T component) where T : struct, IComponent
         {
-            return ref entity.World.RefComponent<T>(entity);
+            entity.World.AddComponent(&entity, in component);
         }
 
-        public static void SetComponent<T>(this in Entity entity, T component) where T : struct, IComponent
+        public unsafe static void AddComponent(this Entity entity, Type type, object component)
         {
-            entity.World.SetComponent(entity, in component);
+            entity.World.AddComponent(&entity, type, component);
         }
 
-        public static void RemoveComponent<T>(this in Entity entity)
+        public unsafe static void SetComponent<T>(this Entity entity, T component) where T : struct, IComponent
         {
-            entity.World.RemoveComponent<T>(entity);
+            entity.World.SetComponent(&entity, in component);
+        }
+
+        public unsafe static void RemoveComponent<T>(this Entity entity)
+        {
+            entity.World.RemoveComponent<T>(&entity);
         }
     }
 }

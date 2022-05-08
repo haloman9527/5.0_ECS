@@ -11,7 +11,7 @@ namespace CZToolKit.ECS
 
         private void Awake()
         {
-            WorldManager.MainWorld.NewEntity(out var entity);
+            World.DefaultWorld.NewEntity(out var entity);
             foreach (var component in components)
             {
                 entity.AddComponent(component.GetType(), component);

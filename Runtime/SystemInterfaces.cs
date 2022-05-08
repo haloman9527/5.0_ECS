@@ -61,7 +61,6 @@ namespace CZToolKit.ECS
                 if (system is ILateUpdate sys)
                     sys.OnLateUpdate();
             }
-            world.CheckDestroyEntities();
         }
     }
 }
