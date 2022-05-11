@@ -94,6 +94,11 @@ namespace CZToolKit.ECS
 
         public void Dispose()
         {
+            foreach (var item in componentsIndexMap.GetValueArray(Allocator.Temp))
+            {
+                if (components[item] is IDisposable disposable)
+                    disposable.Dispose();
+            }
             componentsIndexMap.Dispose();
         }
 

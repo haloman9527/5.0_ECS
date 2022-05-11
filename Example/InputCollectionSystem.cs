@@ -13,7 +13,7 @@ public class InputCollectionSystem : ISystem, IUpdate
 
     public void OnUpdate()
     {
-        var inputInfo = world.global.GetComponent<InputInfoComponent>();
+        var inputInfo = world.singleton.GetComponent<InputInfoComponent>();
 
         inputInfo.SetDownButton(ButtonDefine.Fire1, Input.GetButtonDown("Fire1"));
         inputInfo.SetDownButton(ButtonDefine.Fire2, Input.GetButtonDown("Fire2"));
@@ -36,7 +36,7 @@ public class InputCollectionSystem : ISystem, IUpdate
         inputInfo.SetAxisRaw(AxisDefine.Horizontal, Input.GetAxisRaw("Horizontal"));
         inputInfo.SetAxisRaw(AxisDefine.Vertical, Input.GetAxisRaw("Vertical"));
 
-        world.global.SetComponent(inputInfo);
+        world.singleton.SetComponent(inputInfo);
         // 发出去，然后清理掉，现在还没有转发的功能，所以不清理
         //inputInfo.Clear();
     }

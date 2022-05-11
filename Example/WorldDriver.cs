@@ -26,7 +26,7 @@ public class WorldDriver : MonoBehaviour
     void Start()
     {
         world = new World("Default World");
-        world.global.SetComponent(new InputInfoComponent()
+        world.singleton.SetComponent(new InputInfoComponent()
         {
             axis = new Dictionary<int, float>(),
             axisRaw = new Dictionary<int, float>()

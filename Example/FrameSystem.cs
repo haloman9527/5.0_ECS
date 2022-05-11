@@ -24,7 +24,7 @@ public class FrameSystem : ISystem, IFixedUpdate
 
     public void OnFixedUpdate()
     {
-        var inputInfo = world.global.GetComponent<InputInfoComponent>();
+        var inputInfo = world.singleton.GetComponent<InputInfoComponent>();
         input.downButtons = inputInfo.downButtons;
         input.pressedButtons = inputInfo.pressedButtons;
         input.upButtons = inputInfo.upButtons;

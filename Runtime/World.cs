@@ -23,13 +23,13 @@ namespace CZToolKit.ECS
     {
         public readonly int id;
         public readonly string name;
-        public readonly Entity global;
+        public readonly Entity singleton;
 
         public World(string name)
         {
             this.id = worldIDGenerator.GenerateID();
             this.name = name;
-            this.global = NewEntity(-1);
+            this.singleton = NewEntity(-1);
             worlds[id] = this;
         }
 
@@ -62,11 +62,11 @@ namespace CZToolKit.ECS
             return entity;
         }
 
-        public void NewEntity(out Entity entityPtr)
+        public void NewEntity(out Entity entity)
         {
             var id = entityIDGenerator.GenerateID();
-            entityPtr = new Entity(id, this);
-            entities.Add(id, entityPtr);
+            entity = new Entity(id, this);
+            entities.Add(id, entity);
         }
 
         public bool IsValid(int entityID)
@@ -86,7 +86,7 @@ namespace CZToolKit.ECS
 
         public unsafe void DestroyEntityImmediate(Entity entity)
         {
-            if (!IsValid(&entity))
+            if (entity.WorldID != id)
                 return;
             entities.Remove(entity.ID);
             foreach (var componentPool in componentPools.Values)
