@@ -16,7 +16,6 @@
 using CZToolKit.ECS;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Profiling;
 
 public class WorldDriver : MonoBehaviour
 {
@@ -51,27 +50,27 @@ public class WorldDriver : MonoBehaviour
     private void FixedUpdate()
     {
         ExampleLogicSystem.isAsync = isAsync;
-        foreach (var world in World.Worlds.Values)
+        foreach (var world in World.AllWorlds.Values)
         {
-            Profiler.BeginSample("ECS LogicUpdate");
+            UnityEngine.Profiling.Profiler.BeginSample("ECS LogicUpdate");
             world.FixedUpdate();
-            Profiler.EndSample();
+            UnityEngine.Profiling.Profiler.EndSample();
         }
     }
 
     private void Update()
     {
-        foreach (var world in World.Worlds.Values)
+        foreach (var world in World.AllWorlds.Values)
         {
-            Profiler.BeginSample("ECS RenderUpdate");
+            UnityEngine.Profiling.Profiler.BeginSample("ECS RenderUpdate");
             world.Update();
-            Profiler.EndSample();
+            UnityEngine.Profiling.Profiler.EndSample();
         }
     }
 
     private void LateUpdate()
     {
-        foreach (var world in World.Worlds.Values)
+        foreach (var world in World.AllWorlds.Values)
         {
             world.LateUpdate();
         }
@@ -79,9 +78,6 @@ public class WorldDriver : MonoBehaviour
 
     private void OnDestroy()
     {
-        foreach (var world in World.Worlds.Values)
-        {
-            world.Dispose();
-        }
+        World.DisposeAllWorld();
     }
 }

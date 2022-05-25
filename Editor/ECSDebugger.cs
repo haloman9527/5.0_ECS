@@ -31,7 +31,7 @@ namespace CZToolKit.ECS.Editors
             titleContent = new GUIContent("ECS Debugger");
             base.OnEnable();
             EditorApplication.playModeStateChanged += OnPlayModeChanged;
-            foreach (var world in World.Worlds.Values)
+            foreach (var world in World.AllWorlds.Values)
             {
                 SelectWorld(world);
                 break;
@@ -44,7 +44,7 @@ namespace CZToolKit.ECS.Editors
             switch (obj)
             {
                 case PlayModeStateChange.EnteredPlayMode:
-                    foreach (var world in World.Worlds.Values)
+                    foreach (var world in World.AllWorlds.Values)
                     {
                         SelectWorld(world);
                         break;
@@ -82,7 +82,7 @@ namespace CZToolKit.ECS.Editors
             if (GUI.Button(worldSelectButtonRect, dropDownLabel, EditorStyles.toolbarDropDown))
             {
                 GenericMenu worldMenu = new GenericMenu();
-                foreach (var world in World.Worlds.Values)
+                foreach (var world in World.AllWorlds.Values)
                 {
                     worldMenu.AddItem(new GUIContent(world.name), false, () =>
                     {
@@ -115,7 +115,7 @@ namespace CZToolKit.ECS.Editors
                         var selectedEntity = entityItem.entity;
                         foreach (var componentPool in selectWorld.ComponentPools.Values)
                         {
-                            if (componentPool.Contains(&selectedEntity))
+                            if (componentPool.Contains(selectedEntity))
                             {
                                 GUILayout.Label(componentPool.ComponentType.Name);
                             }
@@ -200,7 +200,7 @@ namespace CZToolKit.ECS.Editors
                 return null;
             var item = new EntityTreeViewItem();
             item.entity = entity;
-            AddMenuItem(entity.ID.ToString(), item);
+            AddMenuItem(entity.index.ToString(), item);
             itemMap[entity] = item;
             return item;
         }
@@ -218,7 +218,7 @@ namespace CZToolKit.ECS.Editors
         {
             (RootItem as CZTreeViewItem).children.QuickSort((a, b) =>
             {
-                return (a as EntityTreeViewItem).entity.ID.CompareTo((b as EntityTreeViewItem).entity.ID);
+                return (a as EntityTreeViewItem).entity.index.CompareTo((b as EntityTreeViewItem).entity.index);
             });
         }
     }

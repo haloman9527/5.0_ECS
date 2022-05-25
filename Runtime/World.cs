@@ -15,31 +15,70 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Collections;
 
 namespace CZToolKit.ECS
 {
-    public sealed class World : IDisposable
+    public unsafe partial class World : IDisposable
     {
-        public readonly int id;
+        #region Static
+        private static readonly IDGenerator worldIDGenerator = new IDGenerator();
+        private static readonly Dictionary<int, World> allWorlds = new Dictionary<int, World>();
+
+        public static IReadOnlyDictionary<int, World> AllWorlds
+        {
+            get { return allWorlds; }
+        }
+
+        public static World DefaultWorld
+        {
+            get;
+            set;
+        }
+
+        public static void DisposeWorld(World world)
+        {
+            world.Dispose();
+        }
+
+        public static void DisposeAllWorld()
+        {
+            var allWorlds = AllWorlds.Values.ToArray();
+            foreach (var world in allWorlds)
+            {
+                world.Dispose();
+            }
+        }
+        #endregion
+
+        public readonly int index;
         public readonly string name;
         public readonly Entity singleton;
 
         public World(string name)
         {
-            this.id = worldIDGenerator.GenerateID();
+            this.index = worldIDGenerator.GenerateID();
             this.name = name;
             this.singleton = NewEntity(-1);
-            worlds[id] = this;
+            allWorlds[index] = this;
         }
 
         public void Dispose()
         {
-            DisposeWorld(this);
+            allWorlds.Remove(index);
+            if (DefaultWorld == this)
+                DefaultWorld = null;
+            systems.Clear();
+            entities.Dispose();
+            foreach (var componentPool in componentPools.Values)
+            {
+                componentPool.Dispose();
+            }
         }
 
         #region Entity
-        private IDGenerator entityIDGenerator = new IDGenerator();
+        private IDGenerator entityIndexGenerator = new IDGenerator();
         private NativeHashMap<int, Entity> entities = new NativeHashMap<int, Entity>(64, Allocator.Persistent);
 
         public ref readonly NativeHashMap<int, Entity> Entities
@@ -47,24 +86,24 @@ namespace CZToolKit.ECS
             get { return ref entities; }
         }
 
-        private Entity NewEntity(int id)
+        private Entity NewEntity(int index)
         {
-            var entity = new Entity(id, this);
-            entities.Add(id, entity);
+            var entity = new Entity(index, this);
+            entities.Add(index, entity);
             return entity;
         }
 
         public Entity NewEntity()
         {
-            var id = entityIDGenerator.GenerateID();
-            var entity = new Entity(id, this);
-            entities.Add(id, entity);
+            var index = entityIndexGenerator.GenerateID();
+            var entity = new Entity(index, this);
+            entities.Add(index, entity);
             return entity;
         }
 
         public void NewEntity(out Entity entity)
         {
-            var id = entityIDGenerator.GenerateID();
+            var id = entityIndexGenerator.GenerateID();
             entity = new Entity(id, this);
             entities.Add(id, entity);
         }
@@ -74,9 +113,9 @@ namespace CZToolKit.ECS
             return entities.ContainsKey(entityID);
         }
 
-        public unsafe bool IsValid(Entity* entityPtr)
+        public unsafe bool IsValid(Entity entity)
         {
-            return entityPtr->WorldID == id && entities.ContainsKey(entityPtr->ID);
+            return entity.worldIndex == index && entities.ContainsKey(entity.index);
         }
 
         public unsafe void DestroyEntityImmediate(int entityID)
@@ -86,12 +125,12 @@ namespace CZToolKit.ECS
 
         public unsafe void DestroyEntityImmediate(Entity entity)
         {
-            if (entity.WorldID != id)
+            if (entity.worldIndex != index)
                 return;
-            entities.Remove(entity.ID);
+            entities.Remove(entity.index);
             foreach (var componentPool in componentPools.Values)
             {
-                componentPool.Del(&entity);
+                componentPool.Del(entity);
             }
         }
         #endregion
@@ -161,68 +200,70 @@ namespace CZToolKit.ECS
             return componentPool as ComponentPool<T>;
         }
 
-        public unsafe bool HasComponent(Entity* entityPtr, Type componentType)
+        public unsafe bool HasComponent(Entity entity, Type componentType)
         {
             var componentPool = GetComponentPool(componentType);
-            if (null != componentPool && componentPool.Contains(entityPtr))
+            if (null != componentPool && componentPool.Contains(entity))
                 return true;
             return false;
         }
 
-        public unsafe bool HasComponent<T>(Entity* entityPtr) where T : struct, IComponent
+        public unsafe bool HasComponent<T>(Entity entity) where T : struct, IComponent
         {
             var componentPool = GetComponentPool<T>();
-            if (null != componentPool && componentPool.Contains(entityPtr))
+            if (null != componentPool && componentPool.Contains(entity))
                 return true;
             return false;
         }
 
-        public unsafe T GetComponent<T>(Entity* entityPtr) where T : struct, IComponent
+        public unsafe T GetComponent<T>(Entity entity) where T : struct, IComponent
         {
-            return GetComponentPool<T>().Get(entityPtr);
+            return GetComponentPool<T>().Get(entity);
         }
 
-        public unsafe bool TryGetComponent<T>(Entity* entityPtr, out T component) where T : struct, IComponent
+        public unsafe bool TryGetComponent<T>(Entity entity, out T component) where T : struct, IComponent
         {
-            component = default;
             var componentPool = GetComponentPool<T>();
             if (componentPool == null)
+            {
+                component = default;
                 return false;
-            return componentPool.TryGet(entityPtr, out component);
+            }
+            return componentPool.TryGet(entity, out component);
         }
 
-        public unsafe ref T RefComponent<T>(Entity* entityPtr) where T : struct, IComponent
+        public unsafe ref T RefComponent<T>(Entity entity) where T : struct, IComponent
         {
-            return ref GetComponentPool<T>().Ref(entityPtr);
+            return ref GetComponentPool<T>().Ref(entity);
         }
 
-        public unsafe void AddComponent<T>(Entity* entityPtr, in T component) where T : struct, IComponent
+        public unsafe void AddComponent<T>(Entity entity, in T component) where T : struct, IComponent
         {
             var componentPool = GetComponentPool<T>();
             if (componentPool == null)
                 componentPool = NewComponentPool<T>();
-            componentPool.Set(entityPtr, component);
+            componentPool.Set(entity, component);
         }
 
-        public unsafe void AddComponent(Entity* entityPtr, Type type, object component)
+        public unsafe void AddComponent(Entity entity, Type type, object component)
         {
             var componentPool = GetComponentPool(type);
             if (componentPool == null)
                 componentPool = NewComponentPool(type);
-            componentPool.Set(entityPtr, component);
+            componentPool.Set(entity, component);
         }
 
-        public unsafe void SetComponent<T>(Entity* entityPtr, in T component) where T : struct, IComponent
+        public unsafe void SetComponent<T>(Entity entity, in T component) where T : struct, IComponent
         {
             var componentPool = GetComponentPool<T>();
             if (componentPool == null)
                 componentPool = NewComponentPool<T>();
-            componentPool.Set(entityPtr, component);
+            componentPool.Set(entity, component);
         }
 
-        public unsafe void RemoveComponent<T>(Entity* entityPtr)
+        public unsafe void RemoveComponent<T>(Entity entity)
         {
-            GetComponentPool(typeof(T)).Del(entityPtr);
+            GetComponentPool(typeof(T)).Del(entity);
         }
         #endregion
 
@@ -244,47 +285,9 @@ namespace CZToolKit.ECS
             systems.Insert(index, system);
         }
 
-        public void RemoveSystem(ISystem system)
+        public bool RemoveSystem(ISystem system)
         {
-            systems.Remove(system);
-        }
-        #endregion
-
-        #region Static
-        private static readonly IDGenerator worldIDGenerator = new IDGenerator();
-        private static readonly Dictionary<int, World> worlds = new Dictionary<int, World>();
-
-        public static IReadOnlyDictionary<int, World> Worlds
-        {
-            get { return worlds; }
-        }
-        public static World DefaultWorld
-        {
-            get;
-            set;
-        }
-
-        public static void DisposeWorld(World world)
-        {
-            foreach (var componentPool in world.componentPools.Values)
-            {
-                componentPool.Dispose();
-            }
-            world.entities.Dispose();
-            worlds.Remove(world.id);
-        }
-
-        public static void DisposeAllWorld()
-        {
-            foreach (var world in Worlds.Values)
-            {
-                foreach (var componentPool in world.componentPools.Values)
-                {
-                    componentPool.Dispose();
-                }
-                world.entities.Dispose();
-            }
-            worlds.Clear();
+            return systems.Remove(system);
         }
         #endregion
     }

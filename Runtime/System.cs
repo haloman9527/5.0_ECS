@@ -17,4 +17,24 @@
 namespace CZToolKit.ECS
 {
     public interface ISystem { }
+
+    public interface IFixedUpdate
+    {
+        void OnFixedUpdate();
+    }
+
+    public interface IUpdate
+    {
+        void OnUpdate();
+    }
+
+    public interface ILateUpdate
+    {
+        void OnLateUpdate();
+    }
+
+    public interface IDestroy
+    {
+        void OnDestroy();
+    }
 }

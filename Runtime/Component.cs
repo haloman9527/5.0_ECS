@@ -26,13 +26,13 @@ namespace CZToolKit.ECS
     {
         Type ComponentType { get; }
 
-        unsafe bool Contains(Entity* entityPtr);
+        unsafe bool Contains(Entity entity);
 
-        unsafe object Get(Entity* entityPtr);
+        unsafe object Get(Entity entity);
 
-        unsafe void Set(Entity* entityPtr, object value);
+        unsafe void Set(Entity entity, object value);
 
-        unsafe void Del(Entity* entityPtr);
+        unsafe void Del(Entity entity);
 
         void Clear();
 
@@ -43,17 +43,17 @@ namespace CZToolKit.ECS
     {
         Type ComponentType { get; }
 
-        unsafe bool Contains(Entity* entityPtr);
+        unsafe bool Contains(Entity entity);
 
-        unsafe T Get(Entity* entityPtr);
+        unsafe T Get(Entity entity);
 
-        unsafe bool TryGet(Entity* entityPtr, out T component);
+        unsafe bool TryGet(Entity entity, out T component);
 
-        unsafe ref T Ref(Entity* entityPtr);
+        unsafe ref T Ref(Entity entity);
 
-        unsafe void Set(Entity* entityPtr, T value);
+        unsafe void Set(Entity entity, T value);
 
-        unsafe void Del(Entity* entityPtr);
+        unsafe void Del(Entity entity);
 
         void Clear();
 
@@ -104,24 +104,24 @@ namespace CZToolKit.ECS
 
         public ComponentPool() : this(DEFAULT_SIZE) { }
 
-        public unsafe bool Contains(Entity* entityPtr)
+        public unsafe bool Contains(Entity entity)
         {
-            return componentsIndexMap.ContainsKey(*entityPtr);
+            return componentsIndexMap.ContainsKey(entity);
         }
 
-        unsafe object IComponentPool.Get(Entity* entityPtr)
+        unsafe object IComponentPool.Get(Entity entity)
         {
-            return Get(entityPtr);
+            return Get(entity);
         }
 
-        public unsafe T Get(Entity* entityPtr)
+        public unsafe T Get(Entity entity)
         {
-            return components[componentsIndexMap[*entityPtr]];
+            return components[componentsIndexMap[entity]];
         }
 
-        public unsafe bool TryGet(Entity* entityPtr, out T component)
+        public unsafe bool TryGet(Entity entity, out T component)
         {
-            if (!componentsIndexMap.TryGetValue(*entityPtr, out int index))
+            if (!componentsIndexMap.TryGetValue(entity, out int index))
             {
                 component = default;
                 return false;
@@ -130,20 +130,20 @@ namespace CZToolKit.ECS
             return true;
         }
 
-        public unsafe ref T Ref(Entity* entityPtr)
+        public unsafe ref T Ref(Entity entity)
         {
-            return ref components[componentsIndexMap[*entityPtr]];
+            return ref components[componentsIndexMap[entity]];
         }
 
-        public unsafe void Set(Entity* entityPtr, object value)
+        public unsafe void Set(Entity entity, object value)
         {
-            Set(entityPtr, (T)value);
+            Set(entity, (T)value);
         }
 
-        public unsafe void Set(Entity* entityPtr, T value)
+        public unsafe void Set(Entity entity, T value)
         {
             // 如果没有与entity对应的组件
-            if (!componentsIndexMap.TryGetValue(*entityPtr, out int index))
+            if (!componentsIndexMap.TryGetValue(entity, out int index))
             {
                 // 查找未使用的Index
                 bool foundUnsedIndex = false;
@@ -168,14 +168,14 @@ namespace CZToolKit.ECS
             }
 
             components[index] = value;
-            componentsIndexMap[*entityPtr] = index;
+            componentsIndexMap[entity] = index;
         }
 
-        public unsafe void Del(Entity* entityPtr)
+        public unsafe void Del(Entity entity)
         {
-            if (componentsIndexMap.TryGetValue(*entityPtr, out var index))
+            if (componentsIndexMap.TryGetValue(entity, out var index))
             {
-                componentsIndexMap.Remove(*entityPtr);
+                componentsIndexMap.Remove(entity);
                 unusedIndexs.Add(index);
             }
         }
