@@ -14,13 +14,18 @@
  */
 #endregion
 using System;
-using System.Collections.Generic;
 using Unity.Collections;
 
 namespace CZToolKit.ECS
 {
+    public delegate void RefAction<Arg0>(ref Arg0 arg0) where Arg0 : struct, IComponent;
+    public delegate void RefAction<Arg0, Arg1>(ref Arg0 arg0, ref Arg1 arg1) where Arg0 : struct, IComponent where Arg1 : struct, IComponent;
+    public delegate void RefAction<Arg0, Arg1, Arg2>(ref Arg0 arg0, ref Arg1 arg1, ref Arg2 arg2) where Arg0 : struct, IComponent where Arg1 : struct, IComponent where Arg2 : struct, IComponent;
+    public delegate void RefAction<Arg0, Arg1, Arg2, Arg3>(ref Arg0 arg0, ref Arg1 arg1, ref Arg2 arg2, ref Arg3 arg3) where Arg0 : struct, IComponent where Arg1 : struct, IComponent where Arg2 : struct, IComponent where Arg3 : struct, IComponent;
+
     public class Filter
     {
+
         private readonly World world;
 
         public Filter(World world)
@@ -29,6 +34,95 @@ namespace CZToolKit.ECS
         }
 
         #region RefForeach
+        public void RefForeach<ComponentType0>(RefAction<ComponentType0> action)
+            where ComponentType0 : struct, IComponent
+        {
+            var componentPool = world.GetComponentPool<ComponentType0>();
+            if (null == componentPool)
+                return;
+            foreach (var entity in componentPool.GetEntities(Allocator.Temp))
+            {
+                action(ref entity.RefComponent<ComponentType0>());
+            }
+        }
+        public void RefForeach<ComponentType0, ComponentType1>(RefAction<ComponentType0, ComponentType1> action)
+            where ComponentType0 : struct, IComponent
+            where ComponentType1 : struct, IComponent
+        {
+            var componentPool0 = world.GetComponentPool<ComponentType0>();
+            if (null == componentPool0)
+                return;
+            var componentPool1 = world.GetComponentPool<ComponentType1>();
+            if (null == componentPool1)
+                return;
+            foreach (var entity in world.Entities.GetValueArray(Allocator.Temp))
+            {
+                if (!componentPool0.Contains(entity))
+                    continue;
+                if (!componentPool1.Contains(entity))
+                    continue;
+                action(ref componentPool0.Ref(entity), ref componentPool1.Ref(entity));
+            }
+        }
+
+        public void RefForeach<ComponentType0, ComponentType1, ComponentType2>(RefAction<ComponentType0, ComponentType1, ComponentType2> action)
+            where ComponentType0 : struct, IComponent
+            where ComponentType1 : struct, IComponent
+            where ComponentType2 : struct, IComponent
+        {
+            var componentPool0 = world.GetComponentPool<ComponentType0>();
+            if (null == componentPool0)
+                return;
+            var componentPool1 = world.GetComponentPool<ComponentType1>();
+            if (null == componentPool1)
+                return;
+            var componentPool2 = world.GetComponentPool<ComponentType2>();
+            if (null == componentPool2)
+                return;
+            foreach (var entity in world.Entities.GetValueArray(Allocator.Temp))
+            {
+                if (!componentPool0.Contains(entity))
+                    continue;
+                if (!componentPool1.Contains(entity))
+                    continue;
+                if (!componentPool2.Contains(entity))
+                    continue;
+                action(ref componentPool0.Ref(entity), ref componentPool1.Ref(entity), ref componentPool2.Ref(entity));
+            }
+        }
+
+        public void RefForeach<ComponentType0, ComponentType1, ComponentType2, ComponentType3>(RefAction<ComponentType0, ComponentType1, ComponentType2, ComponentType3> action)
+            where ComponentType0 : struct, IComponent
+            where ComponentType1 : struct, IComponent
+            where ComponentType2 : struct, IComponent
+            where ComponentType3 : struct, IComponent
+        {
+            var componentPool0 = world.GetComponentPool<ComponentType0>();
+            if (null == componentPool0)
+                return;
+            var componentPool1 = world.GetComponentPool<ComponentType1>();
+            if (null == componentPool1)
+                return;
+            var componentPool2 = world.GetComponentPool<ComponentType2>();
+            if (null == componentPool2)
+                return;
+            var componentPool3 = world.GetComponentPool<ComponentType3>();
+            if (null == componentPool3)
+                return;
+            foreach (var entity in world.Entities.GetValueArray(Allocator.Temp))
+            {
+                if (!componentPool0.Contains(entity))
+                    continue;
+                if (!componentPool1.Contains(entity))
+                    continue;
+                if (!componentPool2.Contains(entity))
+                    continue;
+                if (!componentPool3.Contains(entity))
+                    continue;
+                action(ref componentPool0.Ref(entity), ref componentPool1.Ref(entity), ref componentPool2.Ref(entity), ref componentPool3.Ref(entity));
+            }
+        }
+
         public void RefForeach<ForeachJobType, ComponentType0>(ForeachJobType action)
             where ComponentType0 : struct, IComponent
             where ForeachJobType : struct, IRefForeach<ComponentType0>
@@ -42,7 +136,7 @@ namespace CZToolKit.ECS
             }
         }
 
-        public unsafe void RefForeach<ForeachJobType, ComponentType0, ComponentType1>(ForeachJobType action)
+        public void RefForeach<ForeachJobType, ComponentType0, ComponentType1>(ForeachJobType action)
             where ComponentType0 : struct, IComponent
             where ComponentType1 : struct, IComponent
             where ForeachJobType : struct, IRefForeach<ComponentType0, ComponentType1>
@@ -64,7 +158,7 @@ namespace CZToolKit.ECS
             }
         }
 
-        public unsafe void RefForeach<ForeachJobType, ComponentType0, ComponentType1, ComponentType2>(ForeachJobType action)
+        public void RefForeach<ForeachJobType, ComponentType0, ComponentType1, ComponentType2>(ForeachJobType action)
             where ComponentType0 : struct, IComponent
             where ComponentType1 : struct, IComponent
             where ComponentType2 : struct, IComponent
@@ -93,7 +187,7 @@ namespace CZToolKit.ECS
             }
         }
 
-        public unsafe void RefForeach<ForeachJobType, ComponentType0, ComponentType1, ComponentType2, ComponentType3>(ForeachJobType action)
+        public void RefForeach<ForeachJobType, ComponentType0, ComponentType1, ComponentType2, ComponentType3>(ForeachJobType action)
             where ComponentType0 : struct, IComponent
             where ComponentType1 : struct, IComponent
             where ComponentType2 : struct, IComponent

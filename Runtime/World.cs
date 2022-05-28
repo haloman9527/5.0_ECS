@@ -20,7 +20,7 @@ using Unity.Collections;
 
 namespace CZToolKit.ECS
 {
-    public unsafe partial class World : IDisposable
+    public partial class World : IDisposable
     {
         #region Static
         private static readonly IDGenerator worldIDGenerator = new IDGenerator();
