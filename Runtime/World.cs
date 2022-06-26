@@ -15,7 +15,7 @@
 #endregion
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Runtime.CompilerServices;
 using Unity.Collections;
 
 namespace CZToolKit.ECS
@@ -23,10 +23,9 @@ namespace CZToolKit.ECS
     public partial class World : IDisposable
     {
         #region Static
-        private static readonly IDGenerator worldIDGenerator = new IDGenerator();
-        private static readonly Dictionary<int, World> allWorlds = new Dictionary<int, World>();
+        private static readonly List<World> allWorlds = new List<World>();
 
-        public static IReadOnlyDictionary<int, World> AllWorlds
+        public static IReadOnlyList<World> AllWorlds
         {
             get { return allWorlds; }
         }
@@ -44,37 +43,39 @@ namespace CZToolKit.ECS
 
         public static void DisposeAllWorld()
         {
-            var allWorlds = AllWorlds.Values.ToArray();
             foreach (var world in allWorlds)
             {
                 world.Dispose();
             }
+            allWorlds.Clear();
         }
         #endregion
 
-        public readonly int index;
         public readonly string name;
         public readonly Entity singleton;
 
         public World(string name)
         {
-            this.index = worldIDGenerator.GenerateID();
             this.name = name;
             this.singleton = NewEntity(-1);
-            allWorlds[index] = this;
+            if (DefaultWorld == null)
+                DefaultWorld = this;
+            allWorlds.Add(this);
         }
 
-        public void Dispose()
+        public unsafe void Dispose()
         {
-            allWorlds.Remove(index);
-            if (DefaultWorld == this)
-                DefaultWorld = null;
             systems.Clear();
             entities.Dispose();
-            foreach (var componentPool in componentPools.Values)
+            foreach (var poolPtr in componentPools.GetValueArray(Allocator.Temp))
             {
+                ref var componentPool = ref Unsafe.AsRef<ComponentPool>((void*)poolPtr);
                 componentPool.Dispose();
             }
+            componentPools.Clear();
+            if (DefaultWorld == this)
+                DefaultWorld = null;
+            allWorlds.Remove(this);
         }
 
         #region Entity
@@ -88,7 +89,7 @@ namespace CZToolKit.ECS
 
         private Entity NewEntity(int index)
         {
-            var entity = new Entity(index, this);
+            var entity = new Entity(index);
             entities.Add(index, entity);
             return entity;
         }
@@ -96,7 +97,7 @@ namespace CZToolKit.ECS
         public Entity NewEntity()
         {
             var index = entityIndexGenerator.GenerateID();
-            var entity = new Entity(index, this);
+            var entity = new Entity(index);
             entities.Add(index, entity);
             return entity;
         }
@@ -104,166 +105,150 @@ namespace CZToolKit.ECS
         public void NewEntity(out Entity entity)
         {
             var id = entityIndexGenerator.GenerateID();
-            entity = new Entity(id, this);
+            entity = new Entity(id);
             entities.Add(id, entity);
         }
 
-        public bool IsValid(int entityID)
+        public bool Exists(int entityID)
         {
             return entities.ContainsKey(entityID);
         }
 
-        public unsafe bool IsValid(Entity entity)
+        public bool Exists(Entity entity)
         {
-            return entity.worldIndex == index && entities.ContainsKey(entity.index);
+            return entities.ContainsKey(entity.index);
         }
 
-        public unsafe void DestroyEntityImmediate(int entityID)
+        public void DestroyEntityImmediate(int entityID)
         {
             DestroyEntityImmediate(entities[entityID]);
         }
 
         public unsafe void DestroyEntityImmediate(Entity entity)
         {
-            if (entity.worldIndex != index)
-                return;
             entities.Remove(entity.index);
-            foreach (var componentPool in componentPools.Values)
+            foreach (var poolPtr in componentPools.GetValueArray(Allocator.Temp))
             {
+                ref var componentPool = ref Unsafe.AsRef<ComponentPool>((void*)poolPtr);
                 componentPool.Del(entity);
             }
         }
         #endregion
 
         #region Component
-        private readonly Dictionary<Type, IComponentPool> componentPools = new Dictionary<Type, IComponentPool>();
+        private NativeHashMap<int, IntPtr> componentPools = new NativeHashMap<int, IntPtr>(128, Allocator.Persistent);
 
-        public IReadOnlyDictionary<Type, IComponentPool> ComponentPools
+        public ref NativeHashMap<int, IntPtr> ComponentPools
         {
-            get { return componentPools; }
+            get { return ref componentPools; }
         }
 
-        public ComponentPool<T> NewComponentPool<T>() where T : struct, IComponent
+        public unsafe IntPtr NewComponentPool<T>() where T : struct, IComponent
         {
-            ComponentPool<T> componentPool = new ComponentPool<T>();
-            componentPools[typeof(T)] = componentPool;
-            return componentPool;
+            var componentType = typeof(T);
+            var componentPool = new ComponentPool(componentType);
+            var ptr = new IntPtr(Unsafe.AsPointer(ref componentPool));
+            componentPools[componentType.GetHashCode()] = ptr;
+            return ptr;
         }
 
-        public ComponentPool<T> NewComponentPool<T>(int defaultSize) where T : struct, IComponent
+        public unsafe IntPtr NewComponentPool<T>(int defaultCapacity) where T : struct, IComponent
         {
-            ComponentPool<T> componentPool = new ComponentPool<T>(defaultSize);
-            componentPools[typeof(T)] = componentPool;
-            return componentPool;
+            var componentType = typeof(T);
+            var componentPool = new ComponentPool(componentType, defaultCapacity);
+            var ptr = new IntPtr(Unsafe.AsPointer(ref componentPool));
+            componentPools[componentType.GetHashCode()] = ptr;
+            return ptr;
         }
 
-        public IComponentPool NewComponentPool(Type componentType)
+        public unsafe IntPtr NewComponentPool(Type componentType)
         {
             if (!componentType.IsValueType)
                 throw new Exception($"The type [{componentType.Name}] is not struct");
-            if (componentType.IsAssignableFrom(typeof(IComponent)))
+            if (!componentType.IsAssignableFrom(typeof(IComponent)))
                 throw new NotImplementedException($"The type [{componentType.Name}] is not Implement IComponent");
-
-            var componentPoolType = typeof(ComponentPool<>).MakeGenericType(componentType);
-            var componentPool = Activator.CreateInstance(componentPoolType) as IComponentPool;
-            componentPools[componentType] = componentPool;
-            return componentPool;
+            var componentPool = (ComponentPool)Activator.CreateInstance(typeof(ComponentPool), new object[] { componentType });
+            var poolPtr = new IntPtr(Unsafe.AsPointer(ref componentPool));
+            componentPools[componentType.GetHashCode()] = poolPtr;
+            return poolPtr;
         }
 
-        public IComponentPool NewComponentPool(Type componentType, int defaultSize)
+        public unsafe IntPtr NewComponentPool(Type componentType, int defaultSize)
         {
             if (!componentType.IsValueType)
                 throw new Exception($"The type [{componentType.Name}] is not struct");
-            if (componentType.IsAssignableFrom(typeof(IComponent)))
+            if (!componentType.IsAssignableFrom(typeof(IComponent)))
                 throw new NotImplementedException($"The type [{componentType.Name}] is not Implement IComponent");
-
-            var componentPoolType = typeof(ComponentPool<>).MakeGenericType(componentType);
-            var componentPool = Activator.CreateInstance(componentPoolType, defaultSize) as IComponentPool;
-            componentPools[componentType] = componentPool;
-            return componentPool;
+            var componentPool = (ComponentPool)Activator.CreateInstance(typeof(ComponentPool), new object[] { componentType, defaultSize });
+            var ptr = new IntPtr(Unsafe.AsPointer(ref componentPool));
+            componentPools[componentType.GetHashCode()] = ptr;
+            return ptr;
         }
 
-        public bool ContainsComponentPool(Type componentType)
+        public bool ExistsComponentPool(Type componentType)
         {
-            return componentPools.ContainsKey(componentType);
+            return componentPools.ContainsKey(componentType.GetHashCode());
         }
 
-        public IComponentPool GetComponentPool(Type componentType)
+        public unsafe ref ComponentPool GetComponentPool(Type componentType)
         {
-            componentPools.TryGetValue(componentType, out var componentPool);
-            return componentPool;
-        }
-
-        public ComponentPool<T> GetComponentPool<T>() where T : struct, IComponent
-        {
-            componentPools.TryGetValue(typeof(T), out var componentPool);
-            return componentPool as ComponentPool<T>;
+            if (!componentPools.TryGetValue(componentType.GetHashCode(), out var poolPtr))
+                throw new Exception("AAA");
+            return ref Unsafe.AsRef<ComponentPool>((void*)poolPtr);
         }
 
         public unsafe bool HasComponent(Entity entity, Type componentType)
         {
-            var componentPool = GetComponentPool(componentType);
-            if (null != componentPool && componentPool.Contains(entity))
-                return true;
-            return false;
+            if (!componentPools.TryGetValue(componentType.GetHashCode(), out var poolPtr))
+                return false;
+            ref var component = ref Unsafe.AsRef<ComponentPool>((void*)poolPtr);
+            return component.Contains(entity);
         }
 
         public unsafe bool HasComponent<T>(Entity entity) where T : struct, IComponent
         {
-            var componentPool = GetComponentPool<T>();
-            if (null != componentPool && componentPool.Contains(entity))
-                return true;
-            return false;
+            return HasComponent(entity, typeof(T));
         }
 
-        public unsafe T GetComponent<T>(Entity entity) where T : struct, IComponent
+        public unsafe ref T GetComponent<T>(Entity entity) where T : struct, IComponent
         {
-            return GetComponentPool<T>().Get(entity);
+            var componentType = typeof(T);
+            if (!componentPools.TryGetValue(componentType.GetHashCode(), out var poolPtr))
+                throw new Exception("AAA");
+            ref var componentPool = ref Unsafe.AsRef<ComponentPool>((void*)poolPtr);
+            return ref componentPool.Get<T>(entity);
         }
 
-        public unsafe bool TryGetComponent<T>(Entity entity, out T component) where T : struct, IComponent
+        public unsafe void SetComponent<T>(Entity entity, T component) where T : struct, IComponent
         {
-            var componentPool = GetComponentPool<T>();
-            if (componentPool == null)
-            {
-                component = default;
-                return false;
-            }
-            return componentPool.TryGet(entity, out component);
-        }
-
-        public unsafe ref T RefComponent<T>(Entity entity) where T : struct, IComponent
-        {
-            return ref GetComponentPool<T>().Ref(entity);
-        }
-
-        public unsafe void AddComponent<T>(Entity entity, in T component) where T : struct, IComponent
-        {
-            var componentPool = GetComponentPool<T>();
-            if (componentPool == null)
-                componentPool = NewComponentPool<T>();
+            var componentType = typeof(T);
+            if (!componentPools.TryGetValue(componentType.GetHashCode(), out var poolPtr))
+                poolPtr = NewComponentPool<T>();
+            ref var componentPool = ref Unsafe.AsRef<ComponentPool>((void*)poolPtr);
             componentPool.Set(entity, component);
         }
 
-        public unsafe void AddComponent(Entity entity, Type type, object component)
+        public unsafe void SetComponent(Entity entity, IComponent component)
         {
-            var componentPool = GetComponentPool(type);
-            if (componentPool == null)
-                componentPool = NewComponentPool(type);
+            var componentType = component.GetType();
+            if (!componentPools.TryGetValue(componentType.GetHashCode(), out var poolPtr))
+                poolPtr = NewComponentPool(componentType);
+            ref var componentPool = ref Unsafe.AsRef<ComponentPool>((void*)poolPtr);
             componentPool.Set(entity, component);
         }
 
-        public unsafe void SetComponent<T>(Entity entity, in T component) where T : struct, IComponent
+        public unsafe void RemoveComponent(Entity entity, Type componentType)
         {
-            var componentPool = GetComponentPool<T>();
-            if (componentPool == null)
-                componentPool = NewComponentPool<T>();
-            componentPool.Set(entity, component);
+            if (!componentPools.TryGetValue(componentType.GetHashCode(), out var poolPtr))
+                return;
+            ref var componentPool = ref Unsafe.AsRef<ComponentPool>((void*)poolPtr);
+            componentPool.Del(entity);
         }
 
         public unsafe void RemoveComponent<T>(Entity entity)
         {
-            GetComponentPool(typeof(T)).Del(entity);
+
+            RemoveComponent(entity, typeof(T));
         }
         #endregion
 
@@ -277,17 +262,62 @@ namespace CZToolKit.ECS
 
         public void AddSystem(ISystem system)
         {
+            if (systems.Contains(system))
+                throw new Exception("systems中已经存在一个相同的对象!");
             systems.Add(system);
         }
 
         public void InsertSystem(int index, ISystem system)
         {
+            if (systems.Contains(system))
+                throw new Exception("systems中已经存在一个相同的对象!");
             systems.Insert(index, system);
+            if (system is IOnAwake sys)
+                sys.OnAwake();
         }
 
         public bool RemoveSystem(ISystem system)
         {
             return systems.Remove(system);
+        }
+
+        public void FixedUpdate()
+        {
+            for (int i = 0; i < systems.Count; i++)
+            {
+                var system = systems[i];
+                if (system is IFixedUpdate sys)
+                    sys.OnFixedUpdate();
+            }
+        }
+
+        public void Update()
+        {
+            for (int i = 0; i < systems.Count; i++)
+            {
+                var system = systems[i];
+                if (system is IUpdate sys)
+                    sys.OnUpdate();
+            }
+        }
+
+        public void LateUpdate()
+        {
+            for (int i = 0; i < systems.Count; i++)
+            {
+                var system = systems[i];
+                if (system is ILateUpdate sys)
+                    sys.OnLateUpdate();
+            }
+        }
+
+        public void DestroySystem(ISystem system)
+        {
+            if (!systems.Contains(system))
+                throw new Exception("systems中不存在该对象");
+            if (system is IDestroy sys)
+                sys.OnDestroy();
+            RemoveSystem(system);
         }
         #endregion
     }

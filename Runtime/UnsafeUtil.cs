@@ -13,8 +13,18 @@
  *
  */
 #endregion
+using System;
+using System.Runtime.CompilerServices;
 
 namespace CZToolKit.ECS
 {
-    public interface IComponent { }
+    delegate int Func1<T>();
+
+    public static class UnsafeUtil
+    {
+        public unsafe static int SizeOf<T>()
+        {
+            return Unsafe.SizeOf<T>();
+        }
+    }
 }

@@ -14,7 +14,7 @@ namespace CZToolKit.ECS
             World.DefaultWorld.NewEntity(out var entity);
             foreach (var component in components)
             {
-                entity.AddComponent(component.GetType(), component);
+                World.DefaultWorld.SetComponent(entity, component);
             }
             if (destroyOnAwake)
                 GameObject.Destroy(this);

@@ -31,7 +31,7 @@ namespace CZToolKit.ECS.Editors
             titleContent = new GUIContent("ECS Debugger");
             base.OnEnable();
             EditorApplication.playModeStateChanged += OnPlayModeChanged;
-            foreach (var world in World.AllWorlds.Values)
+            foreach (var world in World.AllWorlds)
             {
                 SelectWorld(world);
                 break;
@@ -44,7 +44,7 @@ namespace CZToolKit.ECS.Editors
             switch (obj)
             {
                 case PlayModeStateChange.EnteredPlayMode:
-                    foreach (var world in World.AllWorlds.Values)
+                    foreach (var world in World.AllWorlds)
                     {
                         SelectWorld(world);
                         break;
@@ -82,7 +82,7 @@ namespace CZToolKit.ECS.Editors
             if (GUI.Button(worldSelectButtonRect, dropDownLabel, EditorStyles.toolbarDropDown))
             {
                 GenericMenu worldMenu = new GenericMenu();
-                foreach (var world in World.AllWorlds.Values)
+                foreach (var world in World.AllWorlds)
                 {
                     worldMenu.AddItem(new GUIContent(world.name), false, () =>
                     {
@@ -113,12 +113,11 @@ namespace CZToolKit.ECS.Editors
                     if (item is EntityTreeViewItem entityItem)
                     {
                         var selectedEntity = entityItem.entity;
-                        foreach (var componentPool in selectWorld.ComponentPools.Values)
+                        foreach (var type in selectWorld.ComponentPools.GetKeyArray(Allocator.Temp))
                         {
-                            if (componentPool.Contains(selectedEntity))
-                            {
-                                GUILayout.Label(componentPool.ComponentType.Name);
-                            }
+                            //ref var pool = ref selectWorld.GetComponentPool(type);
+                            //if (pool.Contains(selectedEntity))
+                            //    GUILayout.Label(type.Name);
                         }
                     }
                 }
@@ -148,7 +147,7 @@ namespace CZToolKit.ECS.Editors
                 var item = MenuTreeView.RootItem.children[i];
                 if (item is EntityTreeViewItem entityItem)
                 {
-                    if (!entityItem.entity.IsValid())
+                    if (!selectWorld.Exists(entityItem.entity))
                         (MenuTreeView as EntitiesTreeView).RemoveEntityItem(entityItem.entity);
                 }
             }

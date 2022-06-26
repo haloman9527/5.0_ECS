@@ -18,6 +18,11 @@ namespace CZToolKit.ECS
 {
     public interface ISystem { }
 
+    public interface IOnAwake
+    {
+        void OnAwake();
+    }
+
     public interface IFixedUpdate
     {
         void OnFixedUpdate();
