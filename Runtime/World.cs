@@ -16,6 +16,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Unity.Collections;
 
 namespace CZToolKit.ECS
@@ -180,6 +181,8 @@ namespace CZToolKit.ECS
             if (!componentType.IsAssignableFrom(typeof(IComponent)))
                 throw new NotImplementedException($"The type [{componentType.Name}] is not Implement IComponent");
             var componentPool = (ComponentPool)Activator.CreateInstance(typeof(ComponentPool), new object[] { componentType, defaultSize });
+
+           Marshal.AllocHGlobal(Marshal.SizeOf<ComponentPool>());
             var ptr = new IntPtr(Unsafe.AsPointer(ref componentPool));
             componentPools[componentType.GetHashCode()] = ptr;
             return ptr;
