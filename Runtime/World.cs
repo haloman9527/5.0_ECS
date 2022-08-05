@@ -15,6 +15,7 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Unity.Collections;
@@ -144,48 +145,46 @@ namespace CZToolKit.ECS
             get { return ref componentPools; }
         }
 
-        public unsafe IntPtr NewComponentPool<T>() where T : struct, IComponent
+        public unsafe ComponentPool* NewComponentPool<T>() where T : unmanaged, IComponent
         {
             var componentType = typeof(T);
             var componentPool = new ComponentPool(componentType);
-            var ptr = new IntPtr(Unsafe.AsPointer(ref componentPool));
-            componentPools[componentType.GetHashCode()] = ptr;
-            return ptr;
+            var componentsPointer = &componentPool;
+            componentPools[componentType.GetHashCode()] = new IntPtr(componentsPointer);
+            return componentsPointer;
         }
 
-        public unsafe IntPtr NewComponentPool<T>(int defaultCapacity) where T : struct, IComponent
+        public unsafe ComponentPool* NewComponentPool<T>(int defaultCapacity) where T : unmanaged, IComponent
         {
             var componentType = typeof(T);
             var componentPool = new ComponentPool(componentType, defaultCapacity);
-            var ptr = new IntPtr(Unsafe.AsPointer(ref componentPool));
-            componentPools[componentType.GetHashCode()] = ptr;
-            return ptr;
+            var componentsPointer = &componentPool;
+            componentPools[componentType.GetHashCode()] = new IntPtr(componentsPointer);
+            return componentsPointer;
         }
 
-        public unsafe IntPtr NewComponentPool(Type componentType)
+        public unsafe ComponentPool* NewComponentPool(Type componentType)
         {
-            if (!componentType.IsValueType)
-                throw new Exception($"The type [{componentType.Name}] is not struct");
+            if (!UnsafeUtil.IsUnManaged(componentType))
+                throw new Exception($"The type [{componentType.Name}] is not UnManaged Type");
             if (!componentType.IsAssignableFrom(typeof(IComponent)))
                 throw new NotImplementedException($"The type [{componentType.Name}] is not Implement IComponent");
             var componentPool = (ComponentPool)Activator.CreateInstance(typeof(ComponentPool), new object[] { componentType });
-            var poolPtr = new IntPtr(Unsafe.AsPointer(ref componentPool));
-            componentPools[componentType.GetHashCode()] = poolPtr;
-            return poolPtr;
+            var componentsPointer = &componentPool;
+            componentPools[componentType.GetHashCode()] = new IntPtr(componentsPointer);
+            return componentsPointer;
         }
 
-        public unsafe IntPtr NewComponentPool(Type componentType, int defaultSize)
+        public unsafe ComponentPool* NewComponentPool(Type componentType, int defaultSize)
         {
-            if (!componentType.IsValueType)
-                throw new Exception($"The type [{componentType.Name}] is not struct");
+            if (!UnsafeUtil.IsUnManaged(componentType))
+                throw new Exception($"The type [{componentType.Name}] is not UnManaged Type");
             if (!componentType.IsAssignableFrom(typeof(IComponent)))
                 throw new NotImplementedException($"The type [{componentType.Name}] is not Implement IComponent");
             var componentPool = (ComponentPool)Activator.CreateInstance(typeof(ComponentPool), new object[] { componentType, defaultSize });
-
-           Marshal.AllocHGlobal(Marshal.SizeOf<ComponentPool>());
-            var ptr = new IntPtr(Unsafe.AsPointer(ref componentPool));
-            componentPools[componentType.GetHashCode()] = ptr;
-            return ptr;
+            var componentsPointer = &componentPool;
+            componentPools[componentType.GetHashCode()] = new IntPtr(componentsPointer);
+            return componentsPointer;
         }
 
         public bool ExistsComponentPool(Type componentType)
@@ -193,59 +192,63 @@ namespace CZToolKit.ECS
             return componentPools.ContainsKey(componentType.GetHashCode());
         }
 
-        public unsafe ref ComponentPool GetComponentPool(Type componentType)
+        public unsafe ComponentPool* GetComponentPool(Type componentType)
         {
             if (!componentPools.TryGetValue(componentType.GetHashCode(), out var poolPtr))
                 throw new Exception("AAA");
-            return ref Unsafe.AsRef<ComponentPool>((void*)poolPtr);
+            return (ComponentPool*)poolPtr;
         }
 
         public unsafe bool HasComponent(Entity entity, Type componentType)
         {
             if (!componentPools.TryGetValue(componentType.GetHashCode(), out var poolPtr))
                 return false;
-            ref var component = ref Unsafe.AsRef<ComponentPool>((void*)poolPtr);
-            return component.Contains(entity);
+            var components = (ComponentPool*)poolPtr;
+            return components->Contains(entity);
         }
 
-        public unsafe bool HasComponent<T>(Entity entity) where T : struct, IComponent
+        public unsafe bool HasComponent<T>(Entity entity) where T : unmanaged, IComponent
         {
             return HasComponent(entity, typeof(T));
         }
 
-        public unsafe ref T GetComponent<T>(Entity entity) where T : struct, IComponent
+        public unsafe T* GetComponent<T>(Entity entity) where T : unmanaged, IComponent
         {
             var componentType = typeof(T);
             if (!componentPools.TryGetValue(componentType.GetHashCode(), out var poolPtr))
                 throw new Exception("AAA");
-            ref var componentPool = ref Unsafe.AsRef<ComponentPool>((void*)poolPtr);
-            return ref componentPool.Get<T>(entity);
+            var components = (ComponentPool*)poolPtr;
+            return components->Get<T>(entity);
         }
 
-        public unsafe void SetComponent<T>(Entity entity, T component) where T : struct, IComponent
+        public unsafe void SetComponent<T>(Entity entity, T component) where T : unmanaged, IComponent
         {
             var componentType = typeof(T);
-            if (!componentPools.TryGetValue(componentType.GetHashCode(), out var poolPtr))
-                poolPtr = NewComponentPool<T>();
-            ref var componentPool = ref Unsafe.AsRef<ComponentPool>((void*)poolPtr);
-            componentPool.Set(entity, component);
+            ComponentPool* components;
+            if (componentPools.TryGetValue(componentType.GetHashCode(), out var poolPtr))
+                components = (ComponentPool*)poolPtr;
+            else
+                components = NewComponentPool<T>();
+            components->Set(entity, component);
         }
 
         public unsafe void SetComponent(Entity entity, IComponent component)
         {
             var componentType = component.GetType();
-            if (!componentPools.TryGetValue(componentType.GetHashCode(), out var poolPtr))
-                poolPtr = NewComponentPool(componentType);
-            ref var componentPool = ref Unsafe.AsRef<ComponentPool>((void*)poolPtr);
-            componentPool.Set(entity, component);
+            ComponentPool* components;
+            if (componentPools.TryGetValue(componentType.GetHashCode(), out var poolPtr))
+                components = (ComponentPool*)poolPtr;
+            else
+                components = NewComponentPool(componentType);
+            components->Set(entity, component);
         }
 
         public unsafe void RemoveComponent(Entity entity, Type componentType)
         {
             if (!componentPools.TryGetValue(componentType.GetHashCode(), out var poolPtr))
                 return;
-            ref var componentPool = ref Unsafe.AsRef<ComponentPool>((void*)poolPtr);
-            componentPool.Del(entity);
+            var components = (ComponentPool*)poolPtr;
+            components->Del(entity);
         }
 
         public unsafe void RemoveComponent<T>(Entity entity)
