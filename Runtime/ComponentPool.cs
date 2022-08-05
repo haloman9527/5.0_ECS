@@ -33,7 +33,7 @@ namespace CZToolKit.ECS
             this.componentSize = Marshal.SizeOf(componentType);
 
 
-            var components = new NativeHashMap<int, IntPtr>(defaultCapacity, Allocator.Persistent);
+            var components = new NativeHashMap<Entity, IntPtr>(defaultCapacity, Allocator.Persistent);
             this.componentsPtr = Unsafe.AsPointer(ref components);
         }
 
@@ -78,13 +78,13 @@ namespace CZToolKit.ECS
 
         public void Dispose()
         {
-            //ref var components = ref Unsafe.AsRef<NativeHashMap<Entity, IntPtr>>(componentsPtr);
-            //var ptrs = components.GetValueArray(Allocator.Temp);
-            //for (int i = 0; i < ptrs.Length; i++)
-            //{
-            //    Marshal.FreeHGlobal(ptrs[i]);
-            //}
-            //components.Dispose();
+            ref var components = ref Unsafe.AsRef<NativeHashMap<Entity, IntPtr>>(componentsPtr);
+            var ptrs = components.GetValueArray(Allocator.Temp);
+            for (int i = 0; i < ptrs.Length; i++)
+            {
+                Marshal.FreeHGlobal(ptrs[i]);
+            }
+            components.Dispose();
         }
     }
 }
