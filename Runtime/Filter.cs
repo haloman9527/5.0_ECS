@@ -26,7 +26,6 @@ namespace CZToolKit.ECS
 
     public class Filter
     {
-
         private readonly World world;
 
         public Filter(World world)
@@ -42,9 +41,9 @@ namespace CZToolKit.ECS
             if (!world.ExistsComponentPool(componentType0))
                 return;
             var componentPool = world.GetComponentPool(componentType0);
-            foreach (var entity in componentPool->GetEntities(Allocator.Temp))
+            foreach (var entity in componentPool.GetEntities(Allocator.Temp))
             {
-                action(ref Unsafe.AsRef<ComponentType0>(componentPool->Get<ComponentType0>(entity)));
+                action(ref Unsafe.AsRef<ComponentType0>(componentPool.Get<ComponentType0>(entity)));
             }
         }
 
@@ -62,12 +61,12 @@ namespace CZToolKit.ECS
             var componentPool1 = world.GetComponentPool(componentType1);
             foreach (var entity in world.Entities.GetValueArray(Allocator.Temp))
             {
-                if (!componentPool0->Contains(entity))
+                if (!componentPool0.Contains(entity))
                     continue;
-                if (!componentPool1->Contains(entity))
+                if (!componentPool1.Contains(entity))
                     continue;
-                action(ref Unsafe.AsRef<ComponentType0>(componentPool0->Get<ComponentType0>(entity)),
-                    ref Unsafe.AsRef<ComponentType1>(componentPool1->Get<ComponentType1>(entity)));
+                action(ref Unsafe.AsRef<ComponentType0>(componentPool0.Get<ComponentType0>(entity)),
+                    ref Unsafe.AsRef<ComponentType1>(componentPool1.Get<ComponentType1>(entity)));
             }
         }
 
@@ -90,15 +89,15 @@ namespace CZToolKit.ECS
             var componentPool2 = world.GetComponentPool(componentType2);
             foreach (var entity in world.Entities.GetValueArray(Allocator.Temp))
             {
-                if (!componentPool0->Contains(entity))
+                if (!componentPool0.Contains(entity))
                     continue;
-                if (!componentPool1->Contains(entity))
+                if (!componentPool1.Contains(entity))
                     continue;
-                if (!componentPool2->Contains(entity))
+                if (!componentPool2.Contains(entity))
                     continue;
-                action(ref Unsafe.AsRef<ComponentType0>(componentPool0->Get<ComponentType0>(entity)),
-                    ref Unsafe.AsRef<ComponentType1>(componentPool1->Get<ComponentType1>(entity)),
-                    ref Unsafe.AsRef<ComponentType2>(componentPool2->Get<ComponentType2>(entity)));
+                action(ref Unsafe.AsRef<ComponentType0>(componentPool0.Get<ComponentType0>(entity)),
+                    ref Unsafe.AsRef<ComponentType1>(componentPool1.Get<ComponentType1>(entity)),
+                    ref Unsafe.AsRef<ComponentType2>(componentPool2.Get<ComponentType2>(entity)));
             }
         }
 
@@ -126,18 +125,18 @@ namespace CZToolKit.ECS
             var componentPool3 = world.GetComponentPool(componentType3);
             foreach (var entity in world.Entities.GetValueArray(Allocator.Temp))
             {
-                if (!componentPool0->Contains(entity))
+                if (!componentPool0.Contains(entity))
                     continue;
-                if (!componentPool1->Contains(entity))
+                if (!componentPool1.Contains(entity))
                     continue;
-                if (!componentPool2->Contains(entity))
+                if (!componentPool2.Contains(entity))
                     continue;
-                if (!componentPool3->Contains(entity))
+                if (!componentPool3.Contains(entity))
                     continue;
-                action(ref Unsafe.AsRef<ComponentType0>(componentPool0->Get<ComponentType0>(entity)),
-                    ref Unsafe.AsRef<ComponentType1>(componentPool1->Get<ComponentType1>(entity)),
-                    ref Unsafe.AsRef<ComponentType2>(componentPool2->Get<ComponentType2>(entity)),
-                    ref Unsafe.AsRef<ComponentType3>(componentPool3->Get<ComponentType3>(entity)));
+                action(ref Unsafe.AsRef<ComponentType0>(componentPool0.Get<ComponentType0>(entity)),
+                    ref Unsafe.AsRef<ComponentType1>(componentPool1.Get<ComponentType1>(entity)),
+                    ref Unsafe.AsRef<ComponentType2>(componentPool2.Get<ComponentType2>(entity)),
+                    ref Unsafe.AsRef<ComponentType3>(componentPool3.Get<ComponentType3>(entity)));
             }
         }
         #endregion
