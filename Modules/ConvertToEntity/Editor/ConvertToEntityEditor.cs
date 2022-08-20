@@ -29,7 +29,7 @@ namespace CZToolKit.ECS.Editors
             {
                 CZAdvancedDropDown components = new CZAdvancedDropDown("Components");
                 components.MinimumSize = new Vector2(150, 300);
-                foreach (var type in Util_Reflection.GetChildTypes<IComponent>())
+                foreach (var type in Util_TypeCache.GetTypesDerivedFrom<IComponent>())
                 {
                     var item = components.Add(ObjectNames.NicifyVariableName(type.Name));
                     item.userData = type;

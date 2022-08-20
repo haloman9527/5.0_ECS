@@ -15,6 +15,7 @@
 #endregion
 using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 
@@ -24,16 +25,21 @@ namespace CZToolKit.ECS
     {
         private const int DEFAULT_CAPACITY = 128;
 
+        public int componentType;
         public int componentSize;
         public int alignment;
         public IntPtr componentsPtr;
 
         public ComponentPool(Type componentType, int defaultCapacity = DEFAULT_CAPACITY)
         {
+            this.componentType = componentType.GetHashCode();
             this.componentSize = UnsafeUtility.SizeOf(componentType);
             this.alignment = 4;
             var components = new NativeHashMap<Entity, IntPtr>(defaultCapacity, Allocator.Persistent);
-            var ptr = UnsafeUtility.Malloc(UnsafeUtility.SizeOf<NativeHashMap<Entity, IntPtr>>(), UnsafeUtility.AlignOf<NativeHashMap<Entity, IntPtr>>(), Allocator.Persistent);
+
+            var componentsSize = UnsafeUtility.SizeOf<NativeHashMap<Entity, IntPtr>>();
+            var componentsAlign = UnsafeUtility.AlignOf<NativeHashMap<Entity, IntPtr>>();
+            var ptr = UnsafeUtility.Malloc(componentsSize, componentsAlign, Allocator.Persistent);
             UnsafeUtility.CopyStructureToPtr(ref components, ptr);
             componentsPtr = new IntPtr(ptr);
         }

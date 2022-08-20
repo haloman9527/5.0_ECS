@@ -9,7 +9,7 @@ namespace CZToolKit.ECS
         [SerializeReference]
         public List<IComponent> components = new List<IComponent>();
 
-        private void Awake()
+        private void Start()
         {
             World.DefaultWorld.NewEntity(out var entity);
             foreach (var component in components)

@@ -14,12 +14,23 @@
  */
 #endregion
 using System;
+using System.Collections.Generic;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 
 namespace CZToolKit.ECS
 {
     public partial class World : IDisposable
     {
+        #region Static
+        private static Dictionary<int, Type> componentTypes = new Dictionary<int, Type>();
+
+        public static IReadOnlyDictionary<int, Type> ComponentTypes
+        {
+            get { return componentTypes; }
+        }
+        #endregion
+
         private NativeHashMap<int, ComponentPool> componentPools = new NativeHashMap<int, ComponentPool>(128, Allocator.Persistent);
 
         public NativeHashMap<int, ComponentPool> ComponentPools
@@ -32,6 +43,7 @@ namespace CZToolKit.ECS
             var componentType = typeof(T);
             var componentPool = new ComponentPool(componentType);
             componentPools[componentType.GetHashCode()] = componentPool;
+            componentTypes[componentType.GetHashCode()] = componentType;
             return componentPool;
         }
 
@@ -40,28 +52,31 @@ namespace CZToolKit.ECS
             var componentType = typeof(T);
             var componentPool = new ComponentPool(componentType, defaultCapacity);
             componentPools[componentType.GetHashCode()] = componentPool;
+            componentTypes[componentType.GetHashCode()] = componentType;
             return componentPool;
         }
 
         public unsafe ComponentPool NewComponentPool(Type componentType)
         {
-            if (!UnsafeUtil.IsUnManaged(componentType))
-                throw new Exception($"The type [{componentType.Name}] is not UnManaged Type");
+            if (!UnsafeUtility.IsUnmanaged(componentType))
+                throw new Exception($"The type [{componentType.Name}] is'n Unmanaged Type!");
             if (!componentType.IsAssignableFrom(typeof(IComponent)))
-                throw new NotImplementedException($"The type [{componentType.Name}] is not Implement IComponent");
+                throw new NotImplementedException($"The type [{componentType.Name}] is'n implement IComponent!");
             var componentPool = (ComponentPool)Activator.CreateInstance(typeof(ComponentPool), new object[] { componentType });
             componentPools[componentType.GetHashCode()] = componentPool;
+            componentTypes[componentType.GetHashCode()] = componentType;
             return componentPool;
         }
 
         public unsafe ComponentPool NewComponentPool(Type componentType, int defaultSize)
         {
-            if (!UnsafeUtil.IsUnManaged(componentType))
-                throw new Exception($"The type [{componentType.Name}] is not UnManaged Type");
+            if (!UnsafeUtility.IsUnmanaged(componentType))
+                throw new Exception($"The type [{componentType.Name}] is'n Unmanaged Type!");
             if (!componentType.IsAssignableFrom(typeof(IComponent)))
-                throw new NotImplementedException($"The type [{componentType.Name}] is not Implement IComponent");
+                throw new NotImplementedException($"The type [{componentType.Name}] is'n implement IComponent!");
             var componentPool = (ComponentPool)Activator.CreateInstance(typeof(ComponentPool), new object[] { componentType, defaultSize });
             componentPools[componentType.GetHashCode()] = componentPool;
+            componentTypes[componentType.GetHashCode()] = componentType;
             return componentPool;
         }
 
