@@ -128,6 +128,8 @@ namespace CZToolKit.ECS
         public void SetComponent(Entity entity, IComponent component)
         {
             var componentType = component.GetType();
+            if (!UnsafeUtility.IsUnmanaged(componentType))
+                throw new Exception($"The type '{componentType.Name}' must be a unmanaged type");
             if (!componentPools.TryGetValue(componentType.GetHashCode(), out var components))
                 components = NewComponentPool(componentType);
             if (!methods.TryGetValue(componentType, out var method))
