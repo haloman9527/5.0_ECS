@@ -13,9 +13,7 @@
  *
  */
 #endregion
-using CZToolKit.ECS.Examples;
 using System;
-using System.Runtime.CompilerServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 
@@ -63,20 +61,6 @@ namespace CZToolKit.ECS
             UnsafeUtility.CopyStructureToPtr(ref component, p);
             UnsafeUtility.CopyPtrToStructure<UnsafeHashMap<Entity, IntPtr>>((void*)componentsPtr, out var components);
             components[entity] = new IntPtr(p);
-        }
-
-        public unsafe void Set1(Entity entity, IComponent component)
-        {
-            var method = typeof(ComponentPool).GetMethod("Set", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
-            var m = method.MakeGenericMethod(new Type[] { component.GetType() });
-            m.Invoke(this, new object[] { entity, component });
-
-            //void** pp = (void**)Unsafe.AsPointer(ref component);
-            //UnityEngine.Debug.Log(((CustomComponent*)*pp)->num);
-            //var p = UnsafeUtility.Malloc(componentSize, 4, Allocator.Persistent);
-            //UnsafeUtility.CopyObjectAddressToPtr(component, p);
-            //UnsafeUtility.CopyPtrToStructure<UnsafeHashMap<Entity, IntPtr>>((void*)componentsPtr, out var components);
-            //components[entity] = new IntPtr(p);
         }
 
         public void Del(Entity entity)
