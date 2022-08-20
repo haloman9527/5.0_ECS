@@ -15,6 +15,7 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 
@@ -24,6 +25,7 @@ namespace CZToolKit.ECS
     {
         #region Static
         private static Dictionary<int, Type> componentTypes = new Dictionary<int, Type>();
+        private static Dictionary<Type, MethodInfo> methods = new Dictionary<Type, MethodInfo>();
 
         public static IReadOnlyDictionary<int, Type> ComponentTypes
         {
@@ -128,7 +130,12 @@ namespace CZToolKit.ECS
             var componentType = component.GetType();
             if (!componentPools.TryGetValue(componentType.GetHashCode(), out var components))
                 components = NewComponentPool(componentType);
-            components.Set(entity, component);
+            if (!methods.TryGetValue(componentType, out var method))
+            {
+                var m = typeof(ComponentPool).GetMethod("Set", BindingFlags.Public | BindingFlags.Instance);
+                methods[componentType] = method = m.MakeGenericMethod(new Type[] { component.GetType() });
+            }
+            method.Invoke(components, new object[] { entity, component });
         }
 
         public void RemoveComponent(Entity entity, Type componentType)
