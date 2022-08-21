@@ -33,7 +33,7 @@ namespace CZToolKit.ECS
         }
 
         #region RefForeach
-        public unsafe void Foreach<ComponentType0>(RefAction<ComponentType0> action)
+        public void Foreach<ComponentType0>(RefAction<ComponentType0> action)
             where ComponentType0 : unmanaged, IComponent
         {
             var componentType0 = typeof(ComponentType0);
@@ -44,11 +44,11 @@ namespace CZToolKit.ECS
             {
                 if (!componentPool0.Contains(entity))
                     continue;
-                action(ref Unsafe.AsRef<ComponentType0>(componentPool0.Get<ComponentType0>(entity)));
+                action(ref componentPool0.Get<ComponentType0>(entity));
             }
         }
 
-        public unsafe void Foreach<ComponentType0, ComponentType1>(RefAction<ComponentType0, ComponentType1> action)
+        public void Foreach<ComponentType0, ComponentType1>(RefAction<ComponentType0, ComponentType1> action)
             where ComponentType0 : unmanaged, IComponent
             where ComponentType1 : unmanaged, IComponent
         {
@@ -66,12 +66,12 @@ namespace CZToolKit.ECS
                     continue;
                 if (!componentPool1.Contains(entity))
                     continue;
-                action(ref Unsafe.AsRef<ComponentType0>(componentPool0.Get<ComponentType0>(entity)),
-                    ref Unsafe.AsRef<ComponentType1>(componentPool1.Get<ComponentType1>(entity)));
+                action(ref componentPool0.Get<ComponentType0>(entity),
+                    ref componentPool1.Get<ComponentType1>(entity));
             }
         }
 
-        public unsafe void Foreach<ComponentType0, ComponentType1, ComponentType2>(RefAction<ComponentType0, ComponentType1, ComponentType2> action)
+        public void Foreach<ComponentType0, ComponentType1, ComponentType2>(RefAction<ComponentType0, ComponentType1, ComponentType2> action)
             where ComponentType0 : unmanaged, IComponent
             where ComponentType1 : unmanaged, IComponent
             where ComponentType2 : unmanaged, IComponent
@@ -96,13 +96,13 @@ namespace CZToolKit.ECS
                     continue;
                 if (!componentPool2.Contains(entity))
                     continue;
-                action(ref Unsafe.AsRef<ComponentType0>(componentPool0.Get<ComponentType0>(entity)),
-                    ref Unsafe.AsRef<ComponentType1>(componentPool1.Get<ComponentType1>(entity)),
-                    ref Unsafe.AsRef<ComponentType2>(componentPool2.Get<ComponentType2>(entity)));
+                action(ref componentPool0.Get<ComponentType0>(entity),
+                    ref componentPool1.Get<ComponentType1>(entity),
+                    ref componentPool2.Get<ComponentType2>(entity));
             }
         }
 
-        public unsafe void Foreach<ComponentType0, ComponentType1, ComponentType2, ComponentType3>(RefAction<ComponentType0, ComponentType1, ComponentType2, ComponentType3> action)
+        public void Foreach<ComponentType0, ComponentType1, ComponentType2, ComponentType3>(RefAction<ComponentType0, ComponentType1, ComponentType2, ComponentType3> action)
             where ComponentType0 : unmanaged, IComponent
             where ComponentType1 : unmanaged, IComponent
             where ComponentType2 : unmanaged, IComponent
@@ -134,10 +134,10 @@ namespace CZToolKit.ECS
                     continue;
                 if (!componentPool3.Contains(entity))
                     continue;
-                action(ref Unsafe.AsRef<ComponentType0>(componentPool0.Get<ComponentType0>(entity)),
-                    ref Unsafe.AsRef<ComponentType1>(componentPool1.Get<ComponentType1>(entity)),
-                    ref Unsafe.AsRef<ComponentType2>(componentPool2.Get<ComponentType2>(entity)),
-                    ref Unsafe.AsRef<ComponentType3>(componentPool3.Get<ComponentType3>(entity)));
+                action(ref componentPool0.Get<ComponentType0>(entity),
+                    ref componentPool1.Get<ComponentType1>(entity),
+                    ref componentPool2.Get<ComponentType2>(entity),
+                    ref componentPool3.Get<ComponentType3>(entity));
             }
         }
         #endregion

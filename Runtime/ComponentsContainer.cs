@@ -14,6 +14,7 @@
  */
 #endregion
 using System;
+using System.Runtime.CompilerServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 
@@ -49,13 +50,13 @@ namespace CZToolKit.ECS
             return components.ContainsKey(entity);
         }
 
-        public unsafe T* Get<T>(Entity entity) where T : unmanaged, IComponent
+        public unsafe ref T Get<T>(Entity entity) where T : unmanaged, IComponent
         {
             var components = UnsafeUtility.ReadArrayElement<UnsafeHashMap<Entity, IntPtr>>((void*)componentsPtr, 0);
-            return (T*)components[entity];
+            return ref Unsafe.AsRef<T>((T*)components[entity]);
         }
 
-        public unsafe void Set<T>(Entity entity, T component) where T : unmanaged, IComponent
+        public unsafe void Set<T>(Entity entity, T component) where T : struct, IComponent
         {
             var p = UnsafeUtility.Malloc(componentSize, 4, Allocator.Persistent);
             UnsafeUtility.CopyStructureToPtr(ref component, p);

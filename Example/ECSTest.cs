@@ -24,11 +24,7 @@ namespace CZToolKit.ECS.Examples
         void Awake()
         {
             world = new World("MainWorld");
-
             world.AddSystem(new CustomSystem(world));
-
-            world.NewEntity(out Entity entity);
-            //world.SetComponent(entity, new CustomComponent() { num = 10 });
         }
     }
 }

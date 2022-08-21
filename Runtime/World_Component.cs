@@ -49,7 +49,7 @@ namespace CZToolKit.ECS
             return componentPool;
         }
 
-        public unsafe ComponentsContainer NewComponentPool<T>(int defaultCapacity) where T : unmanaged, IComponent
+        public ComponentsContainer NewComponentPool<T>(int defaultCapacity) where T : unmanaged, IComponent
         {
             var componentType = typeof(T);
             var componentPool = new ComponentsContainer(componentType, defaultCapacity);
@@ -58,7 +58,7 @@ namespace CZToolKit.ECS
             return componentPool;
         }
 
-        public unsafe ComponentsContainer NewComponentPool(Type componentType)
+        public ComponentsContainer NewComponentPool(Type componentType)
         {
             if (!UnsafeUtility.IsUnmanaged(componentType))
                 throw new Exception($"The type [{componentType.Name}] is'n Unmanaged Type!");
@@ -70,7 +70,7 @@ namespace CZToolKit.ECS
             return componentPool;
         }
 
-        public unsafe ComponentsContainer NewComponentPool(Type componentType, int defaultSize)
+        public ComponentsContainer NewComponentPool(Type componentType, int defaultSize)
         {
             if (!UnsafeUtility.IsUnmanaged(componentType))
                 throw new Exception($"The type [{componentType.Name}] is'n Unmanaged Type!");
@@ -109,12 +109,12 @@ namespace CZToolKit.ECS
             return HasComponent(entity, typeof(T));
         }
 
-        public unsafe T* GetComponent<T>(Entity entity) where T : unmanaged, IComponent
+        public ref T GetComponent<T>(Entity entity) where T : unmanaged, IComponent
         {
             var componentType = typeof(T);
             if (!componentPools.TryGetValue(componentType.GetHashCode(), out var components))
                 throw new Exception("AAA");
-            return components.Get<T>(entity);
+            return ref components.Get<T>(entity);
         }
 
         public void SetComponent<T>(Entity entity, T component) where T : unmanaged, IComponent
