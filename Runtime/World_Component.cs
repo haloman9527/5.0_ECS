@@ -33,50 +33,50 @@ namespace CZToolKit.ECS
         }
         #endregion
 
-        private NativeHashMap<int, ComponentPool> componentPools = new NativeHashMap<int, ComponentPool>(128, Allocator.Persistent);
+        private NativeHashMap<int, ComponentsContainer> componentPools = new NativeHashMap<int, ComponentsContainer>(128, Allocator.Persistent);
 
-        public NativeHashMap<int, ComponentPool> ComponentPools
+        public NativeHashMap<int, ComponentsContainer> ComponentPools
         {
             get { return componentPools; }
         }
 
-        public unsafe ComponentPool NewComponentPool<T>() where T : unmanaged, IComponent
+        public unsafe ComponentsContainer NewComponentPool<T>() where T : unmanaged, IComponent
         {
             var componentType = typeof(T);
-            var componentPool = new ComponentPool(componentType);
+            var componentPool = new ComponentsContainer(componentType);
             componentPools[componentType.GetHashCode()] = componentPool;
             componentTypes[componentType.GetHashCode()] = componentType;
             return componentPool;
         }
 
-        public unsafe ComponentPool NewComponentPool<T>(int defaultCapacity) where T : unmanaged, IComponent
+        public unsafe ComponentsContainer NewComponentPool<T>(int defaultCapacity) where T : unmanaged, IComponent
         {
             var componentType = typeof(T);
-            var componentPool = new ComponentPool(componentType, defaultCapacity);
+            var componentPool = new ComponentsContainer(componentType, defaultCapacity);
             componentPools[componentType.GetHashCode()] = componentPool;
             componentTypes[componentType.GetHashCode()] = componentType;
             return componentPool;
         }
 
-        public unsafe ComponentPool NewComponentPool(Type componentType)
+        public unsafe ComponentsContainer NewComponentPool(Type componentType)
+        {
+            if (!UnsafeUtility.IsUnmanaged(componentType))
+                throw new Exception($"The type [{componentType.Name}] is'n Unmanaged Type!");
+            if (!typeof(IComponent).IsAssignableFrom(componentType))
+                throw new NotImplementedException($"The type [{componentType.Name}] is'n implement IComponent!");
+            var componentPool = (ComponentsContainer)Activator.CreateInstance(typeof(ComponentsContainer), new object[] { componentType, ComponentsContainer.DEFAULT_CAPACITY });
+            componentPools[componentType.GetHashCode()] = componentPool;
+            componentTypes[componentType.GetHashCode()] = componentType;
+            return componentPool;
+        }
+
+        public unsafe ComponentsContainer NewComponentPool(Type componentType, int defaultSize)
         {
             if (!UnsafeUtility.IsUnmanaged(componentType))
                 throw new Exception($"The type [{componentType.Name}] is'n Unmanaged Type!");
             if (!componentType.IsAssignableFrom(typeof(IComponent)))
                 throw new NotImplementedException($"The type [{componentType.Name}] is'n implement IComponent!");
-            var componentPool = (ComponentPool)Activator.CreateInstance(typeof(ComponentPool), new object[] { componentType });
-            componentPools[componentType.GetHashCode()] = componentPool;
-            componentTypes[componentType.GetHashCode()] = componentType;
-            return componentPool;
-        }
-
-        public unsafe ComponentPool NewComponentPool(Type componentType, int defaultSize)
-        {
-            if (!UnsafeUtility.IsUnmanaged(componentType))
-                throw new Exception($"The type [{componentType.Name}] is'n Unmanaged Type!");
-            if (!componentType.IsAssignableFrom(typeof(IComponent)))
-                throw new NotImplementedException($"The type [{componentType.Name}] is'n implement IComponent!");
-            var componentPool = (ComponentPool)Activator.CreateInstance(typeof(ComponentPool), new object[] { componentType, defaultSize });
+            var componentPool = (ComponentsContainer)Activator.CreateInstance(typeof(ComponentsContainer), new object[] { componentType, defaultSize });
             componentPools[componentType.GetHashCode()] = componentPool;
             componentTypes[componentType.GetHashCode()] = componentType;
             return componentPool;
@@ -87,12 +87,12 @@ namespace CZToolKit.ECS
             return componentPools.ContainsKey(componentType.GetHashCode());
         }
 
-        public ComponentPool GetComponentPool<T>()
+        public ComponentsContainer GetComponentPool<T>()
         {
             return GetComponentPool(typeof(T));
         }
 
-        public ComponentPool GetComponentPool(Type componentType)
+        public ComponentsContainer GetComponentPool(Type componentType)
         {
             return componentPools[componentType.GetHashCode()];
         }
@@ -134,7 +134,7 @@ namespace CZToolKit.ECS
                 components = NewComponentPool(componentType);
             if (!methods.TryGetValue(componentType, out var method))
             {
-                var m = typeof(ComponentPool).GetMethod("Set", BindingFlags.Public | BindingFlags.Instance);
+                var m = typeof(ComponentsContainer).GetMethod("Set", BindingFlags.Public | BindingFlags.Instance);
                 methods[componentType] = method = m.MakeGenericMethod(new Type[] { component.GetType() });
             }
             method.Invoke(components, new object[] { entity, component });

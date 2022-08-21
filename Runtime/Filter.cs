@@ -13,7 +13,6 @@
  *
  */
 #endregion
-using System;
 using System.Runtime.CompilerServices;
 using Unity.Collections;
 
@@ -40,10 +39,12 @@ namespace CZToolKit.ECS
             var componentType0 = typeof(ComponentType0);
             if (!world.ExistsComponentPool(componentType0))
                 return;
-            var componentPool = world.GetComponentPool(componentType0);
-            foreach (var entity in componentPool.GetEntities(Allocator.Temp))
+            var componentPool0 = world.GetComponentPool(componentType0);
+            foreach (var entity in world.Entities.GetValueArray(Allocator.Temp))
             {
-                action(ref Unsafe.AsRef<ComponentType0>(componentPool.Get<ComponentType0>(entity)));
+                if (!componentPool0.Contains(entity))
+                    continue;
+                action(ref Unsafe.AsRef<ComponentType0>(componentPool0.Get<ComponentType0>(entity)));
             }
         }
 

@@ -42,9 +42,9 @@ namespace CZToolKit.ECS
 
         public static void DisposeAllWorld()
         {
-            foreach (var world in allWorlds)
+            while (allWorlds.Count > 0)
             {
-                world.Dispose();
+                allWorlds[0].Dispose();
             }
             allWorlds.Clear();
         }
@@ -56,7 +56,7 @@ namespace CZToolKit.ECS
         public World(string name)
         {
             this.name = name;
-            this.singleton = NewEntity(-1);
+            this.singleton = NewEntity();
             if (DefaultWorld == null)
                 DefaultWorld = this;
             allWorlds.Add(this);

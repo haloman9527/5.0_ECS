@@ -21,18 +21,11 @@ namespace CZToolKit.ECS
     public partial class World : IDisposable
     {
         private readonly IDGenerator entityIndexGenerator = new IDGenerator();
-        private readonly NativeHashMap<int, Entity> entities = new NativeHashMap<int, Entity>(64, Allocator.Persistent);
+        private readonly NativeHashMap<uint, Entity> entities = new NativeHashMap<uint, Entity>(64, Allocator.Persistent);
 
-        public NativeHashMap<int, Entity> Entities
+        public NativeHashMap<uint, Entity> Entities
         {
             get { return entities; }
-        }
-
-        private Entity NewEntity(int index)
-        {
-            var entity = new Entity(index);
-            entities.Add(index, entity);
-            return entity;
         }
 
         public Entity NewEntity()
@@ -50,19 +43,9 @@ namespace CZToolKit.ECS
             entities.Add(id, entity);
         }
 
-        public bool Exists(int entityID)
-        {
-            return entities.ContainsKey(entityID);
-        }
-
         public bool Exists(Entity entity)
         {
             return entities.ContainsKey(entity.index);
-        }
-
-        public void DestroyEntityImmediate(int entityID)
-        {
-            DestroyEntityImmediate(entities[entityID]);
         }
 
         public unsafe void DestroyEntityImmediate(Entity entity)

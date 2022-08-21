@@ -19,31 +19,25 @@ namespace CZToolKit.ECS.Examples
 {
     public class WorldDriver : MonoBehaviour
     {
-        private World world;
-
-        void Awake()
-        {
-            world = new World("MainWorld");
-
-            world.AddSystem(new CustomSystem(world));
-
-            world.NewEntity(out Entity entity);
-            world.SetComponent(entity, new CustomComponent() { num = 10 });
-        }
-
         void Update()
         {
-            world.Update();
+            foreach (var world in World.AllWorlds)
+            {
+                world.Update();
+            }
         }
 
         void FixedUpdate()
         {
-            world.FixedUpdate();
+            foreach (var world in World.AllWorlds)
+            {
+                world.FixedUpdate();
+            }
         }
 
         void OnDestroy()
         {
-            world.Dispose();
+            World.DisposeAllWorld();
         }
     }
 }

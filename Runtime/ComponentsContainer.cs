@@ -19,16 +19,16 @@ using Unity.Collections.LowLevel.Unsafe;
 
 namespace CZToolKit.ECS
 {
-    public unsafe struct ComponentPool : IDisposable
+    public unsafe struct ComponentsContainer : IDisposable
     {
-        private const int DEFAULT_CAPACITY = 128;
+        public const int DEFAULT_CAPACITY = 128;
 
         public int componentType;
         public int componentSize;
         public int alignment;
         public IntPtr componentsPtr;
 
-        public ComponentPool(Type componentType, int capacity = DEFAULT_CAPACITY)
+        public ComponentsContainer(Type componentType, int capacity = DEFAULT_CAPACITY)
         {
             this.componentType = componentType.GetHashCode();
             this.componentSize = UnsafeUtility.SizeOf(componentType);
