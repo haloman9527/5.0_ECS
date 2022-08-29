@@ -48,8 +48,10 @@ namespace CZToolKit.ECS
             return entities.ContainsKey(entity.index);
         }
 
-        public unsafe void DestroyEntityImmediate(Entity entity)
+        public void DestroyEntityImmediate(Entity entity)
         {
+            if (entity.index == singleton.index)
+                throw new Exception("Can't Destory Singleton Entity!!!");
             entities.Remove(entity.index);
             foreach (var components in componentPools.GetValueArray(Allocator.Temp))
             {

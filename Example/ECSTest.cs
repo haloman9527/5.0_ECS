@@ -20,11 +20,17 @@ namespace CZToolKit.ECS.Examples
     public class ECSTest : MonoBehaviour
     {
         private World world;
+        public int entityCount = 10000;
 
         void Awake()
         {
             world = new World("MainWorld");
             world.AddSystem(new CustomSystem(world));
+            for (int i = 0; i < entityCount; i++)
+            {
+                world.NewEntity(out var entity);
+                world.SetComponent(entity, new CustomComponent() { num = 10 });
+            }
         }
     }
 }

@@ -46,13 +46,13 @@ namespace CZToolKit.ECS
 
         public bool Contains(Entity entity)
         {
-            UnsafeUtility.CopyPtrToStructure<UnsafeHashMap<Entity, IntPtr>>((void*)componentsPtr, out var components);
+            ref var components = ref Unsafe.AsRef<UnsafeHashMap<Entity, IntPtr>>((void*)componentsPtr);
             return components.ContainsKey(entity);
         }
 
         public unsafe ref T Get<T>(Entity entity) where T : unmanaged, IComponent
         {
-            var components = UnsafeUtility.ReadArrayElement<UnsafeHashMap<Entity, IntPtr>>((void*)componentsPtr, 0);
+            ref var components = ref Unsafe.AsRef<UnsafeHashMap<Entity, IntPtr>>((void*)componentsPtr);
             return ref Unsafe.AsRef<T>((T*)components[entity]);
         }
 
@@ -60,33 +60,42 @@ namespace CZToolKit.ECS
         {
             var p = UnsafeUtility.Malloc(componentSize, 4, Allocator.Persistent);
             UnsafeUtility.CopyStructureToPtr(ref component, p);
-            UnsafeUtility.CopyPtrToStructure<UnsafeHashMap<Entity, IntPtr>>((void*)componentsPtr, out var components);
+            ref var components = ref Unsafe.AsRef<UnsafeHashMap<Entity, IntPtr>>((void*)componentsPtr);
             components[entity] = new IntPtr(p);
         }
 
         public void Del(Entity entity)
         {
-            UnsafeUtility.CopyPtrToStructure<UnsafeHashMap<Entity, IntPtr>>((void*)componentsPtr, out var components);
+            ref var components = ref Unsafe.AsRef<UnsafeHashMap<Entity, IntPtr>>((void*)componentsPtr);
             UnsafeUtility.Free((void*)components[entity], Allocator.Persistent);
             components.Remove(entity);
         }
 
         public NativeArray<Entity> GetEntities(Allocator allocator)
         {
-            var components = UnsafeUtility.ReadArrayElement<UnsafeHashMap<Entity, IntPtr>>((void*)componentsPtr, 0);
+            ref var components = ref Unsafe.AsRef<UnsafeHashMap<Entity, IntPtr>>((void*)componentsPtr);
             return components.GetKeyArray(allocator);
+        }
+
+        public void Reset()
+        {
+            ref var components = ref Unsafe.AsRef<UnsafeHashMap<Entity, IntPtr>>((void*)componentsPtr);
+            var ptrs = components.GetValueArray(Allocator.Temp);
+            foreach (var ptr in ptrs)
+            {
+                UnsafeUtility.Free((void*)ptr, Allocator.Persistent);
+            }
         }
 
         public void Dispose()
         {
-            UnsafeUtility.CopyPtrToStructure<UnsafeHashMap<Entity, IntPtr>>((void*)componentsPtr, out var components);
+            ref var components = ref Unsafe.AsRef<UnsafeHashMap<Entity, IntPtr>>((void*)componentsPtr);
             var ptrs = components.GetValueArray(Allocator.Temp);
             foreach (var ptr in ptrs)
             {
                 UnsafeUtility.Free((void*)ptr, Allocator.Persistent);
             }
             components.Dispose();
-            UnsafeUtility.Free((void*)componentsPtr, Allocator.Persistent);
         }
     }
 }

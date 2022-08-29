@@ -35,6 +35,14 @@ namespace CZToolKit.ECS.Examples
             }
         }
 
+        void LateUpdate()
+        {
+            foreach (var world in World.AllWorlds)
+            {
+                world.LateUpdate();
+            }
+        }
+
         void OnDestroy()
         {
             World.DisposeAllWorld();

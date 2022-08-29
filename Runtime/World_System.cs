@@ -20,39 +20,57 @@ namespace CZToolKit.ECS
 {
     public partial class World : IDisposable
     {
-        private readonly List<ISystem> systems = new List<ISystem>();
+        private readonly List<ISystem> internalBeforeSystems = new List<ISystem>();
+        private readonly List<ISystem> customSystems = new List<ISystem>();
+        private readonly List<ISystem> internalAfterSystems = new List<ISystem>();
 
-        public IReadOnlyList<ISystem> Systems
+        public IReadOnlyList<ISystem> CustomSystems
         {
-            get { return systems; }
+            get { return customSystems; }
         }
 
         public void AddSystem(ISystem system)
         {
-            if (systems.Contains(system))
+            if (customSystems.Contains(system))
                 throw new Exception("Already exists same type system!");
-            systems.Add(system);
+            customSystems.Add(system);
         }
 
         public void InsertSystem(int index, ISystem system)
         {
-            if (systems.Contains(system))
+            if (customSystems.Contains(system))
                 throw new Exception("Already exists same type system!");
-            systems.Insert(index, system);
+            customSystems.Insert(index, system);
             if (system is IOnAwake sys)
                 sys.OnAwake();
         }
 
         public bool RemoveSystem(ISystem system)
         {
-            return systems.Remove(system);
+            return customSystems.Remove(system);
+        }
+
+        /// <summary> 获取所有System，包含内置System </summary>
+        public IEnumerable<ISystem> GetAllSystems()
+        {
+            foreach (var system in internalBeforeSystems)
+            {
+                yield return system;
+            }
+            foreach (var system in customSystems)
+            {
+                yield return system;
+            }
+            foreach (var system in internalAfterSystems)
+            {
+                yield return system;
+            }
         }
 
         public void FixedUpdate()
         {
-            for (int i = 0; i < systems.Count; i++)
+            foreach (var system in GetAllSystems())
             {
-                var system = systems[i];
                 if (system is IFixedUpdate sys)
                     sys.OnFixedUpdate();
             }
@@ -60,9 +78,8 @@ namespace CZToolKit.ECS
 
         public void Update()
         {
-            for (int i = 0; i < systems.Count; i++)
+            foreach (var system in GetAllSystems())
             {
-                var system = systems[i];
                 if (system is IUpdate sys)
                     sys.OnUpdate();
             }
@@ -70,9 +87,8 @@ namespace CZToolKit.ECS
 
         public void LateUpdate()
         {
-            for (int i = 0; i < systems.Count; i++)
+            foreach (var system in GetAllSystems())
             {
-                var system = systems[i];
                 if (system is ILateUpdate sys)
                     sys.OnLateUpdate();
             }
@@ -80,8 +96,8 @@ namespace CZToolKit.ECS
 
         public void DestroySystem(ISystem system)
         {
-            if (!systems.Contains(system))
-                throw new Exception("systems中不存在该对象");
+            if (!customSystems.Contains(system))
+                throw new Exception($"{nameof(customSystems)}中不存在该对象");
             if (system is IDestroy sys)
                 sys.OnDestroy();
             RemoveSystem(system);

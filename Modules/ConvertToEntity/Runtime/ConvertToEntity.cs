@@ -5,13 +5,16 @@ namespace CZToolKit.ECS
 {
     public class ConvertToEntity : MonoBehaviour
     {
-        public bool destroyOnAwake;
+        [SerializeField]
+        private bool destroyOnAwake;
         [SerializeReference]
         public List<IComponent> components = new List<IComponent>();
+        [HideInInspector]
+        public Entity entity;
 
         private void Start()
         {
-            World.DefaultWorld.NewEntity(out var entity);
+            var entity = ECSConverter.ToEntity(gameObject);
             foreach (var component in components)
             {
                 World.DefaultWorld.SetComponent(entity, component);

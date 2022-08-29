@@ -62,9 +62,19 @@ namespace CZToolKit.ECS
             allWorlds.Add(this);
         }
 
+        public void Reset()
+        {
+            customSystems.Clear();
+            entities.Clear();
+            foreach (var components in componentPools.GetValueArray(Allocator.Temp))
+            {
+                components.Reset();
+            }
+        }
+
         public void Dispose()
         {
-            systems.Clear();
+            customSystems.Clear();
             entities.Dispose();
             foreach (var components in componentPools.GetValueArray(Allocator.Temp))
             {

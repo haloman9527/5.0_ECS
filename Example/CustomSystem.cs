@@ -32,7 +32,7 @@ namespace CZToolKit.ECS.Examples
         {
             filter.Foreach((ref CustomComponent c) =>
             {
-                Debug.Log(c.num);
+                //Debug.Log(c.num);
             });
             if (Input.GetButtonDown("Jump"))
             {
