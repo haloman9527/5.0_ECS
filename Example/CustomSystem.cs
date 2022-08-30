@@ -30,9 +30,9 @@ namespace CZToolKit.ECS.Examples
 
         public void OnUpdate()
         {
-            filter.Foreach((ref CustomComponent c) =>
+            filter.ForeachWithEntity((Entity e, ref CustomComponent c) =>
             {
-                //Debug.Log(c.num);
+                Debug.Log(c.num);
             });
             if (Input.GetButtonDown("Jump"))
             {

@@ -16,18 +16,5 @@
 
 namespace CZToolKit.ECS
 {
-    public interface ISystemAwake
-    {
-        void OnAwake();
-    }
-
-    public interface ISystem
-    {
-        void OnUpdate();
-    }
-
-    public interface ISystemDestroy
-    {
-        void OnDestroy();
-    }
+    public interface IUpdate { }
 }

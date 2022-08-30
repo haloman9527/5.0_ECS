@@ -27,7 +27,7 @@ public class TransformSystem : ISystem, ILateUpdate
         this.filter = new Filter(world);
     }
 
-    public void OnLateUpdate()
+    public void OnUpdate()
     {
         filter.Foreach((ref TransformComponent t, ref PositionComponent p) =>
         {

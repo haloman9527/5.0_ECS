@@ -34,6 +34,8 @@ namespace CZToolKit.ECS
             if (customSystems.Contains(system))
                 throw new Exception("Already exists same type system!");
             customSystems.Add(system);
+            if (system is ISystemAwake sys)
+                sys.OnAwake();
         }
 
         public void InsertSystem(int index, ISystem system)
@@ -41,7 +43,7 @@ namespace CZToolKit.ECS
             if (customSystems.Contains(system))
                 throw new Exception("Already exists same type system!");
             customSystems.Insert(index, system);
-            if (system is IOnAwake sys)
+            if (system is ISystemAwake sys)
                 sys.OnAwake();
         }
 
@@ -71,8 +73,8 @@ namespace CZToolKit.ECS
         {
             foreach (var system in GetAllSystems())
             {
-                if (system is IFixedUpdate sys)
-                    sys.OnFixedUpdate();
+                if (system is IFixedUpdate)
+                    system.OnUpdate();
             }
         }
 
@@ -80,8 +82,8 @@ namespace CZToolKit.ECS
         {
             foreach (var system in GetAllSystems())
             {
-                if (system is IUpdate sys)
-                    sys.OnUpdate();
+                if (system is IUpdate)
+                    system.OnUpdate();
             }
         }
 
@@ -89,8 +91,8 @@ namespace CZToolKit.ECS
         {
             foreach (var system in GetAllSystems())
             {
-                if (system is ILateUpdate sys)
-                    sys.OnLateUpdate();
+                if (system is ILateUpdate)
+                    system.OnUpdate();
             }
         }
 
@@ -98,7 +100,7 @@ namespace CZToolKit.ECS
         {
             if (!customSystems.Contains(system))
                 throw new Exception($"{nameof(customSystems)}中不存在该对象");
-            if (system is IDestroy sys)
+            if (system is ISystemDestroy sys)
                 sys.OnDestroy();
             RemoveSystem(system);
         }
