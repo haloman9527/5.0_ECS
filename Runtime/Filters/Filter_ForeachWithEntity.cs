@@ -33,6 +33,8 @@ namespace CZToolKit.ECS
             if (!world.ExistsComponentPool(componentType0))
                 return;
             var componentPool0 = world.GetComponentPool(componentType0);
+            if (componentPool0.Count() <= 0)
+                return;
             foreach (var entity in world.Entities.GetValueArray(Allocator.Temp))
             {
                 if (!componentPool0.Contains(entity))
@@ -52,14 +54,18 @@ namespace CZToolKit.ECS
             if (!world.ExistsComponentPool(componentType1))
                 return;
             var componentPool0 = world.GetComponentPool(componentType0);
+            if (componentPool0.Count() <= 0)
+                return;
             var componentPool1 = world.GetComponentPool(componentType1);
+            if (componentPool1.Count() <= 0)
+                return;
             foreach (var entity in world.Entities.GetValueArray(Allocator.Temp))
             {
                 if (!componentPool0.Contains(entity))
                     continue;
                 if (!componentPool1.Contains(entity))
                     continue;
-                action(entity, 
+                action(entity,
                     ref componentPool0.Get<C0>(entity),
                     ref componentPool1.Get<C1>(entity));
             }
@@ -80,8 +86,14 @@ namespace CZToolKit.ECS
             if (!world.ExistsComponentPool(componentType2))
                 return;
             var componentPool0 = world.GetComponentPool(componentType0);
+            if (componentPool0.Count() <= 0)
+                return;
             var componentPool1 = world.GetComponentPool(componentType1);
+            if (componentPool1.Count() <= 0)
+                return;
             var componentPool2 = world.GetComponentPool(componentType2);
+            if (componentPool2.Count() <= 0)
+                return;
             foreach (var entity in world.Entities.GetValueArray(Allocator.Temp))
             {
                 if (!componentPool0.Contains(entity))
@@ -90,7 +102,7 @@ namespace CZToolKit.ECS
                     continue;
                 if (!componentPool2.Contains(entity))
                     continue;
-                action(entity, 
+                action(entity,
                     ref componentPool0.Get<C0>(entity),
                     ref componentPool1.Get<C1>(entity),
                     ref componentPool2.Get<C2>(entity));
@@ -116,9 +128,17 @@ namespace CZToolKit.ECS
             if (!world.ExistsComponentPool(componentType3))
                 return;
             var componentPool0 = world.GetComponentPool(componentType0);
+            if (componentPool0.Count() <= 0)
+                return;
             var componentPool1 = world.GetComponentPool(componentType1);
+            if (componentPool1.Count() <= 0)
+                return;
             var componentPool2 = world.GetComponentPool(componentType2);
+            if (componentPool2.Count() <= 0)
+                return;
             var componentPool3 = world.GetComponentPool(componentType3);
+            if (componentPool3.Count() <= 0)
+                return;
             foreach (var entity in world.Entities.GetValueArray(Allocator.Temp))
             {
                 if (!componentPool0.Contains(entity))
@@ -129,7 +149,7 @@ namespace CZToolKit.ECS
                     continue;
                 if (!componentPool3.Contains(entity))
                     continue;
-                action(entity, 
+                action(entity,
                     ref componentPool0.Get<C0>(entity),
                     ref componentPool1.Get<C1>(entity),
                     ref componentPool2.Get<C2>(entity),
@@ -160,10 +180,20 @@ namespace CZToolKit.ECS
             if (!world.ExistsComponentPool(componentType4))
                 return;
             var componentPool0 = world.GetComponentPool(componentType0);
+            if (componentPool0.Count() <= 0)
+                return;
             var componentPool1 = world.GetComponentPool(componentType1);
+            if (componentPool1.Count() <= 0)
+                return;
             var componentPool2 = world.GetComponentPool(componentType2);
+            if (componentPool2.Count() <= 0)
+                return;
             var componentPool3 = world.GetComponentPool(componentType3);
+            if (componentPool3.Count() <= 0)
+                return;
             var componentPool4 = world.GetComponentPool(componentType4);
+            if (componentPool4.Count() <= 0)
+                return;
             foreach (var entity in world.Entities.GetValueArray(Allocator.Temp))
             {
                 if (!componentPool0.Contains(entity))
@@ -176,12 +206,12 @@ namespace CZToolKit.ECS
                     continue;
                 if (!componentPool4.Contains(entity))
                     continue;
-                action(entity, 
+                action(entity,
                     ref componentPool0.Get<C0>(entity),
                     ref componentPool1.Get<C1>(entity),
                     ref componentPool2.Get<C2>(entity),
                     ref componentPool3.Get<C3>(entity),
-                    ref componentPool3.Get<C4>(entity));
+                    ref componentPool4.Get<C4>(entity));
             }
         }
 
@@ -212,11 +242,23 @@ namespace CZToolKit.ECS
             if (!world.ExistsComponentPool(componentType5))
                 return;
             var componentPool0 = world.GetComponentPool(componentType0);
+            if (componentPool0.Count() <= 0)
+                return;
             var componentPool1 = world.GetComponentPool(componentType1);
+            if (componentPool1.Count() <= 0)
+                return;
             var componentPool2 = world.GetComponentPool(componentType2);
+            if (componentPool2.Count() <= 0)
+                return;
             var componentPool3 = world.GetComponentPool(componentType3);
+            if (componentPool3.Count() <= 0)
+                return;
             var componentPool4 = world.GetComponentPool(componentType4);
+            if (componentPool4.Count() <= 0)
+                return;
             var componentPool5 = world.GetComponentPool(componentType5);
+            if (componentPool5.Count() <= 0)
+                return;
             foreach (var entity in world.Entities.GetValueArray(Allocator.Temp))
             {
                 if (!componentPool0.Contains(entity))
@@ -231,13 +273,13 @@ namespace CZToolKit.ECS
                     continue;
                 if (!componentPool5.Contains(entity))
                     continue;
-                action(entity, 
+                action(entity,
                     ref componentPool0.Get<C0>(entity),
                     ref componentPool1.Get<C1>(entity),
                     ref componentPool2.Get<C2>(entity),
                     ref componentPool3.Get<C3>(entity),
-                    ref componentPool3.Get<C4>(entity),
-                    ref componentPool3.Get<C5>(entity));
+                    ref componentPool4.Get<C4>(entity),
+                    ref componentPool5.Get<C5>(entity));
             }
         }
     }

@@ -77,6 +77,12 @@ namespace CZToolKit.ECS
             return components.GetKeyArray(allocator);
         }
 
+        public int Count()
+        {
+            ref var components = ref Unsafe.AsRef<UnsafeHashMap<Entity, IntPtr>>((void*)componentsPtr);
+            return components.Count();
+        }
+
         public void Reset()
         {
             ref var components = ref Unsafe.AsRef<UnsafeHashMap<Entity, IntPtr>>((void*)componentsPtr);
