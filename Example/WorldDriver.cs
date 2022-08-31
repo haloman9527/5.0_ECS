@@ -21,25 +21,25 @@ namespace CZToolKit.ECS.Examples
     {
         void Update()
         {
-            foreach (var world in World.AllWorlds)
+            for (int i = 0; i < World.AllWorlds.Count; i++)
             {
-                world.Update();
+                World.AllWorlds[i].Update();
             }
         }
 
         void FixedUpdate()
         {
-            foreach (var world in World.AllWorlds)
+            for (int i = 0; i < World.AllWorlds.Count; i++)
             {
-                world.FixedUpdate();
+                World.AllWorlds[i].FixedUpdate();
             }
         }
 
         void LateUpdate()
         {
-            foreach (var world in World.AllWorlds)
+            for (int i = 0; i < World.AllWorlds.Count; i++)
             {
-                world.LateUpdate();
+                World.AllWorlds[i].LateUpdate();
             }
         }
 

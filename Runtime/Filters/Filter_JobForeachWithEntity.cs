@@ -20,7 +20,7 @@ namespace CZToolKit.ECS
 {
     public partial class Filter
     {
-        public void JobForeachWithEntity<J, C0>(J job) where J : IJob, IJobForeachWithEntity_EC<C0> where C0 : unmanaged, IComponent
+        public void JobForeachWithEntity<J, C0>(J job) where J : IJobForeachWithEntity_EC<C0> where C0 : unmanaged, IComponent
         {
             var componentType0 = typeof(C0);
             if (!world.ExistsComponentPool(componentType0))
@@ -37,7 +37,7 @@ namespace CZToolKit.ECS
             }
         }
 
-        public void JobForeachWithEntity<J, C0, C1>(J job) where J : IJob, IJobForeachWithEntity_ECC<C0, C1> where C0 : unmanaged, IComponent where C1 : unmanaged, IComponent
+        public void JobForeachWithEntity<J, C0, C1>(J job) where J : IJobForeachWithEntity_ECC<C0, C1> where C0 : unmanaged, IComponent where C1 : unmanaged, IComponent
         {
             var componentType0 = typeof(C0);
             var componentType1 = typeof(C1);
@@ -63,7 +63,7 @@ namespace CZToolKit.ECS
             }
         }
 
-        public void JobForeachWithEntity<J, C0, C1, C2>(J job) where J : IJob, IJobForeachWithEntity_ECCC<C0, C1, C2> where C0 : unmanaged, IComponent where C1 : unmanaged, IComponent where C2 : unmanaged, IComponent
+        public void JobForeachWithEntity<J, C0, C1, C2>(J job) where J : IJobForeachWithEntity_ECCC<C0, C1, C2> where C0 : unmanaged, IComponent where C1 : unmanaged, IComponent where C2 : unmanaged, IComponent
         {
             var componentType0 = typeof(C0);
             var componentType1 = typeof(C1);
@@ -98,7 +98,7 @@ namespace CZToolKit.ECS
             }
         }
 
-        public void JobForeachWithEntity<J, C0, C1, C2, C3>(J job) where J : IJob, IJobForeachWithEntity_ECCCC<C0, C1, C2, C3> where C0 : unmanaged, IComponent where C1 : unmanaged, IComponent where C2 : unmanaged, IComponent where C3 : unmanaged, IComponent
+        public void JobForeachWithEntity<J, C0, C1, C2, C3>(J job) where J : IJobForeachWithEntity_ECCCC<C0, C1, C2, C3> where C0 : unmanaged, IComponent where C1 : unmanaged, IComponent where C2 : unmanaged, IComponent where C3 : unmanaged, IComponent
         {
             var componentType0 = typeof(C0);
             var componentType1 = typeof(C1);
@@ -142,7 +142,7 @@ namespace CZToolKit.ECS
             }
         }
 
-        public void JobForeachWithEntity<J, C0, C1, C2, C3, C4>(J job) where J : IJob, IJobForeachWithEntity_ECCCCC<C0, C1, C2, C3, C4> where C0 : unmanaged, IComponent where C1 : unmanaged, IComponent where C2 : unmanaged, IComponent where C3 : unmanaged, IComponent where C4 : unmanaged, IComponent
+        public void JobForeachWithEntity<J, C0, C1, C2, C3, C4>(J job) where J : IJobForeachWithEntity_ECCCCC<C0, C1, C2, C3, C4> where C0 : unmanaged, IComponent where C1 : unmanaged, IComponent where C2 : unmanaged, IComponent where C3 : unmanaged, IComponent where C4 : unmanaged, IComponent
         {
             var componentType0 = typeof(C0);
             var componentType1 = typeof(C1);
@@ -195,7 +195,7 @@ namespace CZToolKit.ECS
             }
         }
 
-        public void JobForeachWithEntity<J, C0, C1, C2, C3, C4, C5>(J job) where J : IJob, IJobForeachWithEntity_ECCCCCC<C0, C1, C2, C3, C4, C5> where C0 : unmanaged, IComponent where C1 : unmanaged, IComponent where C2 : unmanaged, IComponent where C3 : unmanaged, IComponent where C4 : unmanaged, IComponent where C5 : unmanaged, IComponent
+        public void JobForeachWithEntity<J, C0, C1, C2, C3, C4, C5>(J job) where J : IJobForeachWithEntity_ECCCCCC<C0, C1, C2, C3, C4, C5> where C0 : unmanaged, IComponent where C1 : unmanaged, IComponent where C2 : unmanaged, IComponent where C3 : unmanaged, IComponent where C4 : unmanaged, IComponent where C5 : unmanaged, IComponent
         {
             var componentType0 = typeof(C0);
             var componentType1 = typeof(C1);

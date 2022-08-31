@@ -20,9 +20,9 @@ namespace CZToolKit.ECS
 {
     public partial class World : IDisposable
     {
-        private readonly List<ISystem> internalBeforeSystems = new List<ISystem>();
+        private readonly List<ISystem> beforeSystems = new List<ISystem>();
         private readonly List<ISystem> customSystems = new List<ISystem>();
-        private readonly List<ISystem> internalAfterSystems = new List<ISystem>();
+        private readonly List<ISystem> afterSystems = new List<ISystem>();
 
         public IReadOnlyList<ISystem> CustomSystems
         {
@@ -55,23 +55,33 @@ namespace CZToolKit.ECS
         /// <summary> 获取所有System，包含内置System </summary>
         public IEnumerable<ISystem> GetAllSystems()
         {
-            foreach (var system in internalBeforeSystems)
+            for (int i = 0; i < beforeSystems.Count; i++)
             {
-                yield return system;
+                yield return beforeSystems[i];
             }
-            foreach (var system in customSystems)
+            for (int i = 0; i < customSystems.Count; i++)
             {
-                yield return system;
+                yield return customSystems[i];
             }
-            foreach (var system in internalAfterSystems)
+            for (int i = 0; i < afterSystems.Count; i++)
             {
-                yield return system;
+                yield return afterSystems[i];
             }
         }
 
         public void FixedUpdate()
         {
-            foreach (var system in GetAllSystems())
+            foreach (var system in beforeSystems)
+            {
+                if (system is IFixedUpdate)
+                    system.OnUpdate();
+            }
+            foreach (var system in customSystems)
+            {
+                if (system is IFixedUpdate)
+                    system.OnUpdate();
+            }
+            foreach (var system in afterSystems)
             {
                 if (system is IFixedUpdate)
                     system.OnUpdate();
@@ -80,7 +90,17 @@ namespace CZToolKit.ECS
 
         public void Update()
         {
-            foreach (var system in GetAllSystems())
+            foreach (var system in beforeSystems)
+            {
+                if (system is IUpdate)
+                    system.OnUpdate();
+            }
+            foreach (var system in customSystems)
+            {
+                if (system is IUpdate)
+                    system.OnUpdate();
+            }
+            foreach (var system in afterSystems)
             {
                 if (system is IUpdate)
                     system.OnUpdate();
@@ -89,7 +109,17 @@ namespace CZToolKit.ECS
 
         public void LateUpdate()
         {
-            foreach (var system in GetAllSystems())
+            foreach (var system in beforeSystems)
+            {
+                if (system is ILateUpdate)
+                    system.OnUpdate();
+            }
+            foreach (var system in customSystems)
+            {
+                if (system is ILateUpdate)
+                    system.OnUpdate();
+            }
+            foreach (var system in afterSystems)
             {
                 if (system is ILateUpdate)
                     system.OnUpdate();
