@@ -18,7 +18,7 @@ namespace CZToolKit.ECS
 {
     public class IDGenerator
     {
-        uint id = 1;
+        private uint id = 1;
 
         public uint GenerateID()
         {

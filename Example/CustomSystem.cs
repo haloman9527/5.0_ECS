@@ -17,26 +17,17 @@ using UnityEngine;
 
 namespace CZToolKit.ECS.Examples
 {
-    public class CustomSystem : ISystem, IUpdate
+    public class CustomSystem : ComponentSystem, IUpdate
     {
-        private World world;
-        private Filter filter;
-
-        public CustomSystem(World world)
+        public override void OnUpdate()
         {
-            this.world = world;
-            this.filter = new Filter(world);
-        }
-
-        public void OnUpdate()
-        {
-            filter.ForeachWithEntity((Entity e, ref CustomComponent c) =>
+            Filter.ForeachWithEntity((Entity e, ref CustomComponent c) =>
             {
                 Debug.Log(c.num);
             });
             if (Input.GetButtonDown("Jump"))
             {
-                filter.Foreach((ref CustomComponent c) =>
+                Filter.Foreach((ref CustomComponent c) =>
                 {
                     c.num += 1;
                 });

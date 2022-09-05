@@ -16,30 +16,21 @@
 using CZToolKit.ECS;
 using UnityEngine;
 
-public class TransformSystem : ISystem, ILateUpdate
+public class TransformSystem : ComponentSystem, ILateUpdate
 {
-    private World world;
-    private Filter filter;
-
-    public TransformSystem(World world)
+    public override void OnUpdate()
     {
-        this.world = world;
-        this.filter = new Filter(world);
-    }
-
-    public void OnUpdate()
-    {
-        filter.Foreach((ref TransformComponent t, ref PositionComponent p) =>
+        Filter.Foreach((ref TransformComponent t, ref PositionComponent p) =>
         {
             var transform = ECSReferences.Get(t.id) as Transform;
             transform.position = p.value;
         });
-        filter.Foreach((ref TransformComponent t, ref RotationComponent r) =>
+        Filter.Foreach((ref TransformComponent t, ref RotationComponent r) =>
         {
             var transform = ECSReferences.Get(t.id) as Transform;
             transform.rotation = r.value;
         });
-        filter.Foreach((ref TransformComponent t, ref ScaleComponent s) =>
+        Filter.Foreach((ref TransformComponent t, ref ScaleComponent s) =>
         {
             var transform = ECSReferences.Get(t.id) as Transform;
             transform.localScale = s.value;

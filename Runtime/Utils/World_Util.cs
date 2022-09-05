@@ -22,7 +22,7 @@ namespace CZToolKit.ECS
         public static World NewBasicWorld(string worldName)
         {
             World world = new World(worldName);
-            world.afterSystems.Add(new TransformSystem(world));
+            world.AddAfterSystem<TransformSystem>();
             return world;
         }
     }

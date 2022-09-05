@@ -20,40 +20,78 @@ namespace CZToolKit.ECS
 {
     public partial class World : IDisposable
     {
-        private readonly List<ISystem> beforeSystems = new List<ISystem>();
-        private readonly List<ISystem> customSystems = new List<ISystem>();
-        private readonly List<ISystem> afterSystems = new List<ISystem>();
+        private readonly List<ComponentSystem> beforeSystems = new List<ComponentSystem>();
+        private readonly List<ComponentSystem> customSystems = new List<ComponentSystem>();
+        private readonly List<ComponentSystem> afterSystems = new List<ComponentSystem>();
+        private readonly HashSet<Type> existSystemTypes = new HashSet<Type>();
 
-        public IReadOnlyList<ISystem> CustomSystems
+        public IReadOnlyList<ComponentSystem> CustomSystems
         {
             get { return customSystems; }
         }
 
-        public void AddSystem(ISystem system)
+        private ComponentSystem CreateSystem(Type systemType)
         {
-            if (customSystems.Contains(system))
-                throw new Exception("Already exists same type system!");
-            customSystems.Add(system);
-            if (system is ISystemAwake sys)
-                sys.OnAwake();
+            var system = Activator.CreateInstance(systemType) as ComponentSystem;
+            system.Enable = true;
+            system.World = this;
+            system.Filter = new Filter(this);
+            return system;
         }
 
-        public void InsertSystem(int index, ISystem system)
+        private void CheckExists(Type systemType)
         {
-            if (customSystems.Contains(system))
-                throw new Exception("Already exists same type system!");
-            customSystems.Insert(index, system);
-            if (system is ISystemAwake sys)
-                sys.OnAwake();
+            if (existSystemTypes.Contains(systemType))
+                throw new Exception("已存在");
         }
 
-        public bool RemoveSystem(ISystem system)
+        private T AddBeforeSystem<T>() where T : ComponentSystem, new()
         {
-            return customSystems.Remove(system);
+            return AddBeforeSystem(typeof(T)) as T;
+        }
+
+        private ComponentSystem AddBeforeSystem(Type systemType)
+        {
+            CheckExists(systemType);
+            var system = CreateSystem(systemType);
+            beforeSystems.Add(system);
+            existSystemTypes.Add(systemType);
+            system.OnCreate();
+            return system;
+        }
+
+        private T AddAfterSystem<T>() where T : ComponentSystem, new()
+        {
+            return AddAfterSystem(typeof(T)) as T;
+        }
+
+        private ComponentSystem AddAfterSystem(Type systemType)
+        {
+            CheckExists(systemType);
+            var system = CreateSystem(systemType);
+            afterSystems.Add(system);
+            existSystemTypes.Add(systemType);
+            system.OnCreate();
+            return system;
+        }
+
+        public T AddSystem<T>() where T : ComponentSystem, new()
+        {
+            return AddSystem(typeof(T)) as T;
+        }
+
+        public ComponentSystem AddSystem(Type systemType)
+        {
+            CheckExists(systemType);
+            var system = CreateSystem(systemType);
+            afterSystems.Add(system);
+            existSystemTypes.Add(systemType);
+            system.OnCreate();
+            return system;
         }
 
         /// <summary> 获取所有System，包含内置System </summary>
-        public IEnumerable<ISystem> GetAllSystems()
+        public IEnumerable<ComponentSystem> GetAllSystems()
         {
             for (int i = 0; i < beforeSystems.Count; i++)
             {
@@ -73,17 +111,17 @@ namespace CZToolKit.ECS
         {
             foreach (var system in beforeSystems)
             {
-                if (system is IFixedUpdate)
+                if (system.Enable && system is IFixedUpdate)
                     system.OnUpdate();
             }
             foreach (var system in customSystems)
             {
-                if (system is IFixedUpdate)
+                if (system.Enable && system is IFixedUpdate)
                     system.OnUpdate();
             }
             foreach (var system in afterSystems)
             {
-                if (system is IFixedUpdate)
+                if (system.Enable && system is IFixedUpdate)
                     system.OnUpdate();
             }
         }
@@ -92,17 +130,17 @@ namespace CZToolKit.ECS
         {
             foreach (var system in beforeSystems)
             {
-                if (system is IUpdate)
+                if (system.Enable && system is IUpdate)
                     system.OnUpdate();
             }
             foreach (var system in customSystems)
             {
-                if (system is IUpdate)
+                if (system.Enable && system is IUpdate)
                     system.OnUpdate();
             }
             foreach (var system in afterSystems)
             {
-                if (system is IUpdate)
+                if (system.Enable && system is IUpdate)
                     system.OnUpdate();
             }
         }
@@ -111,28 +149,19 @@ namespace CZToolKit.ECS
         {
             foreach (var system in beforeSystems)
             {
-                if (system is ILateUpdate)
+                if (system.Enable && system is ILateUpdate)
                     system.OnUpdate();
             }
             foreach (var system in customSystems)
             {
-                if (system is ILateUpdate)
+                if (system.Enable && system is ILateUpdate)
                     system.OnUpdate();
             }
             foreach (var system in afterSystems)
             {
-                if (system is ILateUpdate)
+                if (system.Enable && system is ILateUpdate)
                     system.OnUpdate();
             }
-        }
-
-        public void DestroySystem(ISystem system)
-        {
-            if (!customSystems.Contains(system))
-                throw new Exception($"{nameof(customSystems)}中不存在该对象");
-            if (system is ISystemDestroy sys)
-                sys.OnDestroy();
-            RemoveSystem(system);
         }
     }
 }

@@ -82,6 +82,11 @@ namespace CZToolKit.ECS
             return componentPool;
         }
 
+        public bool ExistsComponentPool<T>() where T : unmanaged, IComponent
+        {
+            return ExistsComponentPool(typeof(T));
+        }
+
         public bool ExistsComponentPool(Type componentType)
         {
             return componentPools.ContainsKey(componentType.GetHashCode());

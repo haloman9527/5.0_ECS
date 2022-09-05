@@ -335,9 +335,9 @@ MonoBehaviour:
   references:
     version: 1
     00000000:
-      type: {class: CustomComponent, ns: CZToolKit.ECS.Examples, asm: Assembly-CSharp}
+      type: {class: CustomComponent, ns: CZToolKit.ECS.Examples, asm: CZToolKit.ECS}
       data:
-        num: 30
+        num: 0
 --- !u!4 &1411487230
 Transform:
   m_ObjectHideFlags: 0
