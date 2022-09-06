@@ -24,7 +24,7 @@ namespace CZToolKit.ECS.Examples
 
         void Awake()
         {
-            world = new World("MainWorld");
+            world = World.NewWorld("MainWorld");
             world.AddSystem<CustomSystem>();
             for (int i = 0; i < entityCount; i++)
             {

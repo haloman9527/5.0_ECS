@@ -23,9 +23,9 @@ namespace CZToolKit.ECS
         public void JobForeachWithEntity<J, C0>(J job) where J : IJobForeachWithEntity_EC<C0> where C0 : unmanaged, IComponent
         {
             var componentType0 = typeof(C0);
-            if (!world.ExistsComponentPool(componentType0))
+            if (!world.ExistsComponentContainer(componentType0))
                 return;
-            var componentPool0 = world.GetComponentPool(componentType0);
+            var componentPool0 = world.GetComponentContainer(componentType0);
             if (componentPool0.Count() <= 0)
                 return;
             foreach (var entity in world.Entities.GetValueArray(Allocator.Temp))
@@ -41,14 +41,14 @@ namespace CZToolKit.ECS
         {
             var componentType0 = typeof(C0);
             var componentType1 = typeof(C1);
-            if (!world.ExistsComponentPool(componentType0))
+            if (!world.ExistsComponentContainer(componentType0))
                 return;
-            if (!world.ExistsComponentPool(componentType1))
+            if (!world.ExistsComponentContainer(componentType1))
                 return;
-            var componentPool0 = world.GetComponentPool(componentType0);
+            var componentPool0 = world.GetComponentContainer(componentType0);
             if (componentPool0.Count() <= 0)
                 return;
-            var componentPool1 = world.GetComponentPool(componentType1);
+            var componentPool1 = world.GetComponentContainer(componentType1);
             if (componentPool1.Count() <= 0)
                 return;
             foreach (var entity in world.Entities.GetValueArray(Allocator.Temp))
@@ -68,19 +68,19 @@ namespace CZToolKit.ECS
             var componentType0 = typeof(C0);
             var componentType1 = typeof(C1);
             var componentType2 = typeof(C2);
-            if (!world.ExistsComponentPool(componentType0))
+            if (!world.ExistsComponentContainer(componentType0))
                 return;
-            if (!world.ExistsComponentPool(componentType1))
+            if (!world.ExistsComponentContainer(componentType1))
                 return;
-            if (!world.ExistsComponentPool(componentType2))
+            if (!world.ExistsComponentContainer(componentType2))
                 return;
-            var componentPool0 = world.GetComponentPool(componentType0);
+            var componentPool0 = world.GetComponentContainer(componentType0);
             if (componentPool0.Count() <= 0)
                 return;
-            var componentPool1 = world.GetComponentPool(componentType1);
+            var componentPool1 = world.GetComponentContainer(componentType1);
             if (componentPool1.Count() <= 0)
                 return;
-            var componentPool2 = world.GetComponentPool(componentType2);
+            var componentPool2 = world.GetComponentContainer(componentType2);
             if (componentPool2.Count() <= 0)
                 return;
             foreach (var entity in world.Entities.GetValueArray(Allocator.Temp))
@@ -104,24 +104,24 @@ namespace CZToolKit.ECS
             var componentType1 = typeof(C1);
             var componentType2 = typeof(C2);
             var componentType3 = typeof(C3);
-            if (!world.ExistsComponentPool(componentType0))
+            if (!world.ExistsComponentContainer(componentType0))
                 return;
-            if (!world.ExistsComponentPool(componentType1))
+            if (!world.ExistsComponentContainer(componentType1))
                 return;
-            if (!world.ExistsComponentPool(componentType2))
+            if (!world.ExistsComponentContainer(componentType2))
                 return;
-            if (!world.ExistsComponentPool(componentType3))
+            if (!world.ExistsComponentContainer(componentType3))
                 return;
-            var componentPool0 = world.GetComponentPool(componentType0);
+            var componentPool0 = world.GetComponentContainer(componentType0);
             if (componentPool0.Count() <= 0)
                 return;
-            var componentPool1 = world.GetComponentPool(componentType1);
+            var componentPool1 = world.GetComponentContainer(componentType1);
             if (componentPool1.Count() <= 0)
                 return;
-            var componentPool2 = world.GetComponentPool(componentType2);
+            var componentPool2 = world.GetComponentContainer(componentType2);
             if (componentPool2.Count() <= 0)
                 return;
-            var componentPool3 = world.GetComponentPool(componentType3);
+            var componentPool3 = world.GetComponentContainer(componentType3);
             if (componentPool3.Count() <= 0)
                 return;
             foreach (var entity in world.Entities.GetValueArray(Allocator.Temp))
@@ -149,29 +149,29 @@ namespace CZToolKit.ECS
             var componentType2 = typeof(C2);
             var componentType3 = typeof(C3);
             var componentType4 = typeof(C4);
-            if (!world.ExistsComponentPool(componentType0))
+            if (!world.ExistsComponentContainer(componentType0))
                 return;
-            if (!world.ExistsComponentPool(componentType1))
+            if (!world.ExistsComponentContainer(componentType1))
                 return;
-            if (!world.ExistsComponentPool(componentType2))
+            if (!world.ExistsComponentContainer(componentType2))
                 return;
-            if (!world.ExistsComponentPool(componentType3))
+            if (!world.ExistsComponentContainer(componentType3))
                 return;
-            if (!world.ExistsComponentPool(componentType4))
+            if (!world.ExistsComponentContainer(componentType4))
                 return;
-            var componentPool0 = world.GetComponentPool(componentType0);
+            var componentPool0 = world.GetComponentContainer(componentType0);
             if (componentPool0.Count() <= 0)
                 return;
-            var componentPool1 = world.GetComponentPool(componentType1);
+            var componentPool1 = world.GetComponentContainer(componentType1);
             if (componentPool1.Count() <= 0)
                 return;
-            var componentPool2 = world.GetComponentPool(componentType2);
+            var componentPool2 = world.GetComponentContainer(componentType2);
             if (componentPool2.Count() <= 0)
                 return;
-            var componentPool3 = world.GetComponentPool(componentType3);
+            var componentPool3 = world.GetComponentContainer(componentType3);
             if (componentPool3.Count() <= 0)
                 return;
-            var componentPool4 = world.GetComponentPool(componentType4);
+            var componentPool4 = world.GetComponentContainer(componentType4);
             if (componentPool4.Count() <= 0)
                 return;
             foreach (var entity in world.Entities.GetValueArray(Allocator.Temp))
@@ -203,34 +203,34 @@ namespace CZToolKit.ECS
             var componentType3 = typeof(C3);
             var componentType4 = typeof(C4);
             var componentType5 = typeof(C5);
-            if (!world.ExistsComponentPool(componentType0))
+            if (!world.ExistsComponentContainer(componentType0))
                 return;
-            if (!world.ExistsComponentPool(componentType1))
+            if (!world.ExistsComponentContainer(componentType1))
                 return;
-            if (!world.ExistsComponentPool(componentType2))
+            if (!world.ExistsComponentContainer(componentType2))
                 return;
-            if (!world.ExistsComponentPool(componentType3))
+            if (!world.ExistsComponentContainer(componentType3))
                 return;
-            if (!world.ExistsComponentPool(componentType4))
+            if (!world.ExistsComponentContainer(componentType4))
                 return;
-            if (!world.ExistsComponentPool(componentType5))
+            if (!world.ExistsComponentContainer(componentType5))
                 return;
-            var componentPool0 = world.GetComponentPool(componentType0);
+            var componentPool0 = world.GetComponentContainer(componentType0);
             if (componentPool0.Count() <= 0)
                 return;
-            var componentPool1 = world.GetComponentPool(componentType1);
+            var componentPool1 = world.GetComponentContainer(componentType1);
             if (componentPool0.Count() <= 0)
                 return;
-            var componentPool2 = world.GetComponentPool(componentType2);
+            var componentPool2 = world.GetComponentContainer(componentType2);
             if (componentPool2.Count() <= 0)
                 return;
-            var componentPool3 = world.GetComponentPool(componentType3);
+            var componentPool3 = world.GetComponentContainer(componentType3);
             if (componentPool3.Count() <= 0)
                 return;
-            var componentPool4 = world.GetComponentPool(componentType4);
+            var componentPool4 = world.GetComponentContainer(componentType4);
             if (componentPool4.Count() <= 0)
                 return;
-            var componentPool5 = world.GetComponentPool(componentType5);
+            var componentPool5 = world.GetComponentContainer(componentType5);
             if (componentPool5.Count() <= 0)
                 return;
             foreach (var entity in world.Entities.GetValueArray(Allocator.Temp))

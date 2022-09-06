@@ -23,11 +23,13 @@ namespace CZToolKit.ECS
             get;
             set;
         }
+        
         public World World
         {
             get;
             internal set;
         }
+        
         public Filter Filter
         {
             get;

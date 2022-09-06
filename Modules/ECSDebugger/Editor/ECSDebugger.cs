@@ -113,7 +113,7 @@ namespace CZToolKit.ECS.Editors
                     if (item is EntityTreeViewItem entityItem)
                     {
                         var selectedEntity = entityItem.entity;
-                        foreach (var componentPool in selectWorld.ComponentPools.GetValueArray(Allocator.Temp))
+                        foreach (var componentPool in selectWorld.ComponentContainers.GetValueArray(Allocator.Temp))
                         {
                             if (componentPool.Contains(selectedEntity) && World.ComponentTypes.TryGetValue(componentPool.componentType, out var componentType))
                                 GUILayout.Label(componentType.Name);

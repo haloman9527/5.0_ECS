@@ -1,4 +1,5 @@
 #region 注 释
+
 /***
  *
  *  Title:
@@ -12,7 +13,9 @@
  *  Blog: https://www.crosshair.top/
  *
  */
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using Unity.Collections;
@@ -22,6 +25,7 @@ namespace CZToolKit.ECS
     public partial class World : IDisposable
     {
         #region Static
+
         private static readonly List<World> allWorlds = new List<World>();
 
         public static IReadOnlyList<World> AllWorlds
@@ -31,8 +35,21 @@ namespace CZToolKit.ECS
 
         public static World DefaultWorld
         {
-            get;
-            set;
+            get; 
+            private set;
+        }
+
+        static World()
+        {
+            NewWorld("Main World");
+        }
+
+        /// <summary> 创建一个标准World </summary>
+        public static World NewWorld(string worldName)
+        {
+            World world = new World(worldName);
+            world.AddAfterSystem<TransformSystem>();
+            return world;
         }
 
         public static void DisposeWorld(World world)
@@ -46,14 +63,16 @@ namespace CZToolKit.ECS
             {
                 allWorlds[0].Dispose();
             }
+
             allWorlds.Clear();
         }
+
         #endregion
 
         public readonly string name;
         public readonly Entity singleton;
 
-        public World(string name)
+        private World(string name)
         {
             this.name = name;
             this.singleton = NewEntity();
@@ -62,11 +81,16 @@ namespace CZToolKit.ECS
             allWorlds.Add(this);
         }
 
+        ~World()
+        {
+            Dispose();
+        }
+
         public void Reset()
         {
             customSystems.Clear();
             entities.Clear();
-            foreach (var components in componentPools.GetValueArray(Allocator.Temp))
+            foreach (var components in componentContainers.GetValueArray(Allocator.Temp))
             {
                 components.Reset();
             }
@@ -76,11 +100,12 @@ namespace CZToolKit.ECS
         {
             customSystems.Clear();
             entities.Dispose();
-            foreach (var components in componentPools.GetValueArray(Allocator.Temp))
+            foreach (var components in componentContainers.GetValueArray(Allocator.Temp))
             {
                 components.Dispose();
             }
-            componentPools.Dispose();
+
+            componentContainers.Dispose();
             if (DefaultWorld == this)
                 DefaultWorld = null;
             allWorlds.Remove(this);

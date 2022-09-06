@@ -26,15 +26,15 @@ namespace CZToolKit.ECS
             this.world = world;
         }
 
-        public bool GetEntites<ComponentType0>(Allocator allocator, out NativeArray<Entity> entities) where ComponentType0 : unmanaged, IComponent
+        public bool GetEntities<ComponentType0>(Allocator allocator, out NativeArray<Entity> entities) where ComponentType0 : unmanaged, IComponent
         {
             var componentType0 = typeof(ComponentType0);
-            if (!world.ExistsComponentPool(componentType0))
+            if (!world.ExistsComponentContainer(componentType0))
             {
                 entities = default;
                 return false;
             }
-            var componentPool0 = world.GetComponentPool(componentType0);
+            var componentPool0 = world.GetComponentContainer(componentType0);
             entities = componentPool0.GetEntities(allocator);
             return true;
         }

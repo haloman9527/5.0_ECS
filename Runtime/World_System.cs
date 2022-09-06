@@ -93,33 +93,23 @@ namespace CZToolKit.ECS
         /// <summary> 获取所有System，包含内置System </summary>
         public IEnumerable<ComponentSystem> GetAllSystems()
         {
-            for (int i = 0; i < beforeSystems.Count; i++)
+            foreach (var system in beforeSystems)
             {
-                yield return beforeSystems[i];
+                yield return system;
             }
-            for (int i = 0; i < customSystems.Count; i++)
+            foreach (var system in customSystems)
             {
-                yield return customSystems[i];
+                yield return system;
             }
-            for (int i = 0; i < afterSystems.Count; i++)
+            foreach (var system in afterSystems)
             {
-                yield return afterSystems[i];
+                yield return system;
             }
         }
 
         public void FixedUpdate()
         {
-            foreach (var system in beforeSystems)
-            {
-                if (system.Enable && system is IFixedUpdate)
-                    system.OnUpdate();
-            }
-            foreach (var system in customSystems)
-            {
-                if (system.Enable && system is IFixedUpdate)
-                    system.OnUpdate();
-            }
-            foreach (var system in afterSystems)
+            foreach (var system in GetAllSystems())
             {
                 if (system.Enable && system is IFixedUpdate)
                     system.OnUpdate();
@@ -128,17 +118,7 @@ namespace CZToolKit.ECS
 
         public void Update()
         {
-            foreach (var system in beforeSystems)
-            {
-                if (system.Enable && system is IUpdate)
-                    system.OnUpdate();
-            }
-            foreach (var system in customSystems)
-            {
-                if (system.Enable && system is IUpdate)
-                    system.OnUpdate();
-            }
-            foreach (var system in afterSystems)
+            foreach (var system in GetAllSystems())
             {
                 if (system.Enable && system is IUpdate)
                     system.OnUpdate();
@@ -147,17 +127,7 @@ namespace CZToolKit.ECS
 
         public void LateUpdate()
         {
-            foreach (var system in beforeSystems)
-            {
-                if (system.Enable && system is ILateUpdate)
-                    system.OnUpdate();
-            }
-            foreach (var system in customSystems)
-            {
-                if (system.Enable && system is ILateUpdate)
-                    system.OnUpdate();
-            }
-            foreach (var system in afterSystems)
+            foreach (var system in GetAllSystems())
             {
                 if (system.Enable && system is ILateUpdate)
                     system.OnUpdate();

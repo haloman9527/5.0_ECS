@@ -13,7 +13,6 @@
  *
  */
 #endregion
-using UnityEngine;
 
 namespace CZToolKit.ECS
 {

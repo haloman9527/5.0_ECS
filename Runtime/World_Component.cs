@@ -21,7 +21,7 @@ using Unity.Collections.LowLevel.Unsafe;
 
 namespace CZToolKit.ECS
 {
-    public partial class World : IDisposable
+    public partial class World
     {
         #region Static
         private static Dictionary<int, Type> componentTypes = new Dictionary<int, Type>();
@@ -33,78 +33,78 @@ namespace CZToolKit.ECS
         }
         #endregion
 
-        private NativeHashMap<int, ComponentsContainer> componentPools = new NativeHashMap<int, ComponentsContainer>(128, Allocator.Persistent);
+        private NativeHashMap<int, ComponentsContainer> componentContainers = new NativeHashMap<int, ComponentsContainer>(128, Allocator.Persistent);
 
-        public NativeHashMap<int, ComponentsContainer> ComponentPools
+        public NativeHashMap<int, ComponentsContainer> ComponentContainers
         {
-            get { return componentPools; }
+            get { return componentContainers; }
         }
 
-        public unsafe ComponentsContainer NewComponentPool<T>() where T : unmanaged, IComponent
+        public ComponentsContainer NewComponentContainer<T>() where T : unmanaged, IComponent
         {
             var componentType = typeof(T);
             var componentPool = new ComponentsContainer(componentType);
-            componentPools[componentType.GetHashCode()] = componentPool;
+            componentContainers[componentType.GetHashCode()] = componentPool;
             componentTypes[componentType.GetHashCode()] = componentType;
             return componentPool;
         }
 
-        public ComponentsContainer NewComponentPool<T>(int defaultCapacity) where T : unmanaged, IComponent
+        public ComponentsContainer NewComponentContainer<T>(int defaultCapacity) where T : unmanaged, IComponent
         {
             var componentType = typeof(T);
             var componentPool = new ComponentsContainer(componentType, defaultCapacity);
-            componentPools[componentType.GetHashCode()] = componentPool;
+            componentContainers[componentType.GetHashCode()] = componentPool;
             componentTypes[componentType.GetHashCode()] = componentType;
             return componentPool;
         }
 
-        public ComponentsContainer NewComponentPool(Type componentType)
+        public ComponentsContainer NewComponentContainer(Type componentType)
         {
             if (!UnsafeUtility.IsUnmanaged(componentType))
-                throw new Exception($"The type [{componentType.Name}] is'n Unmanaged Type!");
+                throw new Exception($"The type [{componentType.Name}] isn't Unmanaged Type!");
             if (!typeof(IComponent).IsAssignableFrom(componentType))
-                throw new NotImplementedException($"The type [{componentType.Name}] is'n implement IComponent!");
+                throw new NotImplementedException($"The type [{componentType.Name}] isn't implement IComponent!");
             var componentPool = (ComponentsContainer)Activator.CreateInstance(typeof(ComponentsContainer), new object[] { componentType, ComponentsContainer.DEFAULT_CAPACITY });
-            componentPools[componentType.GetHashCode()] = componentPool;
+            componentContainers[componentType.GetHashCode()] = componentPool;
             componentTypes[componentType.GetHashCode()] = componentType;
             return componentPool;
         }
 
-        public ComponentsContainer NewComponentPool(Type componentType, int defaultSize)
+        public ComponentsContainer NewComponentContainer(Type componentType, int defaultSize)
         {
             if (!UnsafeUtility.IsUnmanaged(componentType))
-                throw new Exception($"The type [{componentType.Name}] is'n Unmanaged Type!");
+                throw new Exception($"The type [{componentType.Name}] isn't Unmanaged Type!");
             if (!componentType.IsAssignableFrom(typeof(IComponent)))
-                throw new NotImplementedException($"The type [{componentType.Name}] is'n implement IComponent!");
+                throw new NotImplementedException($"The type [{componentType.Name}] isn't implement IComponent!");
             var componentPool = (ComponentsContainer)Activator.CreateInstance(typeof(ComponentsContainer), new object[] { componentType, defaultSize });
-            componentPools[componentType.GetHashCode()] = componentPool;
+            componentContainers[componentType.GetHashCode()] = componentPool;
             componentTypes[componentType.GetHashCode()] = componentType;
             return componentPool;
         }
 
-        public bool ExistsComponentPool<T>() where T : unmanaged, IComponent
+        public bool ExistsComponentContainer<T>() where T : unmanaged, IComponent
         {
-            return ExistsComponentPool(typeof(T));
+            return ExistsComponentContainer(typeof(T));
         }
 
-        public bool ExistsComponentPool(Type componentType)
+        public bool ExistsComponentContainer(Type componentType)
         {
-            return componentPools.ContainsKey(componentType.GetHashCode());
+            return componentContainers.ContainsKey(componentType.GetHashCode());
         }
 
-        public ComponentsContainer GetComponentPool<T>()
+        public ComponentsContainer GetComponentContainer<T>()
         {
-            return GetComponentPool(typeof(T));
+            return GetComponentContainer(typeof(T));
         }
 
-        public ComponentsContainer GetComponentPool(Type componentType)
+        public ComponentsContainer GetComponentContainer(Type componentType)
         {
-            return componentPools[componentType.GetHashCode()];
+            return componentContainers[componentType.GetHashCode()];
         }
 
         public bool HasComponent(Entity entity, Type componentType)
         {
-            if (!componentPools.TryGetValue(componentType.GetHashCode(), out var components))
+            if (!componentContainers.TryGetValue(componentType.GetHashCode(), out var components))
                 return false;
             return components.Contains(entity);
         }
@@ -117,7 +117,7 @@ namespace CZToolKit.ECS
         public ref T GetComponent<T>(Entity entity) where T : unmanaged, IComponent
         {
             var componentType = typeof(T);
-            if (!componentPools.TryGetValue(componentType.GetHashCode(), out var components))
+            if (!componentContainers.TryGetValue(componentType.GetHashCode(), out var components))
                 throw new Exception("AAA");
             return ref components.Get<T>(entity);
         }
@@ -125,8 +125,8 @@ namespace CZToolKit.ECS
         public void SetComponent<T>(Entity entity, T component) where T : unmanaged, IComponent
         {
             var componentType = typeof(T);
-            if (!componentPools.TryGetValue(componentType.GetHashCode(), out var components))
-                components = NewComponentPool<T>();
+            if (!componentContainers.TryGetValue(componentType.GetHashCode(), out var components))
+                components = NewComponentContainer<T>();
             components.Set(entity, component);
         }
 
@@ -135,8 +135,8 @@ namespace CZToolKit.ECS
             var componentType = component.GetType();
             if (!UnsafeUtility.IsUnmanaged(componentType))
                 throw new Exception($"The type '{componentType.Name}' must be a unmanaged type");
-            if (!componentPools.TryGetValue(componentType.GetHashCode(), out var components))
-                components = NewComponentPool(componentType);
+            if (!componentContainers.TryGetValue(componentType.GetHashCode(), out var components))
+                components = NewComponentContainer(componentType);
             if (!methods.TryGetValue(componentType, out var method))
             {
                 var m = typeof(ComponentsContainer).GetMethod("Set", BindingFlags.Public | BindingFlags.Instance);
@@ -147,7 +147,7 @@ namespace CZToolKit.ECS
 
         public void RemoveComponent(Entity entity, Type componentType)
         {
-            if (!componentPools.TryGetValue(componentType.GetHashCode(), out var components))
+            if (!componentContainers.TryGetValue(componentType.GetHashCode(), out var components))
                 return;
             components.Del(entity);
         }

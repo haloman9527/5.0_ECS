@@ -20,8 +20,8 @@ namespace CZToolKit.ECS
 {
     public partial class World : IDisposable
     {
-        private readonly IDGenerator entityIndexGenerator = new IDGenerator();
-        private readonly NativeHashMap<uint, Entity> entities = new NativeHashMap<uint, Entity>(64, Allocator.Persistent);
+        private IDGenerator entityIndexGenerator = new IDGenerator();
+        private NativeHashMap<uint, Entity> entities = new NativeHashMap<uint, Entity>(64, Allocator.Persistent);
 
         public NativeHashMap<uint, Entity> Entities
         {
@@ -53,7 +53,7 @@ namespace CZToolKit.ECS
             if (entity.index == singleton.index)
                 throw new Exception("Can't Destory Singleton Entity!!!");
             entities.Remove(entity.index);
-            foreach (var components in componentPools.GetValueArray(Allocator.Temp))
+            foreach (var components in componentContainers.GetValueArray(Allocator.Temp))
             {
                 components.Del(entity);
             }

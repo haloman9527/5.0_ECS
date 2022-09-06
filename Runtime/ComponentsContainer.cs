@@ -91,6 +91,7 @@ namespace CZToolKit.ECS
             {
                 UnsafeUtility.Free((void*)ptr, Allocator.Persistent);
             }
+            components.Clear();
         }
 
         public void Dispose()
