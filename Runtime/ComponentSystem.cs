@@ -36,8 +36,6 @@ namespace CZToolKit.ECS
             internal set;
         }
 
-        protected ComponentSystem() { }
-
         public virtual void OnCreate() { }
 
         public abstract void OnUpdate();
