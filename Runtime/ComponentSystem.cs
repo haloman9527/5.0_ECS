@@ -1,4 +1,5 @@
 #region 注 释
+
 /***
  *
  *  Title:
@@ -12,32 +13,40 @@
  *  Blog: https://www.crosshair.top/
  *
  */
+
 #endregion
 
 namespace CZToolKit.ECS
 {
     public abstract class ComponentSystem
     {
+        private bool enable = false;
+
         public bool Enable
         {
-            get;
-            set;
-        }
-        
-        public World World
-        {
-            get;
-            internal set;
-        }
-        
-        public Filter Filter
-        {
-            get;
-            internal set;
+            get { return enable; }
+            set
+            {
+                if (enable == value)
+                    return;
+                enable = value;
+                if (enable)
+                    OnEnable();
+                else
+                    OnDisable();
+            }
         }
 
+        public World World { get; internal set; }
+
+        public Filter Filter { get; internal set; }
+        
         public virtual void OnCreate() { }
 
+        public virtual void OnEnable() { }
+
         public abstract void OnUpdate();
+
+        public virtual void OnDisable() { }
     }
 }

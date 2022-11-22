@@ -44,12 +44,9 @@ namespace CZToolKit.ECS
             NewWorld("Main World");
         }
 
-        /// <summary> 创建一个标准World </summary>
         public static World NewWorld(string worldName)
         {
-            World world = new World(worldName);
-            world.AddAfterSystem<TransformSystem>();
-            return world;
+            return new World(worldName);
         }
 
         public static void DisposeWorld(World world)
@@ -88,7 +85,7 @@ namespace CZToolKit.ECS
 
         public void Reset()
         {
-            customSystems.Clear();
+            systems.Clear();
             entities.Clear();
             foreach (var components in componentContainers.GetValueArray(Allocator.Temp))
             {
@@ -98,7 +95,7 @@ namespace CZToolKit.ECS
 
         public void Dispose()
         {
-            customSystems.Clear();
+            systems.Clear();
             entities.Dispose();
             foreach (var components in componentContainers.GetValueArray(Allocator.Temp))
             {
