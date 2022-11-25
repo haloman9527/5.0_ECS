@@ -39,7 +39,7 @@ namespace CZToolKit.ECS
             {
                 if (!componentPool0.Contains(entity))
                     continue;
-                action(entity, ref componentPool0.Get<C0>(entity));
+                action(entity, ref componentPool0.Ref<C0>(entity));
             }
         }
 
@@ -66,8 +66,8 @@ namespace CZToolKit.ECS
                 if (!componentPool1.Contains(entity))
                     continue;
                 action(entity,
-                    ref componentPool0.Get<C0>(entity),
-                    ref componentPool1.Get<C1>(entity));
+                    ref componentPool0.Ref<C0>(entity),
+                    ref componentPool1.Ref<C1>(entity));
             }
         }
 
@@ -103,9 +103,9 @@ namespace CZToolKit.ECS
                 if (!componentPool2.Contains(entity))
                     continue;
                 action(entity,
-                    ref componentPool0.Get<C0>(entity),
-                    ref componentPool1.Get<C1>(entity),
-                    ref componentPool2.Get<C2>(entity));
+                    ref componentPool0.Ref<C0>(entity),
+                    ref componentPool1.Ref<C1>(entity),
+                    ref componentPool2.Ref<C2>(entity));
             }
         }
 
@@ -150,10 +150,10 @@ namespace CZToolKit.ECS
                 if (!componentPool3.Contains(entity))
                     continue;
                 action(entity,
-                    ref componentPool0.Get<C0>(entity),
-                    ref componentPool1.Get<C1>(entity),
-                    ref componentPool2.Get<C2>(entity),
-                    ref componentPool3.Get<C3>(entity));
+                    ref componentPool0.Ref<C0>(entity),
+                    ref componentPool1.Ref<C1>(entity),
+                    ref componentPool2.Ref<C2>(entity),
+                    ref componentPool3.Ref<C3>(entity));
             }
         }
 
@@ -207,11 +207,11 @@ namespace CZToolKit.ECS
                 if (!componentPool4.Contains(entity))
                     continue;
                 action(entity,
-                    ref componentPool0.Get<C0>(entity),
-                    ref componentPool1.Get<C1>(entity),
-                    ref componentPool2.Get<C2>(entity),
-                    ref componentPool3.Get<C3>(entity),
-                    ref componentPool4.Get<C4>(entity));
+                    ref componentPool0.Ref<C0>(entity),
+                    ref componentPool1.Ref<C1>(entity),
+                    ref componentPool2.Ref<C2>(entity),
+                    ref componentPool3.Ref<C3>(entity),
+                    ref componentPool4.Ref<C4>(entity));
             }
         }
 
@@ -274,12 +274,12 @@ namespace CZToolKit.ECS
                 if (!componentPool5.Contains(entity))
                     continue;
                 action(entity,
-                    ref componentPool0.Get<C0>(entity),
-                    ref componentPool1.Get<C1>(entity),
-                    ref componentPool2.Get<C2>(entity),
-                    ref componentPool3.Get<C3>(entity),
-                    ref componentPool4.Get<C4>(entity),
-                    ref componentPool5.Get<C5>(entity));
+                    ref componentPool0.Ref<C0>(entity),
+                    ref componentPool1.Ref<C1>(entity),
+                    ref componentPool2.Ref<C2>(entity),
+                    ref componentPool3.Ref<C3>(entity),
+                    ref componentPool4.Ref<C4>(entity),
+                    ref componentPool5.Ref<C5>(entity));
             }
         }
     }

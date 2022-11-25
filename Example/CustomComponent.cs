@@ -14,8 +14,11 @@
  */
 #endregion
 
+using Unity.Burst;
+
 namespace CZToolKit.ECS.Examples
 {
+    [BurstCompile]
     public struct CustomComponent : IComponent
     {
         public int num;

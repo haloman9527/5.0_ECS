@@ -50,10 +50,28 @@ namespace CZToolKit.ECS
             return components.ContainsKey(entity);
         }
 
-        public unsafe ref T Get<T>(Entity entity) where T : unmanaged, IComponent
+        public unsafe ref T Ref<T>(Entity entity) where T : unmanaged, IComponent
         {
             ref var components = ref Unsafe.AsRef<UnsafeHashMap<Entity, IntPtr>>((void*)componentsPtr);
             return ref Unsafe.AsRef<T>((T*)components[entity]);
+        }
+
+        public unsafe T Get<T>(Entity entity) where T : unmanaged, IComponent
+        {
+            ref var components = ref Unsafe.AsRef<UnsafeHashMap<Entity, IntPtr>>((void*)componentsPtr);
+            return *((T*)components[entity]);
+        }
+
+        public unsafe bool TryGet<T>(Entity entity, out T value) where T : unmanaged, IComponent
+        {
+            ref var components = ref Unsafe.AsRef<UnsafeHashMap<Entity, IntPtr>>((void*)componentsPtr);
+            if (components.TryGetValue(entity, out var ptr))
+            {
+                value = default;
+                return false;
+            }
+            value = *((T*)ptr);
+            return true;
         }
 
         public unsafe void Set<T>(Entity entity, T component) where T : struct, IComponent

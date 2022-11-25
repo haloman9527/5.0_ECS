@@ -1,4 +1,5 @@
 #region 注 释
+
 /***
  *
  *  Title:
@@ -12,9 +13,12 @@
  *  Blog: https://www.crosshair.top/
  *
  */
+
 #endregion
+
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Reflection;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
@@ -24,6 +28,7 @@ namespace CZToolKit.ECS
     public partial class World
     {
         #region Static
+
         private static Dictionary<int, Type> componentTypes = new Dictionary<int, Type>();
         private static Dictionary<Type, MethodInfo> methods = new Dictionary<Type, MethodInfo>();
 
@@ -31,6 +36,7 @@ namespace CZToolKit.ECS
         {
             get { return componentTypes; }
         }
+
         #endregion
 
         private NativeHashMap<int, ComponentsContainer> componentContainers = new NativeHashMap<int, ComponentsContainer>(128, Allocator.Persistent);
@@ -94,12 +100,20 @@ namespace CZToolKit.ECS
 
         public ComponentsContainer GetComponentContainer<T>()
         {
-            return GetComponentContainer(typeof(T));
+            return componentContainers[typeof(T).GetHashCode()];
         }
 
         public ComponentsContainer GetComponentContainer(Type componentType)
         {
             return componentContainers[componentType.GetHashCode()];
+        }
+
+        #region Has
+        public bool HasComponent(Entity entity, int typeHash)
+        {
+            if (!componentContainers.TryGetValue(typeHash, out var components))
+                return false;
+            return components.Contains(entity);
         }
 
         public bool HasComponent(Entity entity, Type componentType)
@@ -113,19 +127,35 @@ namespace CZToolKit.ECS
         {
             return HasComponent(entity, typeof(T));
         }
+        #endregion
+
+        #region Get
+        public ref T GetComponent<T>(Entity entity, int typeHash) where T : unmanaged, IComponent
+        {
+            if (!componentContainers.TryGetValue(typeHash, out var components))
+                throw new Exception("AAA");
+            return ref components.Ref<T>(entity);
+        }
 
         public ref T GetComponent<T>(Entity entity) where T : unmanaged, IComponent
         {
-            var componentType = typeof(T);
-            if (!componentContainers.TryGetValue(componentType.GetHashCode(), out var components))
+            if (!componentContainers.TryGetValue(typeof(T).GetHashCode(), out var components))
                 throw new Exception("AAA");
-            return ref components.Get<T>(entity);
+            return ref components.Ref<T>(entity);
+        }
+        #endregion
+
+        #region Set
+        public void SetComponent<T>(Entity entity, T component, int typeHash) where T : unmanaged, IComponent
+        {
+            if (!componentContainers.TryGetValue(typeHash, out var components))
+                components = NewComponentContainer<T>();
+            components.Set(entity, component);
         }
 
-        public void SetComponent<T>(Entity entity, T component) where T : unmanaged, IComponent
+        private void SetComponent<T>(Entity entity, T component) where T : unmanaged, IComponent
         {
-            var componentType = typeof(T);
-            if (!componentContainers.TryGetValue(componentType.GetHashCode(), out var components))
+            if (!componentContainers.TryGetValue(typeof(T).GetHashCode(), out var components))
                 components = NewComponentContainer<T>();
             components.Set(entity, component);
         }
@@ -140,9 +170,19 @@ namespace CZToolKit.ECS
             if (!methods.TryGetValue(componentType, out var method))
             {
                 var m = typeof(ComponentsContainer).GetMethod("Set", BindingFlags.Public | BindingFlags.Instance);
-                methods[componentType] = method = m.MakeGenericMethod(new Type[] { component.GetType() });
+                methods[componentType] = method = m.MakeGenericMethod(new Type[] { componentType });
             }
+
             method.Invoke(components, new object[] { entity, component });
+        }
+        #endregion
+        
+        #region Remove
+        public void RemoveComponent(Entity entity, int typeHash)
+        {
+            if (!componentContainers.TryGetValue(typeHash, out var components))
+                return;
+            components.Del(entity);
         }
 
         public void RemoveComponent(Entity entity, Type componentType)
@@ -154,7 +194,10 @@ namespace CZToolKit.ECS
 
         public void RemoveComponent<T>(Entity entity)
         {
-            RemoveComponent(entity, typeof(T));
+            if (!componentContainers.TryGetValue(typeof(T).GetHashCode(), out var components))
+                return;
+            components.Del(entity);
         }
+        #endregion
     }
 }

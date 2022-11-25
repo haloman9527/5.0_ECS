@@ -13,24 +13,46 @@
  *
  */
 #endregion
+
+using System.Diagnostics;
 using UnityEngine;
 
 namespace CZToolKit.ECS.Examples
 {
     public class ECSTest : MonoBehaviour
     {
-        private World world;
+        private Entity ent;
         public int entityCount = 10000;
 
         void Awake()
         {
-            world = World.NewWorld("MainWorld");
-            world.CreateSystem<CustomSystem>();
-            for (int i = 0; i < entityCount; i++)
+            // World.DefaultWorld.CreateSystem<CustomSystem>();
+            // for (int i = 0; i < entityCount; i++)
+            // {
+            //     World.DefaultWorld.NewEntity(out var entity);
+            //     World.DefaultWorld.SetComponent(entity, new CustomComponent() { num = 10 });
+            // }
+        }
+
+        [Sirenix.OdinInspector.Button]
+        public void A()
+        {
+            if (ent == default)
             {
-                world.NewEntity(out var entity);
-                world.SetComponent(entity, new CustomComponent() { num = 10 });
+                ent = World.DefaultWorld.NewEntity();
+                World.DefaultWorld.SetComponent(ent, new CustomComponent() { num = 10 });
             }
+
+            var container = World.DefaultWorld.GetComponentContainer<CustomComponent>();
+            
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            for (int i = 0; i < 1000000; i++)
+            {
+                container.TryGet<CustomComponent>(ent, out var v);
+            }
+            sw.Stop();
+            UnityEngine.Debug.Log(sw.ElapsedMilliseconds);
         }
     }
 }
