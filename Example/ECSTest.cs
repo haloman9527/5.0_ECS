@@ -49,10 +49,28 @@ namespace CZToolKit.ECS.Examples
             sw.Start();
             for (int i = 0; i < 1000000; i++)
             {
-                container.TryGet<CustomComponent>(ent, out var v);
+               ref var a = ref container.Ref<CustomComponent>(ent);
             }
             sw.Stop();
             UnityEngine.Debug.Log(sw.ElapsedMilliseconds);
+            
+            Stopwatch sw1 = new Stopwatch();
+            sw1.Start();
+            for (int i = 0; i < 1000000; i++)
+            {
+               var a = container.Get<CustomComponent>(ent);
+            }
+            sw1.Stop();
+            UnityEngine.Debug.Log(sw1.ElapsedMilliseconds);
+            
+            Stopwatch sw2 = new Stopwatch();
+            sw2.Start();
+            for (int i = 0; i < 1000000; i++)
+            {
+               container.TryGet<CustomComponent>(ent, out var a);
+            }
+            sw2.Stop();
+            UnityEngine.Debug.Log(sw2.ElapsedMilliseconds);
         }
     }
 }
