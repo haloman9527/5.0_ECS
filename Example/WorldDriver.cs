@@ -13,12 +13,19 @@
  *
  */
 #endregion
+
+using System;
 using UnityEngine;
 
 namespace CZToolKit.ECS.Examples
 {
     public class WorldDriver : MonoBehaviour
     {
+        private void Awake()
+        {
+            DontDestroyOnLoad(gameObject);
+        }
+
         void Update()
         {
             for (int i = 0; i < World.AllWorlds.Count; i++)

@@ -8,6 +8,7 @@ namespace CZToolKit.ECS
         void ConvertToComponent(World world, Entity entity);
     }
 
+    [DisallowMultipleComponent]
     public class ConvertToEntity : MonoBehaviour
     {
         [SerializeField]
