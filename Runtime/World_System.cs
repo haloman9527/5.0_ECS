@@ -23,32 +23,89 @@ namespace CZToolKit.ECS
 {
     public partial class World : IDisposable
     {
-        private readonly Dictionary<Type, ComponentSystem> systems = new Dictionary<Type, ComponentSystem>();
-        private readonly HashSet<Type> existSystemTypes = new HashSet<Type>();
+        private readonly List<ISystem> systems = new List<ISystem>();
+        private readonly Dictionary<Type, int> systemsMap = new Dictionary<Type, int>();
 
-        public IReadOnlyDictionary<Type, ComponentSystem> Systems
+        public IReadOnlyList<ISystem> Systems
         {
             get { return systems; }
         }
 
-        public T CreateSystem<T>() where T : ComponentSystem, new()
+        public IReadOnlyDictionary<Type, int> SystemsMap
         {
-            return CreateSystem(typeof(T)) as T;
+            get { return systemsMap; }
         }
 
-        public ComponentSystem CreateSystem(Type type)
+        public T AddSystem<T>() where T : ISystem, new()
         {
-            if (!systems.TryGetValue(type, out var system))
+            var systemType = typeof(T);
+            if (systemsMap.TryGetValue(systemType, out var i))
+                return (T)systems[i];
+
+            var system = new T();
+            system.World = this;
+            system.Filter = new Filter(this);
+            system.OnCreate();
+            systems.Add(system);
+            systemsMap[systemType] = systems.Count - 1;
+            return system;
+        }
+
+        public T InsertSystem<T>(int index) where T : ISystem, new()
+        {
+            var systemType = typeof(T);
+            if (systemsMap.TryGetValue(systemType, out var i))
+                return (T)systems[i];
+
+            var system = new T();
+            system.World = this;
+            system.Filter = new Filter(this);
+            system.OnCreate();
+            systems.Insert(index, system);
+            for (int j = 0; j < systems.Count; j++)
             {
-                systems[type] = system = Activator.CreateInstance(type, true) as ComponentSystem;
-                existSystemTypes.Add(type);
-                system.World = this;
-                system.Filter = new Filter(this);
-                system.OnCreate();
-                system.Enable = true;
+                systemsMap[system.GetType()] = j;
             }
 
             return system;
+        }
+
+        // public void AddSystem(ComponentSystem system)
+        // {
+        //     var systemType = system.GetType();
+        //     if (systemsMap.ContainsKey(systemType))
+        //         throw new Exception("已存在相同类型的System");
+        //
+        //     system.World = this;
+        //     system.Filter = new Filter(this);
+        //     system.OnCreate();
+        //     system.Enable = true;
+        //     systems.Add(system);
+        //     systemsMap[systemType] = systems.Count - 1;
+        // }
+
+        // public void InsertSystem(int index, ComponentSystem system)
+        // {
+        //     var systemType = system.GetType();
+        //     if (systemsMap.ContainsKey(systemType))
+        //         throw new Exception("已存在相同类型的System");
+        //
+        //     system.World = this;
+        //     system.Filter = new Filter(this);
+        //     system.OnCreate();
+        //     system.Enable = true;
+        //     systems.Insert(index, system);
+        //     for (int i = 0; i < systems.Count; i++)
+        //     {
+        //         systemsMap[system.GetType()] = i;
+        //     }
+        // }
+
+        public int GetSystemOrder(Type systemType)
+        {
+            if (systemsMap.TryGetValue(systemType, out var order))
+                return order;
+            return -1;
         }
 
         public void FixedUpdate()
@@ -57,8 +114,8 @@ namespace CZToolKit.ECS
             {
                 while (enumerator.MoveNext())
                 {
-                    var system = enumerator.Current.Value;
-                    if (system.Enable && system is IFixedUpdate)
+                    var system = enumerator.Current;
+                    if (system is IFixedUpdate)
                         system.OnUpdate();
                 }
             }
@@ -70,8 +127,8 @@ namespace CZToolKit.ECS
             {
                 while (enumerator.MoveNext())
                 {
-                    var system = enumerator.Current.Value;
-                    if (system.Enable && system is IUpdate)
+                    var system = enumerator.Current;
+                    if (system is IUpdate)
                         system.OnUpdate();
                 }
             }
@@ -83,11 +140,21 @@ namespace CZToolKit.ECS
             {
                 while (enumerator.MoveNext())
                 {
-                    var system = enumerator.Current.Value;
-                    if (system.Enable && system is ILateUpdate)
+                    var system = enumerator.Current;
+                    if (system is ILateUpdate)
                         system.OnUpdate();
                 }
             }
+        }
+
+        public void DestroySystems()
+        {
+            foreach (var system in systems)
+            {
+                system.OnDestroy();
+            }
+
+            systems.Clear();
         }
     }
 }

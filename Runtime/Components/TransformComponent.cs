@@ -14,10 +14,29 @@
  */
 #endregion
 
+using UnityEngine;
+
 namespace CZToolKit.ECS
 {
     public struct TransformComponent : IComponent
     {
+        [HideInInspector]
         public uint id;
+
+        public TransformComponent(Transform cutscene)
+        {
+            this.id = ECSReferences.Set(cutscene);
+        }
+
+        public Transform Value
+        {
+            get { return ECSReferences.Get(id) as Transform; }
+            set { id = ECSReferences.Set(Value); }
+        }
+
+        public void Release()
+        {
+            ECSReferences.Release(id);
+        }
     }
 }

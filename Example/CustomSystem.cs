@@ -19,7 +19,7 @@ namespace CZToolKit.ECS.Examples
 {
     public class CustomSystem : ComponentSystem, IUpdate
     {
-        public override void OnUpdate()
+        protected override void Update()
         {
             Filter.ForeachWithEntity((Entity e, ref CustomComponent c) =>
             {

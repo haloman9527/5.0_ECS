@@ -1,6 +1,8 @@
 ﻿using CZToolKit.Core;
 using CZToolKit.Core.Editors;
 using System;
+using System.Collections.Generic;
+using System.Reflection;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
@@ -10,6 +12,20 @@ namespace CZToolKit.ECS.Editors
     [CustomEditor(typeof(ConvertToEntity))]
     public class ConvertToEntityEditor : BasicEditor
     {
+        private static Dictionary<string, Type> ComponentTypes = new Dictionary<string, Type>();
+
+        static ConvertToEntityEditor()
+        {
+            foreach (var type in Util_TypeCache.GetTypesDerivedFrom<IComponent>())
+            {
+                var menu = type.GetCustomAttribute<AddComponentMenu>();
+                if (menu != null)
+                    ComponentTypes[menu.componentMenu] = type;
+                else
+                    ComponentTypes[type.Name] = type;
+            }
+        }
+        
         protected override void RegisterDrawers()
         {
             base.RegisterDrawers();
@@ -29,10 +45,10 @@ namespace CZToolKit.ECS.Editors
             {
                 CZAdvancedDropDown components = new CZAdvancedDropDown("Components");
                 components.MinimumSize = new Vector2(150, 300);
-                foreach (var type in Util_TypeCache.GetTypesDerivedFrom<IComponent>())
+                foreach (var pair in ComponentTypes)
                 {
-                    var item = components.Add(ObjectNames.NicifyVariableName(type.Name));
-                    item.userData = type;
+                    var item = components.Add(ObjectNames.NicifyVariableName(pair.Key));
+                    item.userData = pair.Value;
                 }
                 components.onItemSelected += (selectedItem) =>
                 {

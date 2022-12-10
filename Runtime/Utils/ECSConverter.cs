@@ -22,8 +22,8 @@ namespace CZToolKit.ECS
         public static Entity ToEntity(GameObject target)
         {
             World.DefaultWorld.NewEntity(out var entity);
-            World.DefaultWorld.SetComponent(entity, new GameObjectComponent() { id = ECSReferences.Set(target) });
-            World.DefaultWorld.SetComponent(entity, new TransformComponent() { id = ECSReferences.Set(target.transform) });
+            World.DefaultWorld.SetComponent(entity, new GameObjectComponent(target));
+            World.DefaultWorld.SetComponent(entity, new TransformComponent(target.transform));
             World.DefaultWorld.SetComponent(entity, new PositionComponent() { value = target.transform.position });
             World.DefaultWorld.SetComponent(entity, new RotationComponent() { value = target.transform.rotation });
             World.DefaultWorld.SetComponent(entity, new ScaleComponent() { value = target.transform.localScale });

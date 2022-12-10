@@ -18,9 +18,10 @@
 
 namespace CZToolKit.ECS
 {
-    public abstract class ComponentSystem
+
+    public abstract class ComponentSystem: ISystem
     {
-        private bool enable = false;
+        private bool enable = true;
 
         public bool Enable
         {
@@ -37,16 +38,37 @@ namespace CZToolKit.ECS
             }
         }
 
-        public World World { get; internal set; }
+        public World World { get; set; }
 
-        public Filter Filter { get; internal set; }
+        public Filter Filter { get; set; }
+
+        public void OnCreate()
+        {
+            Enable = true;
+            Create();
+        }
         
-        public virtual void OnCreate() { }
+        public void OnUpdate()
+        {
+            if (!enable)
+                return;
+            Update();
+        }
 
-        public virtual void OnEnable() { }
+        public void OnDestroy()
+        {
+            Enable = false;
+            Destroy();
+        }
+        
+        protected virtual void Create() { }
 
-        public abstract void OnUpdate();
+        protected virtual void OnEnable() { }
 
-        public virtual void OnDisable() { }
+        protected abstract void Update();
+
+        protected virtual void OnDisable() { }
+
+        protected virtual void Destroy() { }
     }
 }

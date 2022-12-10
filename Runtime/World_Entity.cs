@@ -48,7 +48,7 @@ namespace CZToolKit.ECS
             return entities.ContainsKey(entity.index);
         }
 
-        public void DestroyEntityImmediate(Entity entity)
+        public void DestroyEntity(Entity entity)
         {
             if (entity.index == singleton.index)
                 throw new Exception("Can't Destory Singleton Entity!!!");
@@ -57,6 +57,16 @@ namespace CZToolKit.ECS
             {
                 components.Del(entity);
             }
+        }
+
+        public void DestroyEntities()
+        {
+            entities.Clear();
+            foreach (var components in componentContainers.GetValueArray(Allocator.Temp))
+            {
+                components.Dispose();
+            }
+            componentContainers.Clear();
         }
     }
 }

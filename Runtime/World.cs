@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Security.Claims;
 using Unity.Collections;
 
 namespace CZToolKit.ECS
@@ -33,11 +34,7 @@ namespace CZToolKit.ECS
             get { return allWorlds; }
         }
 
-        public static World DefaultWorld
-        {
-            get; 
-            private set;
-        }
+        public static World DefaultWorld { get; private set; }
 
         static World()
         {
@@ -85,23 +82,16 @@ namespace CZToolKit.ECS
 
         public void Reset()
         {
-            systems.Clear();
-            entities.Clear();
-            foreach (var components in componentContainers.GetValueArray(Allocator.Temp))
-            {
-                components.Reset();
-            }
+            DestroySystems();
+            DestroyEntities();
         }
 
         public void Dispose()
         {
-            systems.Clear();
+            DestroySystems();
+            DestroyEntities();
+            
             entities.Dispose();
-            foreach (var components in componentContainers.GetValueArray(Allocator.Temp))
-            {
-                components.Dispose();
-            }
-
             componentContainers.Dispose();
             if (DefaultWorld == this)
                 DefaultWorld = null;
