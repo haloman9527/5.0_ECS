@@ -39,7 +39,8 @@ namespace CZToolKit.ECS
 
         #endregion
 
-        private NativeHashMap<int, ComponentsContainer> componentContainers = new NativeHashMap<int, ComponentsContainer>(128, Allocator.Persistent);
+        private NativeHashMap<int, ComponentsContainer> componentContainers =
+            new NativeHashMap<int, ComponentsContainer>(128, Allocator.Persistent);
 
         public NativeHashMap<int, ComponentsContainer> ComponentContainers
         {
@@ -70,7 +71,8 @@ namespace CZToolKit.ECS
                 throw new Exception($"The type [{componentType.Name}] isn't Unmanaged Type!");
             if (!typeof(IComponent).IsAssignableFrom(componentType))
                 throw new NotImplementedException($"The type [{componentType.Name}] isn't implement IComponent!");
-            var componentPool = (ComponentsContainer)Activator.CreateInstance(typeof(ComponentsContainer), new object[] { componentType, ComponentsContainer.DEFAULT_CAPACITY });
+            var componentPool = (ComponentsContainer)Activator.CreateInstance(typeof(ComponentsContainer),
+                new object[] { componentType, ComponentsContainer.DEFAULT_CAPACITY });
             componentContainers[componentType.GetHashCode()] = componentPool;
             componentTypes[componentType.GetHashCode()] = componentType;
             return componentPool;
@@ -82,7 +84,8 @@ namespace CZToolKit.ECS
                 throw new Exception($"The type [{componentType.Name}] isn't Unmanaged Type!");
             if (!componentType.IsAssignableFrom(typeof(IComponent)))
                 throw new NotImplementedException($"The type [{componentType.Name}] isn't implement IComponent!");
-            var componentPool = (ComponentsContainer)Activator.CreateInstance(typeof(ComponentsContainer), new object[] { componentType, defaultSize });
+            var componentPool = (ComponentsContainer)Activator.CreateInstance(typeof(ComponentsContainer),
+                new object[] { componentType, defaultSize });
             componentContainers[componentType.GetHashCode()] = componentPool;
             componentTypes[componentType.GetHashCode()] = componentType;
             return componentPool;
@@ -109,6 +112,7 @@ namespace CZToolKit.ECS
         }
 
         #region Has
+
         public bool HasComponent(Entity entity, int typeHash)
         {
             if (!componentContainers.TryGetValue(typeHash, out var components))
@@ -127,25 +131,73 @@ namespace CZToolKit.ECS
         {
             return HasComponent(entity, typeof(T));
         }
+
         #endregion
 
-        #region Get
-        public ref T GetComponent<T>(Entity entity, int typeHash) where T : unmanaged, IComponent
+        #region Ref
+
+        public ref T RefComponent<T>(Entity entity, int typeHash) where T : unmanaged, IComponent
         {
             if (!componentContainers.TryGetValue(typeHash, out var components))
                 throw new Exception("AAA");
             return ref components.Ref<T>(entity);
         }
 
-        public ref T GetComponent<T>(Entity entity) where T : unmanaged, IComponent
+        public ref T RefComponent<T>(Entity entity) where T : unmanaged, IComponent
         {
             if (!componentContainers.TryGetValue(typeof(T).GetHashCode(), out var components))
                 throw new Exception("AAA");
             return ref components.Ref<T>(entity);
         }
+
+        #endregion
+
+        #region Get
+
+        public T GetComponent<T>(Entity entity, int typeHash) where T : unmanaged, IComponent
+        {
+            if (!componentContainers.TryGetValue(typeHash, out var components))
+                throw new Exception("AAA");
+            return components.Get<T>(entity);
+        }
+
+        public T GetComponent<T>(Entity entity) where T : unmanaged, IComponent
+        {
+            if (!componentContainers.TryGetValue(typeof(T).GetHashCode(), out var components))
+                throw new Exception("AAA");
+            return components.Get<T>(entity);
+        }
+
+        #endregion
+
+        #region TryGet
+
+        public bool TryGetComponent<T>(Entity entity, int typeHash, out T component) where T : unmanaged, IComponent
+        {
+            if (!componentContainers.TryGetValue(typeHash, out var components))
+            {
+                component = default;
+                return false;
+            }
+
+            return components.TryGet<T>(entity, out component);
+        }
+
+        public bool TryGetComponent<T>(Entity entity, out T component) where T : unmanaged, IComponent
+        {
+            if (!componentContainers.TryGetValue(typeof(T).GetHashCode(), out var components))
+            {
+                component = default;
+                return false;
+            }
+
+            return components.TryGet<T>(entity, out component);
+        }
+
         #endregion
 
         #region Set
+
         public void SetComponent<T>(Entity entity, T component, int typeHash) where T : unmanaged, IComponent
         {
             if (!componentContainers.TryGetValue(typeHash, out var components))
@@ -153,7 +205,7 @@ namespace CZToolKit.ECS
             components.Set(entity, component);
         }
 
-        private void SetComponent<T>(Entity entity, T component) where T : unmanaged, IComponent
+        public void SetComponent<T>(Entity entity, T component) where T : unmanaged, IComponent
         {
             if (!componentContainers.TryGetValue(typeof(T).GetHashCode(), out var components))
                 components = NewComponentContainer<T>();
@@ -175,9 +227,11 @@ namespace CZToolKit.ECS
 
             method.Invoke(components, new object[] { entity, component });
         }
+
         #endregion
-        
+
         #region Remove
+
         public void RemoveComponent(Entity entity, int typeHash)
         {
             if (!componentContainers.TryGetValue(typeHash, out var components))
@@ -198,6 +252,7 @@ namespace CZToolKit.ECS
                 return;
             components.Del(entity);
         }
+
         #endregion
     }
 }

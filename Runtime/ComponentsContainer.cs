@@ -53,19 +53,13 @@ namespace CZToolKit.ECS
         public unsafe ref T Ref<T>(Entity entity) where T : unmanaged, IComponent
         {
             ref var components = ref Unsafe.AsRef<UnsafeHashMap<Entity, IntPtr>>((void*)componentsPtr);
-            if (components.TryGetValue(entity, out var ptr))
-                return ref Unsafe.AsRef<T>(*((T*)ptr));
-
-            throw new Exception();
+            return ref Unsafe.AsRef<T>(*((T*)components[entity]));
         }
 
         public unsafe T Get<T>(Entity entity) where T : unmanaged, IComponent
         {
             ref var components = ref Unsafe.AsRef<UnsafeHashMap<Entity, IntPtr>>((void*)componentsPtr);
-            if (components.TryGetValue(entity, out var ptr))
-                return *((T*)ptr);
-            
-            throw new Exception();
+            return *((T*)components[entity]);
         }
 
         public unsafe bool TryGet<T>(Entity entity, out T value) where T : unmanaged, IComponent
