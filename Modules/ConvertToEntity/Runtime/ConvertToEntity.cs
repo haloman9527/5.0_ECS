@@ -23,7 +23,7 @@ namespace CZToolKit.ECS
             get { return entity; }
         }
 
-        private void Start()
+        private void Awake()
         {
             entity = ECSConverter.ToEntity(gameObject);
             foreach (var component in components)

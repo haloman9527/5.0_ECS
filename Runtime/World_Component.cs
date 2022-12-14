@@ -29,12 +29,13 @@ namespace CZToolKit.ECS
     {
         #region Static
 
-        private static Dictionary<int, Type> componentTypes = new Dictionary<int, Type>();
-        private static Dictionary<Type, MethodInfo> methods = new Dictionary<Type, MethodInfo>();
+        private static Dictionary<int, Type> m_ComponentTypes = new Dictionary<int, Type>();
+        private static Dictionary<int, MethodInfo> SetMethods = new Dictionary<int, MethodInfo>();
+        private static Dictionary<int, MethodInfo> GetMethods = new Dictionary<int, MethodInfo>();
 
         public static IReadOnlyDictionary<int, Type> ComponentTypes
         {
-            get { return componentTypes; }
+            get { return m_ComponentTypes; }
         }
 
         #endregion
@@ -52,7 +53,7 @@ namespace CZToolKit.ECS
             var componentType = typeof(T);
             var componentPool = new ComponentsContainer(componentType);
             componentContainers[componentType.GetHashCode()] = componentPool;
-            componentTypes[componentType.GetHashCode()] = componentType;
+            m_ComponentTypes[componentType.GetHashCode()] = componentType;
             return componentPool;
         }
 
@@ -61,7 +62,7 @@ namespace CZToolKit.ECS
             var componentType = typeof(T);
             var componentPool = new ComponentsContainer(componentType, defaultCapacity);
             componentContainers[componentType.GetHashCode()] = componentPool;
-            componentTypes[componentType.GetHashCode()] = componentType;
+            m_ComponentTypes[componentType.GetHashCode()] = componentType;
             return componentPool;
         }
 
@@ -74,7 +75,7 @@ namespace CZToolKit.ECS
             var componentPool = (ComponentsContainer)Activator.CreateInstance(typeof(ComponentsContainer),
                 new object[] { componentType, ComponentsContainer.DEFAULT_CAPACITY });
             componentContainers[componentType.GetHashCode()] = componentPool;
-            componentTypes[componentType.GetHashCode()] = componentType;
+            m_ComponentTypes[componentType.GetHashCode()] = componentType;
             return componentPool;
         }
 
@@ -87,7 +88,7 @@ namespace CZToolKit.ECS
             var componentPool = (ComponentsContainer)Activator.CreateInstance(typeof(ComponentsContainer),
                 new object[] { componentType, defaultSize });
             componentContainers[componentType.GetHashCode()] = componentPool;
-            componentTypes[componentType.GetHashCode()] = componentType;
+            m_ComponentTypes[componentType.GetHashCode()] = componentType;
             return componentPool;
         }
 
@@ -168,6 +169,22 @@ namespace CZToolKit.ECS
             return components.Get<T>(entity);
         }
 
+        public  IComponent GetComponent(Entity entity, Type componentType)
+        {
+            var componentTypeHash = componentType.GetHashCode();
+            if (!UnsafeUtility.IsUnmanaged(componentType))
+                throw new Exception($"The type '{componentType.Name}' must be a unmanaged type");
+            if (!componentContainers.TryGetValue(componentTypeHash, out var components))
+                components = NewComponentContainer(componentType);
+            if (!GetMethods.TryGetValue(componentTypeHash, out var method))
+            {
+                var m = typeof(ComponentsContainer).GetMethod("Get", BindingFlags.Public | BindingFlags.Instance);
+                GetMethods[componentTypeHash] = method = m.MakeGenericMethod(new Type[] { componentType });
+            }
+
+            return (IComponent)method.Invoke(components, new object[] { entity });
+        }
+
         #endregion
 
         #region TryGet
@@ -215,14 +232,15 @@ namespace CZToolKit.ECS
         public void SetComponent(Entity entity, IComponent component)
         {
             var componentType = component.GetType();
+            var componentTypeHash = componentType.GetHashCode();
             if (!UnsafeUtility.IsUnmanaged(componentType))
                 throw new Exception($"The type '{componentType.Name}' must be a unmanaged type");
-            if (!componentContainers.TryGetValue(componentType.GetHashCode(), out var components))
+            if (!componentContainers.TryGetValue(componentTypeHash, out var components))
                 components = NewComponentContainer(componentType);
-            if (!methods.TryGetValue(componentType, out var method))
+            if (!SetMethods.TryGetValue(componentTypeHash, out var method))
             {
                 var m = typeof(ComponentsContainer).GetMethod("Set", BindingFlags.Public | BindingFlags.Instance);
-                methods[componentType] = method = m.MakeGenericMethod(new Type[] { componentType });
+                SetMethods[componentTypeHash] = method = m.MakeGenericMethod(new Type[] { componentType });
             }
 
             method.Invoke(components, new object[] { entity, component });

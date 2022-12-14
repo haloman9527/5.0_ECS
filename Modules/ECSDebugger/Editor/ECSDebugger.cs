@@ -1,4 +1,5 @@
 #region 注 释
+
 /***
  *
  *  Title:
@@ -12,7 +13,9 @@
  *  Blog: https://www.crosshair.top/
  *
  */
+
 #endregion
+
 using UnityEditor;
 using CZToolKit.Core.Editors;
 using UnityEditor.IMGUI.Controls;
@@ -24,8 +27,8 @@ namespace CZToolKit.ECS.Editors
 {
     public class ESCDebugger : BasicMenuEditorWindow
     {
-        private static string[] Pages = new string[]{ "Entities", "Systems" };
-        
+        private static string[] Pages = new string[] { "Entities", "Systems" };
+
         private World selectWorld;
         private int selectPage;
 
@@ -39,6 +42,7 @@ namespace CZToolKit.ECS.Editors
                 SelectWorld(world);
                 break;
             }
+
             RefreshTreeView();
         }
 
@@ -52,6 +56,7 @@ namespace CZToolKit.ECS.Editors
                         SelectWorld(world);
                         break;
                     }
+
                     RefreshTreeView();
                     break;
                 case PlayModeStateChange.ExitingPlayMode:
@@ -77,6 +82,7 @@ namespace CZToolKit.ECS.Editors
                             worldTreeView.AddItem(entity.index.ToString(), entity);
                         }
                     }
+
                     treeView = worldTreeView;
                     break;
                 }
@@ -87,10 +93,11 @@ namespace CZToolKit.ECS.Editors
                     {
                         for (int i = 0; i < selectWorld.Systems.Count; i++)
                         {
-                            var system = selectWorld.Systems[i]; 
+                            var system = selectWorld.Systems[i];
                             worldTreeView.AddItem($"{i} : {system.GetType().Name}", system);
                         }
                     }
+
                     treeView = worldTreeView;
                     break;
                 }
@@ -118,6 +125,7 @@ namespace CZToolKit.ECS.Editors
                         RefreshTreeView();
                     });
                 }
+
                 worldMenu.DropDown(worldSelectButtonRect);
             }
 
@@ -135,9 +143,10 @@ namespace CZToolKit.ECS.Editors
                         RefreshTreeView();
                     });
                 }
+
                 pageMenu.DropDown(pageSelectButtonRect);
             }
-            
+
             EditorGUILayout.BeginVertical();
             base.OnLeftGUI();
             EditorGUILayout.EndHorizontal();
@@ -158,13 +167,24 @@ namespace CZToolKit.ECS.Editors
                         if (item != null)
                             break;
                     }
+
                     if (item is EntityTreeViewItem<Entity> entityItem)
                     {
                         var selectedEntity = entityItem.data;
                         foreach (var componentPool in selectWorld.ComponentContainers.GetValueArray(Allocator.Temp))
                         {
-                            if (componentPool.Contains(selectedEntity) && World.ComponentTypes.TryGetValue(componentPool.componentType, out var componentType))
-                                GUILayout.Label(componentType.Name);
+                            if (World.ComponentTypes.TryGetValue(componentPool.componentType, out var componentType))
+                            {
+                                if (selectWorld.ComponentContainers.ContainsKey(componentPool.componentType.GetHashCode())
+                                    && selectWorld.HasComponent(entityItem.data, componentPool.componentType))
+                                {
+                                    var component = selectWorld.GetComponent(entityItem.data, componentType);
+                                    EditorGUILayout.BeginHorizontal();
+                                    GUILayout.Label(componentType.Name);
+                                    GUILayout.Label(component.ToString());
+                                    EditorGUILayout.EndHorizontal();
+                                }
+                            }
                         }
                     }
                 }
@@ -182,6 +202,7 @@ namespace CZToolKit.ECS.Editors
                     CheckSystemsTreeView();
                     break;
             }
+
             base.OnTreeViewGUI();
             Repaint();
         }
@@ -196,6 +217,7 @@ namespace CZToolKit.ECS.Editors
             {
                 (MenuTreeView as GenericTreeView<Entity>).AddItem(entity.index.ToString(), entity);
             }
+
             entities.Dispose();
             for (int i = MenuTreeView.RootItem.children.Count - 1; i >= 0; i--)
             {
@@ -206,6 +228,7 @@ namespace CZToolKit.ECS.Editors
                         (MenuTreeView as GenericTreeView<Entity>).RemoveItem(entityItem.data);
                 }
             }
+
             if (count != MenuTreeView.RootItem.children.Count)
                 MenuTreeView.Reload();
         }
@@ -219,6 +242,7 @@ namespace CZToolKit.ECS.Editors
             {
                 (MenuTreeView as GenericTreeView<ISystem>).AddItem(system.GetType().Name, system);
             }
+
             for (int i = MenuTreeView.RootItem.children.Count - 1; i >= 0; i--)
             {
                 var item = MenuTreeView.RootItem.children[i];
@@ -247,9 +271,13 @@ namespace CZToolKit.ECS.Editors
 
     public class GenericTreeView<T> : CZTreeView
     {
-        public GenericTreeView(TreeViewState state) : base(state) { }
+        public GenericTreeView(TreeViewState state) : base(state)
+        {
+        }
 
-        public GenericTreeView(TreeViewState state, MultiColumnHeader multiColumnHeader) : base(state, multiColumnHeader) { }
+        public GenericTreeView(TreeViewState state, MultiColumnHeader multiColumnHeader) : base(state, multiColumnHeader)
+        {
+        }
 
         Dictionary<T, EntityTreeViewItem<T>> itemMap = new Dictionary<T, EntityTreeViewItem<T>>();
 
@@ -295,14 +323,10 @@ namespace CZToolKit.ECS.Editors
         {
             if (typeof(T) == typeof(Entity))
             {
-                (RootItem as CZTreeViewItem).children.QuickSort((a, b) =>
-                {
-                    return (a as EntityTreeViewItem<Entity>).data.index.CompareTo((b as EntityTreeViewItem<Entity>).data.index);
-                });
+                (RootItem as CZTreeViewItem).children.QuickSort((a, b) => { return (a as EntityTreeViewItem<Entity>).data.index.CompareTo((b as EntityTreeViewItem<Entity>).data.index); });
             }
             else
             {
-                
             }
         }
     }
