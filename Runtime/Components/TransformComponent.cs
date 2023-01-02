@@ -18,10 +18,15 @@ using UnityEngine;
 
 namespace CZToolKit.ECS
 {
-    public struct TransformComponent : IComponent
+    public struct TransformComponent : IComponent, IReferenceComponent
     {
         [HideInInspector]
         public uint id;
+
+        public uint ID
+        {
+            get { return id; }
+        }
 
         public TransformComponent(Transform cutscene)
         {

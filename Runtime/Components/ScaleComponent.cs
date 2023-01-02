@@ -20,5 +20,10 @@ namespace CZToolKit.ECS
     public struct ScaleComponent : IComponent
     {
         public Vector3 value;
+
+        public override string ToString()
+        {
+            return value.ToString();
+        }
     }
 }

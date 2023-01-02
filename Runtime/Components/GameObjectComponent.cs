@@ -1,4 +1,5 @@
 #region 注 释
+
 /***
  *
  *  Title:
@@ -12,20 +13,25 @@
  *  Blog: https://www.crosshair.top/
  *
  */
+
 #endregion
 
 using UnityEngine;
 
 namespace CZToolKit.ECS
 {
-    public struct GameObjectComponent : IComponent
+    public struct GameObjectComponent : IComponent, IReferenceComponent
     {
-        [HideInInspector]
-        public uint id;
+        [HideInInspector] public uint id;
 
-        public GameObjectComponent(GameObject cutscene)
+        public uint ID
         {
-            this.id = ECSReferences.Set(cutscene);
+            get { return id; }
+        }
+
+        public GameObjectComponent(GameObject gameObject)
+        {
+            this.id = ECSReferences.Set(gameObject);
         }
 
         public GameObject Value
