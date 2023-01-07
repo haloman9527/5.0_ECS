@@ -100,6 +100,7 @@ namespace CZToolKit.ECS.Editors
                         }
                     }
 
+                    worldTreeView.onItemRowGUI += OnTreeViewItemRowGUI;
                     treeView = worldTreeView;
                     break;
                 }
@@ -109,6 +110,35 @@ namespace CZToolKit.ECS.Editors
             treeView.ShowBoder = true;
             treeView.ShowAlternatingRowBackgrounds = true;
             return treeView;
+        }
+
+        protected override void OnTreeViewGUI()
+        {
+            switch (selectPage)
+            {
+                case 0:
+                    CheckEntitiesTreeView();
+                    break;
+                case 1:
+                    CheckSystemsTreeView();
+                    break;
+            }
+
+            base.OnTreeViewGUI();
+            Repaint();
+        }
+
+        protected void OnTreeViewItemRowGUI(CZTreeViewItem item, Rect rowRect)
+        {
+            if (item is EntityTreeViewItem<ISystem> systemItem)
+            {
+                var activeToggleRect = rowRect;
+                activeToggleRect.xMin = activeToggleRect.xMax - activeToggleRect.height;
+                var selectedSystem = systemItem.data;
+                var newActive = EditorGUI.Toggle(activeToggleRect, selectedSystem.Active);
+                if (newActive != selectedSystem.Active)
+                    selectedSystem.Active = newActive;
+            }
         }
 
         protected override void OnLeftGUI()
@@ -154,7 +184,7 @@ namespace CZToolKit.ECS.Editors
             EditorGUILayout.EndHorizontal();
         }
 
-        protected unsafe override void OnRightGUI(IList<int> selection)
+        protected override void OnRightGUI(IList<int> selection)
         {
             base.OnRightGUI(selection);
 
@@ -165,48 +195,37 @@ namespace CZToolKit.ECS.Editors
                     CZTreeViewItem item = null;
                     foreach (var selectedID in selection)
                     {
-                        item = MenuTreeView.FindItem(selection[0]);
+                        item = MenuTreeView.FindItem(selectedID);
                         if (item != null)
                             break;
                     }
 
-                    if (item is EntityTreeViewItem<Entity> entityItem)
+                    switch (item)
                     {
-                        var selectedEntity = entityItem.data;
-                        foreach (var componentPool in selectWorld.ComponentContainers.GetValueArray(Allocator.Temp))
+                        case EntityTreeViewItem<Entity> entityItem:
                         {
-                            if (World.ComponentTypes.TryGetValue(componentPool.componentType, out var componentType))
+                            var selectedEntity = entityItem.data;
+                            foreach (var componentPool in selectWorld.ComponentContainers.GetValueArray(Allocator.Temp))
                             {
-                                if (selectWorld.ComponentContainers.ContainsKey(componentPool.componentType.GetHashCode())
-                                    && selectWorld.HasComponent(entityItem.data, componentPool.componentType))
+                                if (World.ComponentTypes.TryGetValue(componentPool.componentType, out var componentType))
                                 {
-                                    var component = selectWorld.GetComponent(entityItem.data, componentType);
-                                    EditorGUILayout.BeginHorizontal();
-                                    GUILayout.Label(componentType.Name);
-                                    GUILayout.Label(component.ToString());
-                                    EditorGUILayout.EndHorizontal();
+                                    if (selectWorld.ComponentContainers.ContainsKey(componentPool.componentType.GetHashCode())
+                                        && selectWorld.HasComponent(selectedEntity, componentPool.componentType))
+                                    {
+                                        var component = selectWorld.GetComponent(selectedEntity, componentType);
+                                        EditorGUILayout.BeginHorizontal();
+                                        GUILayout.Label(componentType.Name);
+                                        GUILayout.Label(component.ToString());
+                                        EditorGUILayout.EndHorizontal();
+                                    }
                                 }
                             }
+
+                            break;
                         }
                     }
                 }
             }
-        }
-
-        protected override void OnTreeViewGUI()
-        {
-            switch (selectPage)
-            {
-                case 0:
-                    CheckEntitiesTreeView();
-                    break;
-                case 1:
-                    CheckSystemsTreeView();
-                    break;
-            }
-
-            base.OnTreeViewGUI();
-            Repaint();
         }
 
         private void CheckEntitiesTreeView()

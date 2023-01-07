@@ -21,17 +21,17 @@ namespace CZToolKit.ECS
 
     public abstract class ComponentSystem: ISystem
     {
-        private bool enable = true;
+        private bool active = true;
 
-        public bool Enable
+        public bool Active
         {
-            get { return enable; }
+            get { return active; }
             set
             {
-                if (enable == value)
+                if (active == value)
                     return;
-                enable = value;
-                if (enable)
+                active = value;
+                if (active)
                     OnEnable();
                 else
                     OnDisable();
@@ -44,20 +44,20 @@ namespace CZToolKit.ECS
 
         public void OnCreate()
         {
-            Enable = true;
+            Active = true;
             Create();
         }
         
         public void OnUpdate()
         {
-            if (!enable)
+            if (!active)
                 return;
             Update();
         }
 
         public void OnDestroy()
         {
-            Enable = false;
+            Active = false;
             Destroy();
         }
         

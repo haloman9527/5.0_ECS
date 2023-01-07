@@ -18,6 +18,8 @@ namespace CZToolKit.ECS
 {
     public interface ISystem
     {
+        bool Active { get; set; }
+        
         World World { get; set; }
 
         Filter Filter { get; set; }
