@@ -27,18 +27,22 @@ namespace CZToolKit.ECS
     {
         #region Static
 
+        private static World defaultWorld;
         private static readonly List<World> allWorlds = new List<World>();
+
+        public static World DefaultWorld
+        {
+            get
+            {
+                if (defaultWorld == null)
+                    defaultWorld = new World("Main World");
+                return defaultWorld;
+            }
+        }
 
         public static IReadOnlyList<World> AllWorlds
         {
             get { return allWorlds; }
-        }
-
-        public static World DefaultWorld { get; private set; }
-
-        static World()
-        {
-            NewWorld("Main World");
         }
 
         public static World NewWorld(string worldName)
@@ -70,8 +74,8 @@ namespace CZToolKit.ECS
         {
             this.name = name;
             this.singleton = NewEntity();
-            if (DefaultWorld == null)
-                DefaultWorld = this;
+            if (defaultWorld == null)
+                defaultWorld = this;
             allWorlds.Add(this);
         }
 
@@ -93,8 +97,8 @@ namespace CZToolKit.ECS
             
             entities.Dispose();
             componentContainers.Dispose();
-            if (DefaultWorld == this)
-                DefaultWorld = null;
+            if (defaultWorld == this)
+                defaultWorld = null;
             allWorlds.Remove(this);
         }
     }
