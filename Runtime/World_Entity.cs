@@ -20,7 +20,7 @@ namespace CZToolKit.ECS
 {
     public partial class World : IDisposable
     {
-        private IDGenerator entityIndexGenerator = new IDGenerator();
+        private IDGenerator entityIDGenerator = new IDGenerator();
         private NativeHashMap<uint, Entity> entities = new NativeHashMap<uint, Entity>(64, Allocator.Persistent);
 
         public NativeHashMap<uint, Entity> Entities
@@ -30,7 +30,7 @@ namespace CZToolKit.ECS
 
         public Entity NewEntity()
         {
-            var index = entityIndexGenerator.GenerateID();
+            var index = entityIDGenerator.GenerateID();
             var entity = new Entity(index);
             entities.Add(index, entity);
             return entity;
@@ -38,7 +38,7 @@ namespace CZToolKit.ECS
 
         public void NewEntity(out Entity entity)
         {
-            var id = entityIndexGenerator.GenerateID();
+            var id = entityIDGenerator.GenerateID();
             entity = new Entity(id);
             entities.Add(id, entity);
         }
