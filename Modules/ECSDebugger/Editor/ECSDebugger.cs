@@ -18,7 +18,7 @@
 
 using System;
 using UnityEditor;
-using CZToolKit.Core.Editors;
+using CZToolKit.Common.Editors;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 using Unity.Collections;
