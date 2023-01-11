@@ -210,13 +210,17 @@ namespace CZToolKit.ECS.Editors
                                 if (World.ComponentTypes.TryGetValue(componentPool.componentType, out var componentType))
                                 {
                                     if (selectWorld.ComponentContainers.ContainsKey(componentPool.componentType.GetHashCode())
-                                        && selectWorld.HasComponent(selectedEntity, componentPool.componentType))
+                                        && selectWorld.TryGetComponent(selectedEntity, componentType, out var component))
                                     {
-                                        var component = selectWorld.GetComponent(selectedEntity, componentType);
-                                        EditorGUILayout.BeginHorizontal();
-                                        GUILayout.Label(componentType.Name);
-                                        GUILayout.Label(component.ToString());
-                                        EditorGUILayout.EndHorizontal();
+                                        EditorGUILayout.BeginVertical(GUI.skin.box);
+                                        var componentDrawer = ComponentDrawerFactory.GetComponentDrawer(componentType);
+                                        EditorGUI.indentLevel++;
+                                        componentDrawer.Foldout = EditorGUILayout.BeginFoldoutHeaderGroup(componentDrawer.Foldout, componentType.Name);
+                                        if (componentDrawer.Foldout)
+                                            componentDrawer.OnGUI(component);
+                                        EditorGUI.indentLevel--;
+                                        EditorGUILayout.EndFoldoutHeaderGroup();
+                                        EditorGUILayout.EndVertical();
                                     }
                                 }
                             }
@@ -355,5 +359,57 @@ namespace CZToolKit.ECS.Editors
     public class EntityTreeViewItem<T> : CZTreeViewItem
     {
         public T data;
+    }
+
+    [AttributeUsage(AttributeTargets.Method)]
+    public class ComponentDrawerAttribute : Attribute
+    {
+        public Type componentType;
+    }
+
+    public abstract class ComponentDrawer
+    {
+        public bool Foldout { get; set; } = true;
+
+        public abstract void OnGUI(IComponent component);
+    }
+
+    public class ComponentDrawerFactory
+    {
+        private class DefaultComponentDrawer : ComponentDrawer
+        {
+            public override void OnGUI(IComponent component)
+            {
+                EditorGUILayout.LabelField(component.ToString()); 
+            }
+        }
+
+        private static Dictionary<Type, ComponentDrawer> drawers = new Dictionary<Type, ComponentDrawer>();
+        private static Dictionary<Type, Type> drawerTypes = new Dictionary<Type, Type>();
+
+        static ComponentDrawerFactory()
+        {
+            foreach (var type in TypeCache.GetTypesWithAttribute<ComponentDrawerAttribute>())
+            {
+                if (type.IsAbstract)
+                    continue;
+                var attribute = type.GetCustomAttribute<ComponentDrawerAttribute>();
+                drawerTypes[attribute.componentType] = type;
+            }
+        }
+
+        public static ComponentDrawer GetComponentDrawer(Type componentType)
+        {
+            if (!drawers.TryGetValue(componentType, out var drawer))
+            {
+                if (drawerTypes.TryGetValue(componentType, out var drawerType))
+                    drawer = Activator.CreateInstance(drawerType) as ComponentDrawer;
+                if (drawer == null)
+                    drawer = new DefaultComponentDrawer();
+                drawers[componentType] = drawer;
+            }
+
+            return drawer;
+        }
     }
 }

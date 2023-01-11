@@ -32,6 +32,7 @@ namespace CZToolKit.ECS
         private static Dictionary<int, Type> m_ComponentTypes = new Dictionary<int, Type>();
         private static Dictionary<int, MethodInfo> SetMethods = new Dictionary<int, MethodInfo>();
         private static Dictionary<int, MethodInfo> GetMethods = new Dictionary<int, MethodInfo>();
+        private static Dictionary<int, MethodInfo> TryGetMethods = new Dictionary<int, MethodInfo>();
 
         public static IReadOnlyDictionary<int, Type> ComponentTypes
         {
@@ -169,7 +170,7 @@ namespace CZToolKit.ECS
             return components.Get<T>(entity);
         }
 
-        public  IComponent GetComponent(Entity entity, Type componentType)
+        public IComponent GetComponent(Entity entity, Type componentType)
         {
             var componentTypeHash = componentType.GetHashCode();
             if (!UnsafeUtility.IsUnmanaged(componentType))
@@ -209,6 +210,26 @@ namespace CZToolKit.ECS
             }
 
             return components.TryGet<T>(entity, out component);
+        }
+
+        public bool TryGetComponent(Entity entity, Type componentType, out IComponent component)
+        {
+            var typeHash = componentType.GetHashCode();
+            var componentTypeHash = componentType.GetHashCode();
+            if (!UnsafeUtility.IsUnmanaged(componentType))
+                throw new Exception($"The type '{componentType.Name}' must be a unmanaged type");
+            if (!componentContainers.TryGetValue(componentTypeHash, out var components))
+                components = NewComponentContainer(componentType);
+            if (!TryGetMethods.TryGetValue(componentTypeHash, out var method))
+            {
+                var m = typeof(ComponentsContainer).GetMethod("TryGet", BindingFlags.Public | BindingFlags.Instance);
+                TryGetMethods[componentTypeHash] = method = m.MakeGenericMethod(new Type[] { componentType });
+            }
+
+            var args = new object[] { entity, null };
+            var result = (bool)method.Invoke(components, args);
+            component = args[1] as IComponent;
+            return result;
         }
 
         #endregion
