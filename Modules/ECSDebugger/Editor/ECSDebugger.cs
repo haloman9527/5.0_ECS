@@ -212,13 +212,17 @@ namespace CZToolKit.ECS.Editors
                                     if (selectWorld.ComponentContainers.ContainsKey(componentPool.componentType.GetHashCode())
                                         && selectWorld.TryGetComponent(selectedEntity, componentType, out var component))
                                     {
-                                        EditorGUILayout.BeginVertical(GUI.skin.box);
+                                        EditorGUILayout.BeginVertical("FrameBox");
                                         var componentDrawer = ComponentDrawerFactory.GetComponentDrawer(componentType);
-                                        EditorGUI.indentLevel++;
                                         componentDrawer.Foldout = EditorGUILayout.BeginFoldoutHeaderGroup(componentDrawer.Foldout, componentType.Name);
+
                                         if (componentDrawer.Foldout)
-                                            componentDrawer.OnGUI(component);
-                                        EditorGUI.indentLevel--;
+                                        {
+                                            EditorGUI.indentLevel++;
+                                            componentDrawer.OnGUI(selectWorld, component);
+                                            EditorGUI.indentLevel--;
+                                        }
+
                                         EditorGUILayout.EndFoldoutHeaderGroup();
                                         EditorGUILayout.EndVertical();
                                     }
@@ -361,26 +365,31 @@ namespace CZToolKit.ECS.Editors
         public T data;
     }
 
-    [AttributeUsage(AttributeTargets.Method)]
-    public class ComponentDrawerAttribute : Attribute
+    [AttributeUsage(AttributeTargets.Class)]
+    public class CustomComponentDrawerAttribute : Attribute
     {
         public Type componentType;
+
+        public CustomComponentDrawerAttribute(Type componentType)
+        {
+            this.componentType = componentType;
+        }
     }
 
     public abstract class ComponentDrawer
     {
         public bool Foldout { get; set; } = true;
 
-        public abstract void OnGUI(IComponent component);
+        public abstract void OnGUI(World world, IComponent component);
     }
 
     public class ComponentDrawerFactory
     {
         private class DefaultComponentDrawer : ComponentDrawer
         {
-            public override void OnGUI(IComponent component)
+            public override void OnGUI(World world, IComponent component)
             {
-                EditorGUILayout.LabelField(component.ToString()); 
+                EditorGUILayout.LabelField(component.ToString());
             }
         }
 
@@ -389,11 +398,11 @@ namespace CZToolKit.ECS.Editors
 
         static ComponentDrawerFactory()
         {
-            foreach (var type in TypeCache.GetTypesWithAttribute<ComponentDrawerAttribute>())
+            foreach (var type in TypeCache.GetTypesWithAttribute<CustomComponentDrawerAttribute>())
             {
                 if (type.IsAbstract)
                     continue;
-                var attribute = type.GetCustomAttribute<ComponentDrawerAttribute>();
+                var attribute = type.GetCustomAttribute<CustomComponentDrawerAttribute>();
                 drawerTypes[attribute.componentType] = type;
             }
         }
