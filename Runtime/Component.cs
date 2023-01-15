@@ -17,9 +17,4 @@
 namespace CZToolKit.ECS
 {
     public interface IComponent { }
-
-    public interface IReferenceComponent
-    {
-        uint ID { get; }
-    }
 }

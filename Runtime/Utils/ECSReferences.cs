@@ -21,7 +21,7 @@ namespace CZToolKit.ECS
     {
         private static uint index = 0;
 
-        private static Dictionary<uint, object> references = new Dictionary<uint, object>();
+        private static readonly Dictionary<uint, object> references = new Dictionary<uint, object>();
 
         public static uint Set(object data)
         {

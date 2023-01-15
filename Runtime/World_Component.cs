@@ -245,9 +245,7 @@ namespace CZToolKit.ECS
 
         public void SetComponent<T>(Entity entity, T component) where T : unmanaged, IComponent
         {
-            if (!componentContainers.TryGetValue(typeof(T).GetHashCode(), out var components))
-                components = NewComponentContainer<T>();
-            components.Set(entity, component);
+            SetComponent(entity, component, typeof(T).GetHashCode());
         }
 
         public void SetComponent(Entity entity, IComponent component)

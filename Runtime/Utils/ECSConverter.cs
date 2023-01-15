@@ -23,7 +23,6 @@ namespace CZToolKit.ECS
         {
             World.DefaultWorld.NewEntity(out var entity);
             World.DefaultWorld.SetComponent(entity, new GameObjectComponent(target));
-            World.DefaultWorld.SetComponent(entity, new TransformComponent(target.transform));
             World.DefaultWorld.SetComponent(entity, new PositionComponent() { value = target.transform.position });
             World.DefaultWorld.SetComponent(entity, new RotationComponent() { value = target.transform.rotation });
             World.DefaultWorld.SetComponent(entity, new ScaleComponent() { value = target.transform.localScale });

@@ -207,9 +207,9 @@ namespace CZToolKit.ECS.Editors
                             var selectedEntity = entityItem.data;
                             foreach (var componentPool in selectWorld.ComponentContainers.GetValueArray(Allocator.Temp))
                             {
-                                if (World.ComponentTypes.TryGetValue(componentPool.componentType, out var componentType))
+                                if (World.ComponentTypes.TryGetValue(componentPool.componentTypeHash, out var componentType))
                                 {
-                                    if (selectWorld.ComponentContainers.ContainsKey(componentPool.componentType.GetHashCode())
+                                    if (selectWorld.ComponentContainers.ContainsKey(componentPool.componentTypeHash.GetHashCode())
                                         && selectWorld.TryGetComponent(selectedEntity, componentType, out var component))
                                     {
                                         EditorGUILayout.BeginVertical("FrameBox");

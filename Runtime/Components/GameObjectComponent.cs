@@ -16,11 +16,12 @@
 
 #endregion
 
+using System;
 using UnityEngine;
 
 namespace CZToolKit.ECS
 {
-    public struct GameObjectComponent : IComponent, IReferenceComponent
+    public struct GameObjectComponent : IComponent, IDisposable
     {
         [HideInInspector] public uint id;
 
@@ -40,7 +41,7 @@ namespace CZToolKit.ECS
             set { id = ECSReferences.Set(Value); }
         }
 
-        public void Release()
+        public void Dispose()
         {
             ECSReferences.Release(id);
         }
