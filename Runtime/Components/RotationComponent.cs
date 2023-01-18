@@ -20,5 +20,10 @@ namespace CZToolKit.ECS
     public struct RotationComponent : IComponent
     {
         public Quaternion value;
+
+        public override string ToString()
+        {
+            return value.ToString();
+        }
     }
 }
