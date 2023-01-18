@@ -207,25 +207,23 @@ namespace CZToolKit.ECS.Editors
                             var selectedEntity = entityItem.data;
                             foreach (var componentPool in selectWorld.ComponentContainers.GetValueArray(Allocator.Temp))
                             {
-                                if (World.ComponentTypes.TryGetValue(componentPool.componentTypeHash, out var componentType))
+                                var componentType = World.ComponentTypes[componentPool.componentTypeHash];
+                                if (selectWorld.ComponentContainers.ContainsKey(componentPool.componentTypeHash.GetHashCode())
+                                    && selectWorld.TryGetComponent(selectedEntity, componentType, out var component))
                                 {
-                                    if (selectWorld.ComponentContainers.ContainsKey(componentPool.componentTypeHash.GetHashCode())
-                                        && selectWorld.TryGetComponent(selectedEntity, componentType, out var component))
+                                    EditorGUILayout.BeginVertical("FrameBox");
+                                    var componentDrawer = ComponentDrawerFactory.GetComponentDrawer(componentType);
+                                    componentDrawer.Foldout = EditorGUILayout.BeginFoldoutHeaderGroup(componentDrawer.Foldout, componentType.Name);
+
+                                    if (componentDrawer.Foldout)
                                     {
-                                        EditorGUILayout.BeginVertical("FrameBox");
-                                        var componentDrawer = ComponentDrawerFactory.GetComponentDrawer(componentType);
-                                        componentDrawer.Foldout = EditorGUILayout.BeginFoldoutHeaderGroup(componentDrawer.Foldout, componentType.Name);
-
-                                        if (componentDrawer.Foldout)
-                                        {
-                                            EditorGUI.indentLevel++;
-                                            componentDrawer.OnGUI(selectWorld, component);
-                                            EditorGUI.indentLevel--;
-                                        }
-
-                                        EditorGUILayout.EndFoldoutHeaderGroup();
-                                        EditorGUILayout.EndVertical();
+                                        EditorGUI.indentLevel++;
+                                        componentDrawer.OnGUI(selectWorld, selectedEntity, component);
+                                        EditorGUI.indentLevel--;
                                     }
+
+                                    EditorGUILayout.EndFoldoutHeaderGroup();
+                                    EditorGUILayout.EndVertical();
                                 }
                             }
 
@@ -380,14 +378,14 @@ namespace CZToolKit.ECS.Editors
     {
         public bool Foldout { get; set; } = true;
 
-        public abstract void OnGUI(World world, IComponent component);
+        public abstract void OnGUI(World world, Entity entity, IComponent component);
     }
 
     public class ComponentDrawerFactory
     {
         private class DefaultComponentDrawer : ComponentDrawer
         {
-            public override void OnGUI(World world, IComponent component)
+            public override void OnGUI(World world, Entity entity, IComponent component)
             {
                 EditorGUILayout.LabelField(component.ToString());
             }
