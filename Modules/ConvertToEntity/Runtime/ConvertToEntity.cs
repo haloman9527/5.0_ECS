@@ -11,29 +11,32 @@ namespace CZToolKit.ECS
     [DisallowMultipleComponent]
     public class ConvertToEntity : MonoBehaviour
     {
-        [SerializeField]
+        [SerializeField] 
         private bool destroyOnAwake;
-        [SerializeReference]
+        [SerializeReference] 
         public List<IComponent> components = new List<IComponent>();
-        [HideInInspector]
-        private Entity entity;
 
-        public Entity Entity
-        {
-            get { return entity; }
-        }
+        public Entity Entity { get; private set; }
 
         private void Awake()
         {
-            entity = ECSConverter.ToEntity(gameObject);
+            Entity = World.DefaultWorld.NewEntity();
+
+            World.DefaultWorld.SetComponent(Entity, new GameObjectComponent(gameObject));
+            World.DefaultWorld.SetComponent(Entity, new PositionComponent() { value = transform.position });
+            World.DefaultWorld.SetComponent(Entity, new RotationComponent() { value = transform.rotation });
+            World.DefaultWorld.SetComponent(Entity, new ScaleComponent() { value = transform.localScale });
+
             foreach (var component in components)
             {
-                World.DefaultWorld.SetComponent(entity, component);
+                World.DefaultWorld.SetComponent(Entity, component);
             }
+
             foreach (var convert in GetComponents<IConvertToComponent>())
             {
-                convert.ConvertToComponent(World.DefaultWorld, entity);
+                convert.ConvertToComponent(World.DefaultWorld, Entity);
             }
+
             if (destroyOnAwake)
                 GameObject.Destroy(this);
         }

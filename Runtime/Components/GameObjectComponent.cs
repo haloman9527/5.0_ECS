@@ -21,9 +21,9 @@ using UnityEngine;
 
 namespace CZToolKit.ECS
 {
-    public struct GameObjectComponent : IComponent, IDisposable
+    public struct GameObjectComponent : IComponent
     {
-        [HideInInspector] public uint id;
+        private uint id;
 
         public uint ID
         {
@@ -41,7 +41,7 @@ namespace CZToolKit.ECS
             set { id = ECSReferences.Set(Value); }
         }
 
-        public void Dispose()
+        public void Release()
         {
             ECSReferences.Release(id);
         }
