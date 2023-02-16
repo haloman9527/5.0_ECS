@@ -72,12 +72,17 @@ namespace CZToolKit.ECS
             return false;
         }
 
-        public unsafe void Set<T>(Entity entity, T component) where T : unmanaged, IComponent
+        public void Set<T>(Entity entity, T component) where T : unmanaged, IComponent
         {
             var p = UnsafeUtility.Malloc(componentSize, 4, Allocator.Persistent);
             UnsafeUtility.CopyStructureToPtr(ref component, p);
             ref var components = ref Unsafe.AsRef<UnsafeHashMap<Entity, IntPtr>>((void*)componentsPtr);
             components[entity] = new IntPtr(p);
+        }
+
+        public ref UnsafeHashMap<Entity, IntPtr> GetMap()
+        {
+            return ref Unsafe.AsRef<UnsafeHashMap<Entity, IntPtr>>((void*)componentsPtr);
         }
 
         public void Del(Entity entity)
