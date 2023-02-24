@@ -1,0 +1,30 @@
+#region 注 释
+
+/***
+ *
+ *  Title:
+ *  
+ *  Description:
+ *  
+ *  Date:
+ *  Version:
+ *  Writer: 半只龙虾人
+ *  Github: https://github.com/HalfLobsterMan
+ *  Blog: https://www.crosshair.top/
+ *
+ */
+
+#endregion
+
+namespace CZToolKit.ECS
+{
+    public static class SharedTypeHash<TComponent>
+    {
+        public static int Data { get; }
+
+        static SharedTypeHash()
+        {
+            Data = typeof(TComponent).GetHashCode();
+        }
+    }
+}

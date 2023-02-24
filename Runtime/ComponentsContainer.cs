@@ -24,14 +24,14 @@ namespace CZToolKit.ECS
     {
         public const int DEFAULT_CAPACITY = 128;
 
-        public int componentTypeHash;
+        public int componentTypeID;
         public int componentSize;
         public IntPtr componentsPtr;
 
-        public ComponentsContainer(Type componentType, int capacity = DEFAULT_CAPACITY)
+        public ComponentsContainer(int componentTypeID, int componentSize, int capacity = DEFAULT_CAPACITY)
         {
-            this.componentTypeHash = componentType.GetHashCode();
-            this.componentSize = UnsafeUtility.SizeOf(componentType);
+            this.componentTypeID = componentTypeID;
+            this.componentSize = componentSize;
             var components = new UnsafeHashMap<Entity, IntPtr>(capacity, Allocator.Persistent);
 
             var componentsSize = UnsafeUtility.SizeOf<UnsafeHashMap<Entity, IntPtr>>();

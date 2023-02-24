@@ -52,7 +52,9 @@ namespace CZToolKit.ECS
         public ComponentsContainer NewComponentContainer<T>() where T : unmanaged, IComponent
         {
             var componentType = typeof(T);
-            var componentPool = new ComponentsContainer(componentType);
+            var componentTypeID = SharedTypeHash<T>.Data;
+            var componentSize = SharedTypeSize<T>.Data;
+            var componentPool = new ComponentsContainer(componentTypeID, componentSize);
             componentContainers[componentType.GetHashCode()] = componentPool;
             m_ComponentTypes[componentType.GetHashCode()] = componentType;
             return componentPool;
@@ -61,9 +63,11 @@ namespace CZToolKit.ECS
         public ComponentsContainer NewComponentContainer<T>(int defaultCapacity) where T : unmanaged, IComponent
         {
             var componentType = typeof(T);
-            var componentPool = new ComponentsContainer(componentType, defaultCapacity);
-            componentContainers[componentType.GetHashCode()] = componentPool;
-            m_ComponentTypes[componentType.GetHashCode()] = componentType;
+            var componentTypeID = SharedTypeHash<T>.Data;
+            var componentSize = SharedTypeSize<T>.Data;
+            var componentPool = new ComponentsContainer(componentTypeID, componentSize, defaultCapacity);
+            componentContainers[componentTypeID] = componentPool;
+            m_ComponentTypes[componentTypeID] = componentType;
             return componentPool;
         }
 
