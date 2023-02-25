@@ -27,22 +27,22 @@ namespace CZToolKit.ECS
     {
         #region Static
 
-        private static World defaultWorld;
-        private static readonly List<World> allWorlds = new List<World>();
+        private static World s_DefaultWorld;
+        private static List<World> s_AllWorlds = new List<World>();
 
         public static World DefaultWorld
         {
             get
             {
-                if (defaultWorld == null)
-                    defaultWorld = new World("Main World");
-                return defaultWorld;
+                if (s_DefaultWorld == null)
+                    s_DefaultWorld = new World("Main World");
+                return s_DefaultWorld;
             }
         }
 
         public static IReadOnlyList<World> AllWorlds
         {
-            get { return allWorlds; }
+            get { return s_AllWorlds; }
         }
 
         public static World NewWorld(string worldName)
@@ -57,12 +57,12 @@ namespace CZToolKit.ECS
 
         public static void DisposeAllWorld()
         {
-            while (allWorlds.Count > 0)
+            while (s_AllWorlds.Count > 0)
             {
-                allWorlds[0].Dispose();
+                s_AllWorlds[0].Dispose();
             }
 
-            allWorlds.Clear();
+            s_AllWorlds.Clear();
         }
 
         #endregion
@@ -74,9 +74,9 @@ namespace CZToolKit.ECS
         {
             this.name = name;
             this.singleton = NewEntity();
-            if (defaultWorld == null)
-                defaultWorld = this;
-            allWorlds.Add(this);
+            if (s_DefaultWorld == null)
+                s_DefaultWorld = this;
+            s_AllWorlds.Add(this);
         }
 
         ~World()
@@ -97,9 +97,9 @@ namespace CZToolKit.ECS
             
             entities.Dispose();
             componentContainers.Dispose();
-            if (defaultWorld == this)
-                defaultWorld = null;
-            allWorlds.Remove(this);
+            if (s_DefaultWorld == this)
+                s_DefaultWorld = null;
+            s_AllWorlds.Remove(this);
         }
     }
 }

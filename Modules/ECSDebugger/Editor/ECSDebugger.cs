@@ -205,10 +205,10 @@ namespace CZToolKit.ECS.Editors
                         case EntityTreeViewItem<Entity> entityItem:
                         {
                             var selectedEntity = entityItem.data;
-                            foreach (var componentPool in selectWorld.ComponentContainers.GetValueArray(Allocator.Temp))
+                            foreach (var componentContainer in selectWorld.ComponentContainers.GetValueArray(Allocator.Temp))
                             {
-                                var componentType = World.ComponentTypes[componentPool.componentTypeID];
-                                if (selectWorld.ComponentContainers.ContainsKey(componentPool.componentTypeID.GetHashCode())
+                                var componentType = TypeManager.FindType(componentContainer.componentTypeIndex);
+                                if (selectWorld.ComponentContainers.ContainsKey(componentContainer.componentTypeIndex)
                                     && selectWorld.TryGetComponent(selectedEntity, componentType, out var component))
                                 {
                                     EditorGUILayout.BeginVertical("FrameBox");

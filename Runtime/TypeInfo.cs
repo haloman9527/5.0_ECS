@@ -19,12 +19,14 @@ namespace CZToolKit.ECS
     public struct TypeInfo
     {
         public int typeIndex;
+        public int typeHash;
         public int componentSize;
         public int alignInBytes;
 
-        public TypeInfo(int typeIndex, int componentSize, int alignInBytes)
+        public TypeInfo(int typeIndex, int typeHash, int componentSize, int alignInBytes)
         {
             this.typeIndex = typeIndex;
+            this.typeHash = typeHash;
             this.componentSize = componentSize;
             this.alignInBytes = alignInBytes;
         }
