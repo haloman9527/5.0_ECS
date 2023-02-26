@@ -22,13 +22,11 @@ namespace CZToolKit.ECS
 {
     public unsafe struct ComponentsContainer : IDisposable
     {
-        public const int DEFAULT_CAPACITY = 128;
-
         public int componentTypeIndex;
         public int componentSize;
         public IntPtr componentsPtr;
 
-        public ComponentsContainer(int componentTypeID, int componentSize, int capacity = DEFAULT_CAPACITY)
+        public ComponentsContainer(int componentTypeID, int componentSize, int capacity)
         {
             this.componentTypeIndex = componentTypeID;
             this.componentSize = componentSize;
@@ -51,7 +49,7 @@ namespace CZToolKit.ECS
         public ref T Ref<T>(Entity entity) where T : unmanaged, IComponent
         {
             ref var components = ref Unsafe.AsRef<UnsafeHashMap<Entity, IntPtr>>((void*)componentsPtr);
-            return ref Unsafe.AsRef<T>(*((T*)components[entity]));
+            return ref Unsafe.AsRef(*((T*)components[entity]));
         }
 
         public T Get<T>(Entity entity) where T : unmanaged, IComponent

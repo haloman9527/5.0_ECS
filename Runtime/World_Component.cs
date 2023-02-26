@@ -55,7 +55,7 @@ namespace CZToolKit.ECS
 
         public ComponentsContainer NewComponentContainer<T>() where T : unmanaged, IComponent
         {
-            return NewComponentContainer<T>(ComponentsContainer.DEFAULT_CAPACITY);
+            return NewComponentContainer<T>(128);
         }
 
         public ComponentsContainer NewComponentContainer(Type componentType, int defaultSize)
@@ -73,7 +73,7 @@ namespace CZToolKit.ECS
 
         public ComponentsContainer NewComponentContainer(Type componentType)
         {
-            return NewComponentContainer(componentType, ComponentsContainer.DEFAULT_CAPACITY);
+            return NewComponentContainer(componentType, 128);
         }
 
         public bool ExistsComponentContainer<T>() where T : unmanaged, IComponent

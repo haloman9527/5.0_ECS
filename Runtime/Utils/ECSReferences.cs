@@ -19,24 +19,24 @@ namespace CZToolKit.ECS
 {
     public class ECSReferences
     {
-        private static uint index = 0;
+        private static uint s_Index = 0;
 
-        private static readonly Dictionary<uint, object> references = new Dictionary<uint, object>();
+        private static readonly Dictionary<uint, object> s_References = new Dictionary<uint, object>();
 
         public static uint Set(object data)
         {
-            references[++index] = data;
-            return index;
+            s_References[++s_Index] = data;
+            return s_Index;
         }
 
         public static object Get(uint id)
         {
-            return references[id];
+            return s_References[id];
         }
 
         public static void Release(uint id)
         {
-            references.Remove(id);
+            s_References.Remove(id);
         }
     }
 }

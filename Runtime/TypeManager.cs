@@ -12,7 +12,9 @@ namespace CZToolKit.ECS
         
         private const int MAXIMUN_TYPE_COUNT = 1024 * 10;
         private const int MAXIMUN_SUPPORTED_ALIGNMENT = 16;
-        
+
+        public const int ZERO_SIZE_FLAG = 1 << 30;
+        public const int MANAGED_COMPONENT_TYPE_FLAG = 1 << 29;
         #endregion
 
         private static bool s_Initialized;
@@ -21,7 +23,6 @@ namespace CZToolKit.ECS
         private static NativeHashMap<int, int> s_TypeHashToTypeIndex;
         private static int s_TypeCount;
 
-        private static Dictionary<Type, int> s_ManagedTypeToIndex;
         private static Dictionary<int, Type> s_IndexToManagedType;
 
         static TypeManager()
@@ -37,7 +38,6 @@ namespace CZToolKit.ECS
             s_TypeInfos = new NativeArray<TypeInfo>(MAXIMUN_TYPE_COUNT, Allocator.Persistent);
             s_TypeHashToTypeIndex = new NativeHashMap<int, int>(MAXIMUN_TYPE_COUNT, Allocator.Persistent);
             
-            s_ManagedTypeToIndex = new Dictionary<Type, int>(1000);
             s_IndexToManagedType = new Dictionary<int, Type>(1000);
 
             InitializeAllComponentTypes();
@@ -82,10 +82,13 @@ namespace CZToolKit.ECS
                 var typeHash = type.GetHashCode();
                 var componentSize = UnsafeUtility.SizeOf(type);
                 var alighInBytes = CalculateAlignmentInChunk(componentSize);
+
+                if (componentSize == 0)
+                    typeIndex &= ZERO_SIZE_FLAG;
+                
                 TypeInfo typeInfo = new TypeInfo(typeIndex, typeHash, componentSize, alighInBytes);
                 s_TypeInfos[typeIndex] = typeInfo;
                 s_TypeHashToTypeIndex[type.GetHashCode()] = typeIndex;
-                s_ManagedTypeToIndex[type] = typeIndex;
                 s_IndexToManagedType[typeIndex] = type;
                 s_TypeCount++;
             }
@@ -107,7 +110,7 @@ namespace CZToolKit.ECS
 
         public static int FindTypeIndex(Type type)
         {
-            if (s_ManagedTypeToIndex.TryGetValue(type, out var index))
+            if (s_TypeHashToTypeIndex.TryGetValue(type.GetHashCode(), out var index))
                 return index;
             return -1;
         }
@@ -126,9 +129,7 @@ namespace CZToolKit.ECS
         
         public static TypeInfo GetTypeInfo<T>()
         {
-            var typeHash = SharedTypeHash<T>.Data;
-            var typeIndex = s_TypeHashToTypeIndex[typeHash];
-            return s_TypeInfos[typeIndex];
+            return s_TypeInfos[SharedTypeIndex<T>.Data];
         }
         
         public static TypeInfo GetTypeInfo(Type componentType)
