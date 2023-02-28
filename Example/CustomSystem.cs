@@ -27,7 +27,7 @@ namespace CZToolKit.ECS.Examples
             });
             if (Input.GetButtonDown("Jump"))
             {
-                Filter.Foreach((ref CustomComponent c) =>
+                Filter.ForeachWithEntity((Entity e, ref CustomComponent c) =>
                 {
                     c.num += 1;
                 });
