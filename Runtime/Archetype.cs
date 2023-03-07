@@ -22,23 +22,33 @@
 //
 // namespace CZToolKit.ECS
 // {
-//     public unsafe class ArchetypeContainer : IDisposable
+//     public unsafe struct ArchetypeContainer : IDisposable
 //     {
-//         UnsafeList<Archetype>* archetypes;
-//         
+//         UnsafeList<Archetype> archetypes;
 //         public int typeCount;
+//         public ComponentType* componentTypes;
 //         public int archetypeCount;
 //         
-//         public int 
-//         
-//         public unsafe ArchetypeContainer()
+//         public ArchetypeContainer(params ComponentType[] types)
 //         {
-//             
+//             typeCount = types.Length;
+//             archetypeCount = 0;
+//             fixed (ComponentType* typesPtr = types)
+//             {
+//                 componentTypes = (ComponentType*)UnsafeUtil.Malloc(sizeof(ComponentType) * typeCount);
+//                 for (int i = 0; i < typeCount; i++)
+//                 {
+//                     componentTypes[i] = typesPtr[i];
+//                 }
+//             }
+//
+//             archetypes = new UnsafeList<Archetype>();
 //         }
 //
 //         public void Dispose()
 //         {
-//             
+//             archetypes.Dispose();
+//             UnsafeUtil.Free(new IntPtr(componentTypes));
 //         }
 //     }
 //     

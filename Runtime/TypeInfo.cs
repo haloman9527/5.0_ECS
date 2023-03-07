@@ -1,4 +1,5 @@
 #region 注 释
+
 /***
  *
  *  Title:
@@ -12,7 +13,10 @@
  *  Blog: https://www.crosshair.top/
  *
  */
+
 #endregion
+
+using System;
 
 namespace CZToolKit.ECS
 {
@@ -29,6 +33,21 @@ namespace CZToolKit.ECS
             this.typeHash = typeHash;
             this.componentSize = componentSize;
             this.alignInBytes = alignInBytes;
+        }
+
+        public bool IsZeroSize
+        {
+            get { return componentSize != 0; }
+        }
+
+        public bool IsManagedComponentType
+        {
+            get { return (typeIndex & TypeManager.MANAGED_COMPONENT_FLAG) != 0; }
+        }
+
+        public Type TypeIndex
+        {
+            get { return TypeManager.GetType(typeIndex); }
         }
     }
 }

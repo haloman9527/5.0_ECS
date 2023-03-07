@@ -70,7 +70,7 @@ namespace CZToolKit.ECS
             return false;
         }
 
-        public void Set<T>(Entity entity, T component) where T : unmanaged, IComponent
+        public void Set<T>(Entity entity, T component) where T : struct, IComponent
         {
             var p = UnsafeUtility.Malloc(componentSize, 4, Allocator.Persistent);
             UnsafeUtility.CopyStructureToPtr(ref component, p);

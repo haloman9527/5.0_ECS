@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 
 namespace CZToolKit.ECS
 {
@@ -48,9 +49,13 @@ namespace CZToolKit.ECS
         public ComponentsContainer NewComponentContainer<T>(int capacity) where T : unmanaged, IComponent
         {
             TypeInfo typeInfo = TypeManager.GetTypeInfo<T>();
-            var componentContainer = new ComponentsContainer(typeInfo.typeIndex, typeInfo.componentSize, capacity);
-            componentContainers[typeInfo.typeIndex] = componentContainer;
-            return componentContainer;
+            if (!componentContainers.TryGetValue(typeInfo.typeIndex, out var container))
+            {
+                container = new ComponentsContainer(typeInfo.typeIndex, typeInfo.componentSize, capacity);
+                componentContainers[typeInfo.typeIndex] = container;
+            }
+
+            return container;
         }
 
         public ComponentsContainer NewComponentContainer<T>() where T : unmanaged, IComponent
@@ -60,7 +65,7 @@ namespace CZToolKit.ECS
 
         public ComponentsContainer NewComponentContainer(Type componentType, int defaultSize)
         {
-            var typeIndex = TypeManager.FindTypeIndex(componentType);
+            var typeIndex = TypeManager.GetTypeIndex(componentType);
             if (typeIndex == -1)
                 throw new Exception($"The type [{componentType.Name}] is unsupported Type!");
             
@@ -83,7 +88,7 @@ namespace CZToolKit.ECS
 
         public bool ExistsComponentContainer(Type componentType)
         {
-            return componentContainers.ContainsKey(TypeManager.FindTypeIndex(componentType));
+            return componentContainers.ContainsKey(TypeManager.GetTypeIndex(componentType));
         }
 
         public ComponentsContainer GetComponentContainer<T>()
@@ -93,7 +98,7 @@ namespace CZToolKit.ECS
 
         public ComponentsContainer GetComponentContainer(Type componentType)
         {
-            return componentContainers[TypeManager.FindTypeIndex(componentType)];
+            return componentContainers[TypeManager.GetTypeIndex(componentType)];
         }
 
         #region Has
@@ -107,7 +112,7 @@ namespace CZToolKit.ECS
 
         public bool HasComponent(Entity entity, Type componentType)
         {
-            if (!componentContainers.TryGetValue(TypeManager.FindTypeIndex(componentType), out var components))
+            if (!componentContainers.TryGetValue(TypeManager.GetTypeIndex(componentType), out var components))
                 return false;
             return components.Contains(entity);
         }
@@ -141,7 +146,7 @@ namespace CZToolKit.ECS
 
         public IComponent GetComponent(Entity entity, Type componentType)
         {
-            var typeIndex = TypeManager.FindTypeIndex(componentType);
+            var typeIndex = TypeManager.GetTypeIndex(componentType);
             if (typeIndex == -1)
                 throw new Exception($"The type [{componentType.Name}] is unsupported Type!");
             
@@ -173,7 +178,7 @@ namespace CZToolKit.ECS
 
         public bool TryGetComponent(Entity entity, Type componentType, out IComponent component)
         {
-            var typeIndex = TypeManager.FindTypeIndex(componentType);
+            var typeIndex = TypeManager.GetTypeIndex(componentType);
             if (typeIndex == -1)
                 throw new Exception($"The type [{componentType.Name}] is unsupported Type!");
             
@@ -205,7 +210,7 @@ namespace CZToolKit.ECS
         public void SetComponent(Entity entity, IComponent component)
         {
             var componentType = component.GetType();
-            var typeIndex = TypeManager.FindTypeIndex(componentType);
+            var typeIndex = TypeManager.GetTypeIndex(componentType);
             if (typeIndex == -1)
                 throw new Exception($"The type [{componentType.Name}] is unsupported Type!");
             
@@ -226,7 +231,7 @@ namespace CZToolKit.ECS
 
         public void RemoveComponent(Entity entity, Type componentType)
         {
-            if (!componentContainers.TryGetValue(TypeManager.FindTypeIndex(componentType), out var components))
+            if (!componentContainers.TryGetValue(TypeManager.GetTypeIndex(componentType), out var components))
                 return;
             components.Del(entity);
         }

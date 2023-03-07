@@ -1,20 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 
 namespace CZToolKit.ECS
 {
-    public class TypeManager
+    public static class TypeManager
     {
         #region Const
         
         private const int MAXIMUN_TYPE_COUNT = 1024 * 10;
         private const int MAXIMUN_SUPPORTED_ALIGNMENT = 16;
 
-        public const int ZERO_SIZE_FLAG = 1 << 30;
-        public const int MANAGED_COMPONENT_TYPE_FLAG = 1 << 29;
+        public const int ZERO_SIZE_FLAG = 1 << 31;
+        public const int MANAGED_COMPONENT_FLAG = 1 << 30;
         #endregion
 
         private static bool s_Initialized;
@@ -23,7 +22,7 @@ namespace CZToolKit.ECS
         private static NativeHashMap<int, int> s_TypeHashToTypeIndex;
         private static int s_TypeCount;
 
-        private static Dictionary<int, Type> s_IndexToManagedType;
+        private static List<Type> s_Types;
 
         static TypeManager()
         {
@@ -38,7 +37,7 @@ namespace CZToolKit.ECS
             s_TypeInfos = new NativeArray<TypeInfo>(MAXIMUN_TYPE_COUNT, Allocator.Persistent);
             s_TypeHashToTypeIndex = new NativeHashMap<int, int>(MAXIMUN_TYPE_COUNT, Allocator.Persistent);
             
-            s_IndexToManagedType = new Dictionary<int, Type>(1000);
+            s_Types = new List<Type>(1000);
 
             InitializeAllComponentTypes();
             
@@ -60,7 +59,7 @@ namespace CZToolKit.ECS
                     
                     if (!type.IsValueType && !typeof(IComponent).IsAssignableFrom(type))
                         continue;
-
+                    
                     if (type.ContainsGenericParameters)
                         continue;
 
@@ -76,6 +75,7 @@ namespace CZToolKit.ECS
 
         private static void AddAllComponentTypes(Type[] componentTypes)
         {
+            var managedComponentType = typeof(IManagedComponent);
             foreach (var type in componentTypes)
             {
                 var typeIndex = s_TypeCount;
@@ -85,16 +85,19 @@ namespace CZToolKit.ECS
 
                 if (componentSize == 0)
                     typeIndex &= ZERO_SIZE_FLAG;
+
+                if (managedComponentType.IsAssignableFrom(type))
+                    typeIndex &= MANAGED_COMPONENT_FLAG;
                 
                 TypeInfo typeInfo = new TypeInfo(typeIndex, typeHash, componentSize, alighInBytes);
                 s_TypeInfos[typeIndex] = typeInfo;
                 s_TypeHashToTypeIndex[type.GetHashCode()] = typeIndex;
-                s_IndexToManagedType[typeIndex] = type;
+                s_Types.Add(type);
                 s_TypeCount++;
             }
         }
 
-        internal static int CalculateAlignmentInChunk(int sizeOfTypeInBytes)
+        private static int CalculateAlignmentInChunk(int sizeOfTypeInBytes)
         {
             int alignmentInBytes = MAXIMUN_SUPPORTED_ALIGNMENT;
             if (sizeOfTypeInBytes < alignmentInBytes && CollectionHelper.IsPowerOfTwo(sizeOfTypeInBytes))
@@ -108,18 +111,16 @@ namespace CZToolKit.ECS
             return s_TypeCount;
         }
 
-        public static int FindTypeIndex(Type type)
+        public static int GetTypeIndex(Type type)
         {
             if (s_TypeHashToTypeIndex.TryGetValue(type.GetHashCode(), out var index))
                 return index;
             return -1;
         }
 
-        public static Type FindType(int typeIndex)
+        public static Type GetType(int typeIndex)
         {
-            if (s_IndexToManagedType.TryGetValue(typeIndex, out var type))
-                return type;
-            return null;
+            return s_Types[typeIndex];
         }
 
         public static TypeInfo GetTypeInfo(int typeIndex)
@@ -134,7 +135,7 @@ namespace CZToolKit.ECS
         
         public static TypeInfo GetTypeInfo(Type componentType)
         {
-            var typeIndex = FindTypeIndex(componentType);
+            var typeIndex = GetTypeIndex(componentType);
             return s_TypeInfos[typeIndex];
         }
     }

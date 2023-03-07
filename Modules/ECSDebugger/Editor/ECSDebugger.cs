@@ -207,7 +207,7 @@ namespace CZToolKit.ECS.Editors
                             var selectedEntity = entityItem.data;
                             foreach (var componentContainer in selectWorld.ComponentContainers.GetValueArray(Allocator.Temp))
                             {
-                                var componentType = TypeManager.FindType(componentContainer.componentTypeIndex);
+                                var componentType = TypeManager.GetType(componentContainer.componentTypeIndex);
                                 if (selectWorld.ComponentContainers.ContainsKey(componentContainer.componentTypeIndex)
                                     && selectWorld.TryGetComponent(selectedEntity, componentType, out var component))
                                 {

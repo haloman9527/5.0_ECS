@@ -24,7 +24,7 @@ namespace CZToolKit.ECS
 
         static SharedTypeIndex()
         {
-            Data = TypeManager.FindTypeIndex(typeof(TComponent));
+            Data = TypeManager.GetTypeIndex(typeof(TComponent));
         }
     }
 }
