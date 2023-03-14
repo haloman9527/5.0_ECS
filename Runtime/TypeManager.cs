@@ -14,6 +14,8 @@ namespace CZToolKit.ECS
 
         public const int ZERO_SIZE_FLAG = 1 << 31;
         public const int MANAGED_COMPONENT_FLAG = 1 << 30;
+        
+        public const int CLEAR_FLAG_MASK = int.MaxValue >> 2;
         #endregion
 
         private static bool s_Initialized;
@@ -90,7 +92,7 @@ namespace CZToolKit.ECS
                     typeIndex &= MANAGED_COMPONENT_FLAG;
                 
                 TypeInfo typeInfo = new TypeInfo(typeIndex, typeHash, componentSize, alighInBytes);
-                s_TypeInfos[typeIndex] = typeInfo;
+                s_TypeInfos[s_TypeCount] = typeInfo;
                 s_TypeHashToTypeIndex[type.GetHashCode()] = typeIndex;
                 s_Types.Add(type);
                 s_TypeCount++;
@@ -118,25 +120,30 @@ namespace CZToolKit.ECS
             return -1;
         }
 
+        public static int GetTypeIndex<T>()
+        {
+            return SharedTypeIndex<T>.Data;
+        }
+
         public static Type GetType(int typeIndex)
         {
-            return s_Types[typeIndex];
+            return s_Types[typeIndex & CLEAR_FLAG_MASK];
         }
 
         public static TypeInfo GetTypeInfo(int typeIndex)
         {
-            return s_TypeInfos[typeIndex];
+            return s_TypeInfos[typeIndex & CLEAR_FLAG_MASK];
         }
         
         public static TypeInfo GetTypeInfo<T>()
         {
-            return s_TypeInfos[SharedTypeIndex<T>.Data];
+            return s_TypeInfos[SharedTypeIndex<T>.Data & CLEAR_FLAG_MASK];
         }
         
         public static TypeInfo GetTypeInfo(Type componentType)
         {
             var typeIndex = GetTypeIndex(componentType);
-            return s_TypeInfos[typeIndex];
+            return s_TypeInfos[typeIndex & CLEAR_FLAG_MASK];
         }
     }
 }

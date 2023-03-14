@@ -38,6 +38,8 @@ namespace CZToolKit.ECS
         
         #endregion
 
+        public UnsafeList<Archetype> archetypes = new UnsafeList<Archetype>();
+
         private NativeHashMap<int, ComponentsContainer> componentContainers =
             new NativeHashMap<int, ComponentsContainer>(128, Allocator.Persistent);
 

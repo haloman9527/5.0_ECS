@@ -16,14 +16,15 @@
 
 #endregion
 
+using CZToolKit.Common.Collection;
+using CZToolKit.Common.IMGUI;
 using System;
-using UnityEditor;
-using CZToolKit.Common.Editors;
-using UnityEditor.IMGUI.Controls;
-using UnityEngine;
-using Unity.Collections;
 using System.Collections.Generic;
 using System.Reflection;
+using UnityEditor.IMGUI.Controls;
+using UnityEngine;
+using UnityEditor;
+using Unity.Collections;
 
 namespace CZToolKit.ECS.Editors
 {

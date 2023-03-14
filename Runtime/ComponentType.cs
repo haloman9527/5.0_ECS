@@ -28,10 +28,37 @@ namespace CZToolKit.ECS
         {
             typeIndex = TypeManager.GetTypeIndex(type);
         }
+
+        public TypeInfo GetTypeInfo()
+        {
+            return TypeManager.GetTypeInfo(typeIndex);
+        }
         
         public Type GetManagedType()
         {
             return TypeManager.GetType(typeIndex);
+        }
+        
+        public static ComponentType ReadWrite<T>()
+        {
+            return FromTypeIndex(TypeManager.GetTypeIndex<T>());
+        }
+
+        public static ComponentType ReadWrite(Type type)
+        {
+            return FromTypeIndex(TypeManager.GetTypeIndex(type));
+        }
+
+        public static ComponentType ReadWrite(int typeIndex)
+        {
+            return FromTypeIndex(typeIndex);
+        }
+
+        public static ComponentType FromTypeIndex(int typeIndex)
+        {
+            ComponentType type;
+            type.typeIndex = typeIndex;
+            return type;
         }
 
         public static implicit operator ComponentType(Type type)
