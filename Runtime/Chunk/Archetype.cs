@@ -16,8 +16,8 @@
 
 #endregion
 
-using System;
 using CZToolKit.Common.UnsafeEx;
+using System;
 using Unity.Collections.LowLevel.Unsafe;
 
 namespace CZToolKit.ECS
@@ -32,10 +32,9 @@ namespace CZToolKit.ECS
 
     public unsafe struct ChunkList
     {
-        public Chunk* chunk;
-
-        public int capacity;
+        public Chunk** chunk;
         public int length;
+        public int capacity;
 
         public UnsafeList ListData()
         {

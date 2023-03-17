@@ -16,6 +16,7 @@ namespace CZToolKit.ECS
         public const int MANAGED_COMPONENT_FLAG = 1 << 30;
         
         public const int CLEAR_FLAG_MASK = int.MaxValue >> 2;
+        
         #endregion
 
         private static bool s_Initialized;
