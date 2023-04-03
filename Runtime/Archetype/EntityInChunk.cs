@@ -20,21 +20,21 @@ using System;
 
 namespace CZToolKit.ECS
 {
-    public unsafe struct EntityInArchetype : IComparable<EntityInArchetype>, IEquatable<EntityInArchetype>
+    public unsafe struct EntityInChunk : IComparable<EntityInChunk>, IEquatable<EntityInChunk>
     {
-        public Archetype* archetype;
-        public int indexInArchetype;
+        public Chunk* chunk;
+        public int indexInChunk;
     
-        public int CompareTo(EntityInArchetype other)
+        public int CompareTo(EntityInChunk other)
         {
-            ulong lhs = (ulong)archetype;
-            ulong rhs = (ulong)other.archetype;
+            ulong lhs = (ulong)chunk;
+            ulong rhs = (ulong)other.chunk;
             int archetypeCompare = lhs < rhs ? -1 : 1;
-            int indexCompare = indexInArchetype - other.indexInArchetype;
+            int indexCompare = indexInChunk - other.indexInChunk;
             return (lhs != rhs) ? archetypeCompare : indexCompare;
         }
     
-        public bool Equals(EntityInArchetype other)
+        public bool Equals(EntityInChunk other)
         {
             return CompareTo(other) == 0;
         }

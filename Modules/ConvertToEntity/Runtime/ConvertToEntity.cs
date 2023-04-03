@@ -1,21 +1,12 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace CZToolKit.ECS
 {
-    public interface IConvertToComponent
-    {
-        void ConvertToComponent(World world, Entity entity);
-    }
-
     [DisallowMultipleComponent]
     public class ConvertToEntity : MonoBehaviour
     {
         [SerializeField] 
         private bool destroyOnAwake;
-        [SerializeReference] 
-        public List<IComponent> components = new List<IComponent>();
-
         public Entity Entity { get; private set; }
 
         private void Awake()
@@ -27,12 +18,7 @@ namespace CZToolKit.ECS
             World.DefaultWorld.SetComponent(Entity, new RotationComponent() { value = transform.rotation });
             World.DefaultWorld.SetComponent(Entity, new ScaleComponent() { value = transform.localScale });
 
-            foreach (var component in components)
-            {
-                World.DefaultWorld.SetComponent(Entity, component);
-            }
-
-            foreach (var convert in GetComponents<IConvertToComponent>())
+            foreach (var convert in GetComponents<ComponentConverter>())
             {
                 convert.ConvertToComponent(World.DefaultWorld, Entity);
             }
