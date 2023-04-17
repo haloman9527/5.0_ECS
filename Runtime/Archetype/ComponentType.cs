@@ -23,6 +23,9 @@ namespace CZToolKit.ECS
     public struct ComponentType : IEquatable<ComponentType>
     {
         public int typeIndex;
+
+        public bool IsZeroSized => (typeIndex & TypeManager.ZERO_SIZE_FLAG) != 0;
+        public bool IsManagedComponent => (typeIndex & TypeManager.MANAGED_COMPONENT_FLAG) != 0;
         
         public ComponentType(Type type)
         {
