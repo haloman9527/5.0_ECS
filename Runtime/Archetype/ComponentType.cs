@@ -31,6 +31,11 @@ namespace CZToolKit.ECS
         {
             typeIndex = TypeManager.GetTypeIndex(type);
         }
+        
+        public ComponentType(ComponentType type)
+        {
+            typeIndex = type.typeIndex;
+        }
 
         public TypeInfo GetTypeInfo()
         {

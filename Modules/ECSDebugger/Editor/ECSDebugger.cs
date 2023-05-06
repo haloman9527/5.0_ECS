@@ -18,6 +18,7 @@
 
 using CZToolKit.Common.Collection;
 using CZToolKit.Common.IMGUI;
+using CZToolKit.Common.IMGUI.Controls;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -28,7 +29,7 @@ using Unity.Collections;
 
 namespace CZToolKit.ECS.Editors
 {
-    public class ESCDebugger : BasicMenuEditorWindow
+    public class ESCDebugger : BaseMenuEditorWindow
     {
         private static string[] Pages = new string[] { "Entities", "Systems" };
 
