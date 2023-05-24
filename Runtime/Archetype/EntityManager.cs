@@ -55,10 +55,8 @@ namespace CZToolKit.ECS
         /// <returns></returns>
         public int FillSortedArchetypeArray(ComponentType* dst, ComponentType* src, int count)
         {
-// #if ENABLE_UNITY_COLLECTIONS_CHECKS
-//             if (count + 1 > 1024)
-//                 throw new ArgumentException($"Archetypes can't hold more than 1024 components");
-// #endif
+            if (count + 1 > 1024)
+                throw new ArgumentException($"Archetypes can't hold more than 1024 components");
 
             dst[0] = new ComponentType(ComponentType.ReadWrite<Entity>());
             for (int i = 0; i < count; i++)
@@ -101,7 +99,6 @@ namespace CZToolKit.ECS
             return dstArchetype;
         }
 
-        // 1231223
         public static void InsertSorted(ComponentType* data, int length, ComponentType newValue)
         {
             var newVal = new ComponentType(newValue);
