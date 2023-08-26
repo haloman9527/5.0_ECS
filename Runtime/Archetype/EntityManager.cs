@@ -1,5 +1,5 @@
 ﻿using System;
-using CZToolKit.Common.UnsafeEx;
+using CZToolKit.UnsafeEx;
 using Unity.Collections.LowLevel.Unsafe;
 
 namespace CZToolKit.ECS

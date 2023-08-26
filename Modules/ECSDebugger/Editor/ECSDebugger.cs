@@ -16,12 +16,11 @@
 
 #endregion
 
-using CZToolKit.Common;
-using CZToolKit.Common.IMGUI;
-using CZToolKit.Common.IMGUI.Controls;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using CZToolKitEditor;
+using CZToolKitEditor.IMGUI.Controls;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 using UnityEditor;
