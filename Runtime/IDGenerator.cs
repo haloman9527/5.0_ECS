@@ -16,13 +16,18 @@
 
 namespace CZToolKit.ECS
 {
-    public class IDGenerator
+    public class IndexGenerator
     {
-        private uint id = 1;
+        private int index;
 
-        public uint GenerateID()
+        public IndexGenerator(int startIndex = 1)
         {
-            return id++;
+            this.index = startIndex;
+        }
+
+        public int Next()
+        {
+            return index++;
         }
     }
 }

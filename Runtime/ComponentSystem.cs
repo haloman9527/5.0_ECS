@@ -19,7 +19,7 @@
 namespace CZToolKit.ECS
 {
 
-    public abstract class ComponentSystem: ISystem
+    public abstract class ComponentSystem : ISystem
     {
         private bool active = true;
 

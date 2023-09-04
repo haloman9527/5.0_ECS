@@ -19,9 +19,9 @@ namespace CZToolKit.ECS
 {
     public struct Entity : IEquatable<Entity>, IComparable<Entity>
     {
-        public readonly uint index;
+        public readonly int index;
 
-        internal Entity(uint index)
+        internal Entity(int index)
         {
             this.index = index;
         }
@@ -53,7 +53,7 @@ namespace CZToolKit.ECS
 
         public override int GetHashCode()
         {
-            return (int)(int.MinValue + index);
+            return int.MinValue + index;
         }
 
         public override string ToString()

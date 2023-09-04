@@ -83,7 +83,7 @@ namespace CZToolKit.ECS
 
         public bool ExistsComponentContainer<T>() where T : unmanaged, IComponent
         {
-            return componentContainers.ContainsKey(SharedTypeIndex<T>.Data);
+            return componentContainers.ContainsKey(TypeInfo<T>.Index);
         }
 
         public bool ExistsComponentContainer(Type componentType)
@@ -93,7 +93,7 @@ namespace CZToolKit.ECS
 
         public ComponentsContainer GetComponentContainer<T>()
         {
-            return componentContainers[SharedTypeIndex<T>.Data];
+            return componentContainers[TypeInfo<T>.Index];
         }
 
         public ComponentsContainer GetComponentContainer(Type componentType)
@@ -128,7 +128,7 @@ namespace CZToolKit.ECS
 
         public ref T RefComponent<T>(Entity entity) where T : unmanaged, IComponent
         {
-            if (!componentContainers.TryGetValue(SharedTypeIndex<T>.Data, out var components))
+            if (!componentContainers.TryGetValue(TypeInfo<T>.Index, out var components))
                 throw new Exception();
             return ref components.Ref<T>(entity);
         }
@@ -139,7 +139,7 @@ namespace CZToolKit.ECS
 
         public T GetComponent<T>(Entity entity) where T : unmanaged, IComponent
         {
-            if (!componentContainers.TryGetValue(SharedTypeIndex<T>.Data, out var components))
+            if (!componentContainers.TryGetValue(TypeInfo<T>.Index, out var components))
                 throw new Exception();
             return components.Get<T>(entity);
         }
@@ -167,7 +167,7 @@ namespace CZToolKit.ECS
 
         public bool TryGetComponent<T>(Entity entity, out T component) where T : unmanaged, IComponent
         {
-            if (!componentContainers.TryGetValue(SharedTypeIndex<T>.Data, out var components))
+            if (!componentContainers.TryGetValue(TypeInfo<T>.Index, out var components))
             {
                 component = default;
                 return false;
@@ -202,7 +202,7 @@ namespace CZToolKit.ECS
 
         public void SetComponent<T>(Entity entity, T component) where T : unmanaged, IComponent
         {
-            if (!componentContainers.TryGetValue(SharedTypeIndex<T>.Data, out var components))
+            if (!componentContainers.TryGetValue(TypeInfo<T>.Index, out var components))
                 components = NewComponentContainer<T>();
             components.Set(entity, component);
         }
@@ -238,7 +238,7 @@ namespace CZToolKit.ECS
 
         public void RemoveComponent<T>(Entity entity)
         {
-            if (!componentContainers.TryGetValue(SharedTypeIndex<T>.Data, out var components))
+            if (!componentContainers.TryGetValue(TypeInfo<T>.Index, out var components))
                 return;
             components.Del(entity);
         }

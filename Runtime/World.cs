@@ -27,6 +27,7 @@ namespace CZToolKit.ECS
     {
         #region Static
 
+        private static IndexGenerator s_WorldIDGenerator = new IndexGenerator();
         private static World s_DefaultWorld;
         private static List<World> s_AllWorlds = new List<World>();
 
@@ -67,12 +68,14 @@ namespace CZToolKit.ECS
 
         #endregion
 
+        public readonly int id;
         public readonly string name;
         public readonly Entity singleton;
 
         private World(string name)
         {
             this.name = name;
+            this.id = s_WorldIDGenerator.Next();
             this.singleton = NewEntity();
             if (s_DefaultWorld == null)
                 s_DefaultWorld = this;

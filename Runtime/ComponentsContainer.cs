@@ -31,7 +31,6 @@ namespace CZToolKit.ECS
             this.componentTypeIndex = componentTypeID;
             this.componentSize = componentSize;
             var components = new UnsafeHashMap<Entity, IntPtr>(capacity, Allocator.Persistent);
-
             var componentsSize = UnsafeUtility.SizeOf<UnsafeHashMap<Entity, IntPtr>>();
             var componentsAlign = UnsafeUtility.AlignOf<UnsafeHashMap<Entity, IntPtr>>();
             var ptr = UnsafeUtility.Malloc(componentsSize, componentsAlign, Allocator.Persistent);
@@ -49,6 +48,7 @@ namespace CZToolKit.ECS
         public ref T Ref<T>(Entity entity) where T : unmanaged, IComponent
         {
             ref var components = ref Unsafe.AsRef<UnsafeHashMap<Entity, IntPtr>>((void*)componentsPtr);
+            
             return ref Unsafe.AsRef(*((T*)components[entity]));
         }
 

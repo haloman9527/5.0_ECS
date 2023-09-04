@@ -20,17 +20,17 @@ namespace CZToolKit.ECS
 {
     public partial class World : IDisposable
     {
-        private IDGenerator entityIDGenerator = new IDGenerator();
-        private NativeHashMap<uint, Entity> entities = new NativeHashMap<uint, Entity>(64, Allocator.Persistent);
+        private IndexGenerator entityIndexGenerator = new IndexGenerator();
+        private NativeHashMap<int, Entity> entities = new NativeHashMap<int, Entity>(64, Allocator.Persistent);
 
-        public NativeHashMap<uint, Entity> Entities
+        public NativeHashMap<int, Entity> Entities
         {
             get { return entities; }
         }
 
         public Entity NewEntity()
         {
-            var index = entityIDGenerator.GenerateID();
+            var index = entityIndexGenerator.Next();
             var entity = new Entity(index);
             entities.Add(index, entity);
             return entity;
@@ -38,9 +38,9 @@ namespace CZToolKit.ECS
 
         public void NewEntity(out Entity entity)
         {
-            var id = entityIDGenerator.GenerateID();
-            entity = new Entity(id);
-            entities.Add(id, entity);
+            var index = entityIndexGenerator.Next();
+            entity = new Entity(index);
+            entities.Add(entity.index, entity);
         }
 
         public bool Exists(Entity entity)

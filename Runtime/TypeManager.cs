@@ -87,10 +87,10 @@ namespace CZToolKit.ECS
                 var alighInBytes = CalculateAlignmentInChunk(componentSize);
 
                 if (componentSize == 0)
-                    typeIndex &= ZERO_SIZE_FLAG;
+                    typeIndex |= ZERO_SIZE_FLAG;
 
                 if (managedComponentType.IsAssignableFrom(type))
-                    typeIndex &= MANAGED_COMPONENT_FLAG;
+                    typeIndex |= MANAGED_COMPONENT_FLAG;
                 
                 TypeInfo typeInfo = new TypeInfo(typeIndex, typeHash, componentSize, alighInBytes);
                 s_TypeInfos[s_TypeCount] = typeInfo;
@@ -123,7 +123,7 @@ namespace CZToolKit.ECS
 
         public static int GetTypeIndex<T>()
         {
-            return SharedTypeIndex<T>.Data;
+            return TypeInfo<T>.Index;
         }
 
         public static Type GetType(int typeIndex)
@@ -138,7 +138,7 @@ namespace CZToolKit.ECS
         
         public static TypeInfo GetTypeInfo<T>()
         {
-            return s_TypeInfos[SharedTypeIndex<T>.Data & CLEAR_FLAG_MASK];
+            return s_TypeInfos[TypeInfo<T>.Index & CLEAR_FLAG_MASK];
         }
         
         public static TypeInfo GetTypeInfo(Type componentType)

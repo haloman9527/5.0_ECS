@@ -37,7 +37,7 @@ namespace CZToolKit.ECS
 
         public bool IsZeroSize
         {
-            get { return componentSize != 0; }
+            get { return (typeIndex & TypeManager.ZERO_SIZE_FLAG) != 0; }
         }
 
         public bool IsManagedComponentType
@@ -48,6 +48,24 @@ namespace CZToolKit.ECS
         public Type TypeIndex
         {
             get { return TypeManager.GetType(typeIndex); }
+        }
+    }
+
+    public class TypeInfo<TComponent>
+    {
+        public readonly static int Index;
+        public readonly static int Size;
+        public readonly static int HashCode;
+        public readonly static bool IsManagedType;
+
+        static TypeInfo()
+        {
+            var typeInfo = TypeManager.GetTypeInfo<TComponent>();
+            
+            Index = typeInfo.typeIndex;
+            Size = typeInfo.componentSize;
+            HashCode = typeInfo.typeHash;
+            IsManagedType = typeInfo.IsManagedComponentType;
         }
     }
 }

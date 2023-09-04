@@ -32,8 +32,7 @@ namespace CZToolKit.ECS
         public Archetype* GetOrCreateArchetype(ComponentType* types, int count)
         {
             // 排序types, 保证相同的Archetype的ComponentType顺序一致
-            ComponentType* sortedTypes = stackalloc ComponentType[count + 1];
-
+            var sortedTypes = stackalloc ComponentType[count + 1];
             var sortedCount = FillSortedArchetypeArray(sortedTypes, types, count);
 
             // 查找是否已经存在相同的Archetype
