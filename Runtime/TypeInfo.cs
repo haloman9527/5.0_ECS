@@ -22,10 +22,10 @@ namespace CZToolKit.ECS
 {
     public struct TypeInfo
     {
-        public int typeIndex;
-        public int typeHash;
-        public int componentSize;
-        public int alignInBytes;
+        public readonly int typeIndex;
+        public readonly int typeHash;
+        public readonly int componentSize;
+        public readonly int alignInBytes;
 
         public TypeInfo(int typeIndex, int typeHash, int componentSize, int alignInBytes)
         {
@@ -45,7 +45,7 @@ namespace CZToolKit.ECS
             get { return (typeIndex & TypeManager.MANAGED_COMPONENT_FLAG) != 0; }
         }
 
-        public Type TypeIndex
+        public Type Type
         {
             get { return TypeManager.GetType(typeIndex); }
         }

@@ -22,20 +22,17 @@ namespace CZToolKit.ECS
 {
     public unsafe struct ComponentsContainer : IDisposable
     {
-        public int componentTypeIndex;
-        public int componentSize;
+        public TypeInfo componentTypeInfo;
         public IntPtr componentsPtr;
 
-        public ComponentsContainer(int componentTypeID, int componentSize, int capacity)
+        public ComponentsContainer(int componentTypeIndex, int componentSize, int capacity)
         {
-            this.componentTypeIndex = componentTypeID;
-            this.componentSize = componentSize;
+            componentTypeInfo = TypeManager.GetTypeInfo(componentTypeIndex);
             var components = new UnsafeHashMap<Entity, IntPtr>(capacity, Allocator.Persistent);
             var componentsSize = UnsafeUtility.SizeOf<UnsafeHashMap<Entity, IntPtr>>();
             var componentsAlign = UnsafeUtility.AlignOf<UnsafeHashMap<Entity, IntPtr>>();
             var ptr = UnsafeUtility.Malloc(componentsSize, componentsAlign, Allocator.Persistent);
             UnsafeUtility.CopyStructureToPtr(ref components, ptr);
-
             componentsPtr = new IntPtr(ptr);
         }
 
@@ -72,7 +69,7 @@ namespace CZToolKit.ECS
 
         public void Set<T>(Entity entity, T component) where T : struct, IComponent
         {
-            var p = UnsafeUtility.Malloc(componentSize, 4, Allocator.Persistent);
+            var p = UnsafeUtility.Malloc(componentTypeInfo.componentSize, 4, Allocator.Persistent);
             UnsafeUtility.CopyStructureToPtr(ref component, p);
             ref var components = ref Unsafe.AsRef<UnsafeHashMap<Entity, IntPtr>>((void*)componentsPtr);
             components[entity] = new IntPtr(p);
@@ -86,7 +83,13 @@ namespace CZToolKit.ECS
         public void Del(Entity entity)
         {
             ref var components = ref Unsafe.AsRef<UnsafeHashMap<Entity, IntPtr>>((void*)componentsPtr);
-            UnsafeUtility.Free((void*)components[entity], Allocator.Persistent);
+            var ptr = (void*)components[entity];
+            var typeInfo = TypeManager.GetTypeInfo(componentTypeInfo.typeIndex);
+            if (typeInfo.IsManagedComponentType)
+            {
+                
+            }
+            UnsafeUtility.Free(ptr, Allocator.Persistent);
             components.Remove(entity);
         }
 

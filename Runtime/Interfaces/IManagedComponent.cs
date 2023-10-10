@@ -14,10 +14,12 @@
  */
 #endregion
 
+using System;
+
 namespace CZToolKit.ECS
 {
     public interface IManagedComponent : IComponent
     {
-        int ID { get; set; }
+        void Release();
     }
 }

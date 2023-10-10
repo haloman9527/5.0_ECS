@@ -85,5 +85,10 @@ namespace CZToolKit.ECS.Examples
         public int ID { get; set; }
 
         public object Data { get; set; }
+
+        public void Release()
+        {
+            
+        }
     }
 }

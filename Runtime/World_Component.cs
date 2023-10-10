@@ -20,7 +20,6 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
 
 namespace CZToolKit.ECS
 {
@@ -231,7 +230,8 @@ namespace CZToolKit.ECS
 
         public void RemoveComponent(Entity entity, Type componentType)
         {
-            if (!componentContainers.TryGetValue(TypeManager.GetTypeIndex(componentType), out var components))
+            var typeInfo = TypeManager.GetTypeInfo(componentType);
+            if (!componentContainers.TryGetValue(typeInfo.typeIndex, out var components))
                 return;
             components.Del(entity);
         }

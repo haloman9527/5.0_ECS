@@ -208,8 +208,8 @@ namespace CZToolKit.ECS.Editors
                             var selectedEntity = entityItem.data;
                             foreach (var componentContainer in selectWorld.ComponentContainers.GetValueArray(Allocator.Temp))
                             {
-                                var componentType = TypeManager.GetType(componentContainer.componentTypeIndex);
-                                if (selectWorld.ComponentContainers.ContainsKey(componentContainer.componentTypeIndex)
+                                var componentType = TypeManager.GetType(componentContainer.componentTypeInfo.typeIndex);
+                                if (selectWorld.ComponentContainers.ContainsKey(componentContainer.componentTypeInfo.typeIndex)
                                     && selectWorld.TryGetComponent(selectedEntity, componentType, out var component))
                                 {
                                     EditorGUILayout.BeginVertical("FrameBox");
