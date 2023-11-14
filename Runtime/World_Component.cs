@@ -47,10 +47,10 @@ namespace CZToolKit.ECS
 
         public ComponentsContainer NewComponentContainer<T>(int capacity) where T : unmanaged, IComponent
         {
-            TypeInfo typeInfo = TypeManager.GetTypeInfo<T>();
+            var typeInfo = TypeManager.GetTypeInfo<T>();
             if (!componentContainers.TryGetValue(typeInfo.typeIndex, out var container))
             {
-                container = new ComponentsContainer(typeInfo.typeIndex, typeInfo.componentSize, capacity);
+                container = new ComponentsContainer(typeInfo, capacity);
                 componentContainers[typeInfo.typeIndex] = container;
             }
 

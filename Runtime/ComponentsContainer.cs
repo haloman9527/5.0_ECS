@@ -25,9 +25,9 @@ namespace CZToolKit.ECS
         public TypeInfo componentTypeInfo;
         public IntPtr componentsPtr;
 
-        public ComponentsContainer(int componentTypeIndex, int componentSize, int capacity)
+        public ComponentsContainer(TypeInfo componentTypeInfo, int capacity)
         {
-            componentTypeInfo = TypeManager.GetTypeInfo(componentTypeIndex);
+            this.componentTypeInfo = componentTypeInfo;
             var components = new UnsafeHashMap<Entity, IntPtr>(capacity, Allocator.Persistent);
             var componentsSize = UnsafeUtility.SizeOf<UnsafeHashMap<Entity, IntPtr>>();
             var componentsAlign = UnsafeUtility.AlignOf<UnsafeHashMap<Entity, IntPtr>>();
@@ -45,7 +45,6 @@ namespace CZToolKit.ECS
         public ref T Ref<T>(Entity entity) where T : unmanaged, IComponent
         {
             ref var components = ref Unsafe.AsRef<UnsafeHashMap<Entity, IntPtr>>((void*)componentsPtr);
-            
             return ref Unsafe.AsRef(*((T*)components[entity]));
         }
 

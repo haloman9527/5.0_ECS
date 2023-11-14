@@ -70,83 +70,13 @@ namespace CZToolKit.ECS
             return system;
         }
 
-        // public void AddSystem(ComponentSystem system)
-        // {
-        //     var systemType = system.GetType();
-        //     if (systemsMap.ContainsKey(systemType))
-        //         throw new Exception("已存在相同类型的System");
-        //
-        //     system.World = this;
-        //     system.Filter = new Filter(this);
-        //     system.OnCreate();
-        //     system.Enable = true;
-        //     systems.Add(system);
-        //     systemsMap[systemType] = systems.Count - 1;
-        // }
-
-        // public void InsertSystem(int index, ComponentSystem system)
-        // {
-        //     var systemType = system.GetType();
-        //     if (systemsMap.ContainsKey(systemType))
-        //         throw new Exception("已存在相同类型的System");
-        //
-        //     system.World = this;
-        //     system.Filter = new Filter(this);
-        //     system.OnCreate();
-        //     system.Enable = true;
-        //     systems.Insert(index, system);
-        //     for (int i = 0; i < systems.Count; i++)
-        //     {
-        //         systemsMap[system.GetType()] = i;
-        //     }
-        // }
-
-        public int GetSystemOrder(Type systemType)
+        public int GetSystemIndex(Type systemType)
         {
             if (systemsMap.TryGetValue(systemType, out var order))
                 return order;
             return -1;
         }
-
-        public void FixedUpdate()
-        {
-            using (var enumerator = systems.GetEnumerator())
-            {
-                while (enumerator.MoveNext())
-                {
-                    var system = enumerator.Current;
-                    if (system is IFixedUpdate)
-                        system.OnUpdate();
-                }
-            }
-        }
-
-        public void Update()
-        {
-            using (var enumerator = systems.GetEnumerator())
-            {
-                while (enumerator.MoveNext())
-                {
-                    var system = enumerator.Current;
-                    if (system is IUpdate)
-                        system.OnUpdate();
-                }
-            }
-        }
-
-        public void LateUpdate()
-        {
-            using (var enumerator = systems.GetEnumerator())
-            {
-                while (enumerator.MoveNext())
-                {
-                    var system = enumerator.Current;
-                    if (system is ILateUpdate)
-                        system.OnUpdate();
-                }
-            }
-        }
-
+        
         public void DestroySystems()
         {
             foreach (var system in systems)
