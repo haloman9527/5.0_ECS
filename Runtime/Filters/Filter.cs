@@ -21,6 +21,11 @@ namespace CZToolKit.ECS
     {
         private readonly World world;
 
+        public Filter()
+        {
+            
+        }
+
         public Filter(World world)
         {
             this.world = world;

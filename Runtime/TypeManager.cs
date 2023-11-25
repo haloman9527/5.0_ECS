@@ -39,12 +39,12 @@ namespace CZToolKit.ECS
 
         static TypeManager()
         {
-            Initialize();
+            Init(true);
         }
         
-        private static void Initialize()
+        public static void Init(bool force)
         {
-            if (s_Initialized)
+            if (!force && s_Initialized)
                 return;
 
             s_TypeInfos = new NativeArray<TypeInfo>(MAXIMUN_TYPE_COUNT, Allocator.Persistent);

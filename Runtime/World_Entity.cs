@@ -14,6 +14,7 @@
  */
 #endregion
 using System;
+using System.Collections.Generic;
 using Unity.Collections;
 
 namespace CZToolKit.ECS
@@ -21,7 +22,7 @@ namespace CZToolKit.ECS
     public partial class World : IDisposable
     {
         private IndexGenerator entityIndexGenerator = new IndexGenerator();
-        private NativeHashMap<int, Entity> entities = new NativeHashMap<int, Entity>(64, Allocator.Persistent);
+        private NativeHashMap<int, Entity> entities = new NativeHashMap<int, Entity>(256, Allocator.Persistent);
 
         public NativeHashMap<int, Entity> Entities
         {
