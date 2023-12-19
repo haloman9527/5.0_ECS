@@ -9,7 +9,7 @@
  *  Date:
  *  Version:
  *  Writer: 半只龙虾人
- *  Github: https://github.com/HalfLobsterMan
+ *  Github: https://github.com/haloman9527
  *  Blog: https://www.mindgear.net/
  *
  */
@@ -37,10 +37,10 @@ namespace CZToolKit.ECS
         
         #endregion
 
-        private NativeHashMap<int, ComponentsContainer> componentContainers =
-            new NativeHashMap<int, ComponentsContainer>(128, Allocator.Persistent);
+        private NativeParallelHashMap<int, ComponentsContainer> componentContainers =
+            new NativeParallelHashMap<int, ComponentsContainer>(128, Allocator.Persistent);
 
-        public NativeHashMap<int, ComponentsContainer> ComponentContainers
+        public NativeParallelHashMap<int, ComponentsContainer> ComponentContainers
         {
             get { return componentContainers; }
         }

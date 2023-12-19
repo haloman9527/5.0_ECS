@@ -8,7 +8,7 @@
  *  Date:
  *  Version:
  *  Writer: 半只龙虾人
- *  Github: https://github.com/HalfLobsterMan
+ *  Github: https://github.com/haloman9527
  *  Blog: https://www.mindgear.net/
  *
  */
@@ -22,9 +22,9 @@ namespace CZToolKit.ECS
     public partial class World : IDisposable
     {
         private IndexGenerator entityIndexGenerator = new IndexGenerator();
-        private NativeHashMap<int, Entity> entities = new NativeHashMap<int, Entity>(256, Allocator.Persistent);
+        private NativeParallelHashMap<int, Entity> entities = new NativeParallelHashMap<int, Entity>(256, Allocator.Persistent);
 
-        public NativeHashMap<int, Entity> Entities
+        public NativeParallelHashMap<int, Entity> Entities
         {
             get { return entities; }
         }

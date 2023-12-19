@@ -33,7 +33,7 @@ namespace CZToolKit.ECS
 
         private static bool s_Initialized;
         private static NativeArray<TypeInfo> s_TypeInfos;
-        private static NativeHashMap<int, int> s_TypeHashToTypeIndex;
+        private static NativeParallelHashMap<int, int> s_TypeHashToTypeIndex;
         private static int s_TypeCount;
         private static List<Type> s_Types;
 
@@ -48,7 +48,7 @@ namespace CZToolKit.ECS
                 return;
 
             s_TypeInfos = new NativeArray<TypeInfo>(MAXIMUN_TYPE_COUNT, Allocator.Persistent);
-            s_TypeHashToTypeIndex = new NativeHashMap<int, int>(MAXIMUN_TYPE_COUNT, Allocator.Persistent);
+            s_TypeHashToTypeIndex = new NativeParallelHashMap<int, int>(MAXIMUN_TYPE_COUNT, Allocator.Persistent);
             s_Types = new List<Type>(1024);
 
             InitializeAllComponentTypes();
