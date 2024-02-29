@@ -129,11 +129,12 @@ namespace CZToolKit.ECS.Editors
             Repaint();
         }
 
-        protected void OnTreeViewItemRowGUI(CZTreeViewItem item, Rect rowRect)
+        protected void OnTreeViewItemRowGUI(CZTreeView.RowGUIArgsBridge args)
         {
+            var item = args.item as CZTreeViewItem;
             if (item is EntityTreeViewItem<ISystem> systemItem)
             {
-                var activeToggleRect = rowRect;
+                var activeToggleRect = args.rowRect;
                 activeToggleRect.xMin = activeToggleRect.xMax - activeToggleRect.height;
                 var selectedSystem = systemItem.data;
                 var newActive = EditorGUI.Toggle(activeToggleRect, selectedSystem.Active);
