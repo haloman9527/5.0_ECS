@@ -28,6 +28,6 @@ namespace CZToolKit.ECS
 
         void OnUpdate();
 
-        void OnDestroy();
+        void OnDestroy(); 
     }
 }

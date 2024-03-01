@@ -22,32 +22,28 @@ namespace CZToolKit.ECS
 {
     public struct TypeInfo
     {
-        public readonly int typeIndex;
-        public readonly int typeHash;
+        public readonly int index;
+        public readonly int id;
+        public readonly int hash;
         public readonly int componentSize;
         public readonly int alignInBytes;
+        public readonly bool isZeroSize;
+        public readonly bool isManagedComponentType;
 
-        public TypeInfo(int typeIndex, int typeHash, int componentSize, int alignInBytes)
+        public TypeInfo(int typeIndex, int typeId, int typeHash, int componentSize, int alignInBytes, bool isZeroSize, bool isManagedComponentType)
         {
-            this.typeIndex = typeIndex;
-            this.typeHash = typeHash;
+            this.index = typeIndex;
+            this.id = typeId;
+            this.hash = typeHash;
             this.componentSize = componentSize;
             this.alignInBytes = alignInBytes;
-        }
-
-        public bool IsZeroSize
-        {
-            get { return (typeIndex & TypeManager.ZERO_SIZE_FLAG) != 0; }
-        }
-
-        public bool IsManagedComponentType
-        {
-            get { return (typeIndex & TypeManager.MANAGED_COMPONENT_FLAG) != 0; }
+            this.isZeroSize = isZeroSize;
+            this.isManagedComponentType = isManagedComponentType;
         }
 
         public Type Type
         {
-            get { return TypeManager.GetType(typeIndex); }
+            get { return TypeManager.GetType(id); }
         }
     }
 
@@ -61,11 +57,11 @@ namespace CZToolKit.ECS
         static TypeInfo()
         {
             var typeInfo = TypeManager.GetTypeInfo<TComponent>();
-            
-            Index = typeInfo.typeIndex;
+
+            Index = typeInfo.index;
             Size = typeInfo.componentSize;
-            HashCode = typeInfo.typeHash;
-            IsManagedType = typeInfo.IsManagedComponentType;
+            HashCode = typeInfo.hash;
+            IsManagedType = typeInfo.isManagedComponentType;
         }
     }
 }

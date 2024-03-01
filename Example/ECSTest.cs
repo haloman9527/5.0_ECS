@@ -79,16 +79,4 @@ namespace CZToolKit.ECS.Examples
             UnityEngine.Debug.Log(sw2.ElapsedMilliseconds);
         }
     }
-
-    public struct S : IManagedComponent
-    {
-        public int ID { get; set; }
-
-        public object Data { get; set; }
-
-        public void Release()
-        {
-            
-        }
-    }
 }

@@ -48,10 +48,10 @@ namespace CZToolKit.ECS
         public ComponentsContainer NewComponentContainer<T>(int capacity) where T : unmanaged, IComponent
         {
             var typeInfo = TypeManager.GetTypeInfo<T>();
-            if (!componentContainers.TryGetValue(typeInfo.typeIndex, out var container))
+            if (!componentContainers.TryGetValue(typeInfo.id, out var container))
             {
                 container = new ComponentsContainer(typeInfo, capacity);
-                componentContainers[typeInfo.typeIndex] = container;
+                componentContainers[typeInfo.id] = container;
             }
 
             return container;
@@ -70,7 +70,7 @@ namespace CZToolKit.ECS
             
             var typeInfo = TypeManager.GetTypeInfo(typeIndex);
             var componentContainer = (ComponentsContainer)Activator.CreateInstance(typeof(ComponentsContainer),
-                new object[] { typeInfo.typeIndex, typeInfo.componentSize, defaultSize });
+                new object[] { typeInfo.id, typeInfo.componentSize, defaultSize });
             componentContainers[typeIndex] = componentContainer;
             return componentContainer;
         }
@@ -201,7 +201,13 @@ namespace CZToolKit.ECS
 
         public void SetComponent<T>(Entity entity, T component) where T : unmanaged, IComponent
         {
-            if (!componentContainers.TryGetValue(TypeInfo<T>.Index, out var components))
+            var typeInfo = TypeManager.GetTypeInfo<T>();
+            if (typeInfo.isManagedComponentType)
+            {
+                ((IManagedComponent)component).Alloc(this);
+            }
+            
+            if (!componentContainers.TryGetValue(typeInfo.index, out var components))
                 components = NewComponentContainer<T>();
             components.Set(entity, component);
         }
@@ -231,7 +237,7 @@ namespace CZToolKit.ECS
         public void RemoveComponent(Entity entity, Type componentType)
         {
             var typeInfo = TypeManager.GetTypeInfo(componentType);
-            if (!componentContainers.TryGetValue(typeInfo.typeIndex, out var components))
+            if (!componentContainers.TryGetValue(typeInfo.id, out var components))
                 return;
             components.Del(entity);
         }

@@ -1,4 +1,5 @@
 #region 注 释
+
 /***
  *
  *  Title:
@@ -12,7 +13,9 @@
  *  Blog: https://www.haloman.net/
  *
  */
+
 #endregion
+
 using System;
 using CZToolKit.UnsafeEx;
 using Unity.Collections;
@@ -62,6 +65,7 @@ namespace CZToolKit.ECS
                 value = *((T*)ptr);
                 return true;
             }
+
             value = default;
             return false;
         }
@@ -83,11 +87,12 @@ namespace CZToolKit.ECS
         {
             ref var components = ref UnsafeUtil.AsRef<UnsafeParallelHashMap<Entity, IntPtr>>((void*)componentsPtr);
             var ptr = (void*)components[entity];
-            var typeInfo = TypeManager.GetTypeInfo(componentTypeInfo.typeIndex);
-            if (typeInfo.IsManagedComponentType)
+            var typeInfo = TypeManager.GetTypeInfo(componentTypeInfo.id);
+            if (typeInfo.isManagedComponentType)
             {
-                
+                // UnsafeUtil.Read<IManagedComponent>(ptr);
             }
+
             UnsafeUtility.Free(ptr, Allocator.Persistent);
             components.Remove(entity);
         }
@@ -112,6 +117,7 @@ namespace CZToolKit.ECS
             {
                 UnsafeUtility.Free((void*)ptr, Allocator.Persistent);
             }
+
             components.Clear();
         }
 
@@ -123,6 +129,7 @@ namespace CZToolKit.ECS
             {
                 UnsafeUtility.Free((void*)ptr, Allocator.Persistent);
             }
+
             components.Dispose();
         }
     }
