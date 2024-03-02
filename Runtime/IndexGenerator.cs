@@ -18,16 +18,16 @@ namespace CZToolKit.ECS
 {
     public class IndexGenerator
     {
-        private int index;
-
-        public IndexGenerator(int startIndex = 1)
-        {
-            this.index = startIndex;
-        }
+        private int index = 1;
 
         public int Next()
         {
             return index++;
+        }
+        
+        public void Reset()
+        {
+            index = 1;
         }
     }
 }

@@ -18,57 +18,16 @@
 
 namespace CZToolKit.ECS
 {
-
     public abstract class ComponentSystem : ISystem
     {
-        private bool active = true;
+        private bool active;
 
         public bool Active
         {
-            get { return active; }
-            set
-            {
-                if (active == value)
-                    return;
-                active = value;
-                if (active)
-                    OnEnable();
-                else
-                    OnDisable();
-            }
+            get => active;
+            set => active = value;
         }
 
-        public World World { get; set; }
-
-        public Filter Filter { get; set; }
-
-        public void OnCreate()
-        {
-            Active = true;
-            Create();
-        }
-        
-        public void OnUpdate()
-        {
-            if (!active)
-                return;
-            Update();
-        }
-
-        public void OnDestroy()
-        {
-            Active = false;
-            Destroy();
-        }
-        
-        protected virtual void Create() { }
-
-        protected virtual void OnEnable() { }
-
-        protected abstract void Update();
-
-        protected virtual void OnDisable() { }
-
-        protected virtual void Destroy() { }
+        public virtual void Execute() { }
     }
 }

@@ -46,6 +46,12 @@ namespace CZToolKit.ECS
         {
             map.Remove(id);
         }
+        
+        public void Clear()
+        {
+            lastIndex = 0;
+            map.Clear();
+        }
     }
 
     public static class ECSReferencesEx

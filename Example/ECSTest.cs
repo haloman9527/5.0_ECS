@@ -28,10 +28,10 @@ namespace CZToolKit.ECS.Examples
 
         void Awake()
         {
-            World.DefaultWorld.AddSystem<CustomSystem>();
+            World.DefaultWorld.systems.Add(new CustomSystem(World.DefaultWorld));
             for (int i = 0; i < entityCount; i++)
             {
-                World.DefaultWorld.NewEntity(out var entity);
+                var entity = World.DefaultWorld.NewEntity();
                 World.DefaultWorld.SetComponent(entity, new CustomComponent() { num = 10 });
                 // World.DefaultWorld.SetComponent<S>(entity, new S());
             }
@@ -39,7 +39,8 @@ namespace CZToolKit.ECS.Examples
 
         [Sirenix.OdinInspector.Button]
         public void A()
-        {
+        {TypeManager.Init(true);
+            return;
             if (ent == default)
             {
                 ent = World.DefaultWorld.NewEntity();

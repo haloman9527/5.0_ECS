@@ -1,4 +1,5 @@
 #region 注 释
+
 /***
  *
  *  Title:
@@ -12,7 +13,9 @@
  *  Blog: https://www.haloman.net/
  *
  */
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using Unity.Collections;
@@ -37,13 +40,6 @@ namespace CZToolKit.ECS
             return entity;
         }
 
-        public void NewEntity(out Entity entity)
-        {
-            var index = entityIndexGenerator.Next();
-            entity = new Entity(index);
-            entities.Add(entity.index, entity);
-        }
-
         public bool Exists(Entity entity)
         {
             return entities.ContainsKey(entity.index);
@@ -56,6 +52,15 @@ namespace CZToolKit.ECS
             entities.Remove(entity.index);
             foreach (var components in componentContainers.GetValueArray(Allocator.Temp))
             {
+                if (components.typeInfo.isManagedComponentType)
+                {
+                    var managedComponent = components.Get(entity) as IManagedComponent;
+                    if (managedComponent != null)
+                    {
+                        references.Release(managedComponent.Id);
+                    }
+                }
+
                 components.Del(entity);
             }
         }
@@ -67,7 +72,9 @@ namespace CZToolKit.ECS
             {
                 components.Dispose();
             }
+
             componentContainers.Clear();
+            references.Clear();
         }
     }
 }

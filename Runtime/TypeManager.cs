@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using CZToolKit.UnsafeEx;
 
 namespace CZToolKit.ECS
@@ -56,14 +55,18 @@ namespace CZToolKit.ECS
             var managedComponentType = typeof(IManagedComponent);
             foreach (var type in Util_TypeCache.AllTypes)
             {
-                if (type.IsAbstract)
-                    continue;
-
-                if (!type.IsValueType && !typeof(IComponent).IsAssignableFrom(type))
+                if (!type.IsValueType)
                     continue;
 
                 if (type.ContainsGenericParameters)
                     continue;
+
+                if (!typeof(IComponent).IsAssignableFrom(type))
+                    continue;
+
+                if (!UnsafeUtil.IsUnmanaged(type))
+                    continue;
+
                 var typeId = s_TypeCount;
                 var typeHash = type.GetHashCode();
                 var componentSize = UnsafeUtil.SizeOf(type);
@@ -107,7 +110,7 @@ namespace CZToolKit.ECS
             return -1;
         }
 
-        public static int GetTypeIndex<T>()
+        public static int GetTypeId<T>()
         {
             return TypeInfo<T>.Id;
         }

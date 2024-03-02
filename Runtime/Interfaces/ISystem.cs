@@ -20,14 +20,6 @@ namespace CZToolKit.ECS
     {
         bool Active { get; set; }
         
-        World World { get; set; }
-
-        Filter Filter { get; set; }
-        
-        void OnCreate();
-
-        void OnUpdate();
-
-        void OnDestroy(); 
+        void Execute();
     }
 }

@@ -29,7 +29,7 @@ namespace CZToolKit.ECS
 
         private static IndexGenerator s_WorldIDGenerator = new IndexGenerator();
         private static World s_DefaultWorld;
-        private static List<World> s_AllWorlds = new List<World>();
+        private readonly static List<World> s_AllWorlds = new List<World>();
 
         public static World DefaultWorld
         {
@@ -44,16 +44,6 @@ namespace CZToolKit.ECS
         public static IReadOnlyList<World> AllWorlds
         {
             get { return s_AllWorlds; }
-        }
-
-        public static World NewWorld(string worldName)
-        {
-            return new World(worldName);
-        }
-
-        public static void DisposeWorld(World world)
-        {
-            world.Dispose();
         }
 
         public static void DisposeAllWorld()
@@ -71,6 +61,12 @@ namespace CZToolKit.ECS
         public readonly int id;
         public readonly string name;
         public readonly Entity singleton;
+        public readonly Systems systems = new Systems();
+
+        public bool IsDisposed
+        {
+            get { return id == 0; }
+        }
 
         private World(string name)
         {
@@ -87,22 +83,17 @@ namespace CZToolKit.ECS
             Dispose();
         }
 
-        public void Reset()
-        {
-            DestroySystems();
-            DestroyEntities();
-        }
-
         public void Dispose()
         {
-            DestroySystems();
             DestroyEntities();
-            
+
             entities.Dispose();
             componentContainers.Dispose();
             if (s_DefaultWorld == this)
                 s_DefaultWorld = null;
             s_AllWorlds.Remove(this);
+
+            systems.Clear();
         }
     }
 }

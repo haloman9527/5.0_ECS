@@ -1,4 +1,5 @@
 #region 注 释
+
 /***
  *
  *  Title:
@@ -12,25 +13,30 @@
  *  Blog: https://www.haloman.net/
  *
  */
+
 #endregion
+
 using UnityEngine;
 
 namespace CZToolKit.ECS.Examples
 {
     public class CustomSystem : ComponentSystem
     {
-        protected override void Update()
+        private World world;
+        private Filter filter;
+
+        public CustomSystem(World world)
         {
-            Filter.ForeachWithEntity((Entity e, ref CustomComponent c) =>
-            {
-                Debug.Log(c.num);
-            });
+            this.world = world;
+            this.filter = new Filter(world);
+        }
+
+        public override void Execute()
+        {
+            filter.ForeachWithEntity((Entity e, ref CustomComponent c) => { Debug.Log(c.num); });
             if (Input.GetButtonDown("Jump"))
             {
-                Filter.ForeachWithEntity((Entity e, ref CustomComponent c) =>
-                {
-                    c.num += 1;
-                });
+                filter.ForeachWithEntity((Entity e, ref CustomComponent c) => { c.num += 1; });
             }
         }
     }
