@@ -1,10 +1,11 @@
 #region 注 释
+
 /***
  *
  *  Title:
- *  
+ *
  *  Description:
- *  
+ *
  *  Date:
  *  Version:
  *  Writer: 半只龙虾人
@@ -12,31 +13,61 @@
  *  Blog: https://www.haloman.net/
  *
  */
+
 #endregion
+
 using System.Collections.Generic;
 
 namespace CZToolKit.ECS
 {
     public class ECSReferences
     {
-        private static uint s_Index = 0;
+        private uint lastIndex = 0;
+        private Dictionary<uint, object> map = new Dictionary<uint, object>();
 
-        private static readonly Dictionary<uint, object> s_References = new Dictionary<uint, object>();
-
-        public static uint Set(object data)
+        public uint Alloc()
         {
-            s_References[++s_Index] = data;
-            return s_Index;
+            lastIndex++;
+            map[lastIndex] = null;
+            return lastIndex;
+        }
+        
+        public void Set(uint id, object data)
+        {
+            map[id] = data;
         }
 
-        public static object Get(uint id)
+        public object Get(uint id)
         {
-            return s_References[id];
+            return map[id];
         }
 
-        public static void Release(uint id)
+        public void Release(uint id)
         {
-            s_References.Remove(id);
+            map.Remove(id);
+        }
+    }
+
+    public static class ECSReferencesEx
+    {
+        public static object GetValue(this IManagedComponent component, World world)
+        {
+            return world.references.Get(component.Id);
+        }
+
+        public static T GetValue<T>(this IManagedComponent component, World world) where T : class
+        {
+            return (T)GetValue(component, world);
+        }
+
+        public static void SetValue(this IManagedComponent component, World world, object value)
+        {
+            world.references.Set(component.Id, value);
+        }
+
+        public static void Release(this IManagedComponent component, World world, object value)
+        {
+            world.references.Release(component.Id);
         }
     }
 }

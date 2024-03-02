@@ -35,7 +35,7 @@ namespace CZToolKit.ECS
 
         private static bool s_Initialized;
         private static TypeInfo[] s_TypeInfos;
-        private static Dictionary<int, int> s_TypeHashToTypeIndex;
+        private static Dictionary<int, int> s_TypeHashToTypeId;
         private static int s_TypeCount;
         private static List<Type> s_Types;
 
@@ -50,7 +50,7 @@ namespace CZToolKit.ECS
                 return;
 
             s_TypeInfos = new TypeInfo[MAXIMUN_TYPE_COUNT];
-            s_TypeHashToTypeIndex = new Dictionary<int, int>(MAXIMUN_TYPE_COUNT);
+            s_TypeHashToTypeId = new Dictionary<int, int>(MAXIMUN_TYPE_COUNT);
             s_Types = new List<Type>(MAXIMUN_TYPE_COUNT);
 
             var managedComponentType = typeof(IManagedComponent);
@@ -64,23 +64,22 @@ namespace CZToolKit.ECS
 
                 if (type.ContainsGenericParameters)
                     continue;
-                var typeIndex = s_TypeCount;
+                var typeId = s_TypeCount;
                 var typeHash = type.GetHashCode();
                 var componentSize = UnsafeUtil.SizeOf(type);
                 var alighInBytes = CalculateAlignmentInChunk(componentSize);
                 var isZeroSize = componentSize == 0;
                 var isManagedComponentType = managedComponentType.IsAssignableFrom(type);
-                var typeId = typeIndex;
                 if (isZeroSize)
                     typeId |= ZERO_SIZE_FLAG;
 
                 if (isManagedComponentType)
                     typeId |= MANAGED_COMPONENT_FLAG;
 
-                var typeInfo = new TypeInfo(typeIndex, typeId, typeHash, componentSize, alighInBytes, isZeroSize, isManagedComponentType);
+                var typeInfo = new TypeInfo(typeId, typeHash, componentSize, alighInBytes, isZeroSize, isManagedComponentType);
                 s_Types.Add(type);
                 s_TypeInfos[s_TypeCount] = typeInfo;
-                s_TypeHashToTypeIndex[type.GetHashCode()] = typeIndex;
+                s_TypeHashToTypeId[type.GetHashCode()] = typeId;
                 s_TypeCount++;
             }
 
@@ -101,16 +100,16 @@ namespace CZToolKit.ECS
             return s_TypeCount;
         }
 
-        public static int GetTypeIndex(Type type)
+        public static int GetTypeId(Type type)
         {
-            if (s_TypeHashToTypeIndex.TryGetValue(type.GetHashCode(), out var index))
-                return index;
+            if (s_TypeHashToTypeId.TryGetValue(type.GetHashCode(), out var id))
+                return id;
             return -1;
         }
 
         public static int GetTypeIndex<T>()
         {
-            return TypeInfo<T>.Index;
+            return TypeInfo<T>.Id;
         }
 
         public static Type GetType(int typeId)
@@ -118,19 +117,19 @@ namespace CZToolKit.ECS
             return s_Types[typeId & CLEAR_FLAG_MASK];
         }
 
-        public static TypeInfo GetTypeInfo(int typeIndex)
+        public static TypeInfo GetTypeInfo(int typeId)
         {
-            return s_TypeInfos[typeIndex & CLEAR_FLAG_MASK];
+            return s_TypeInfos[typeId & CLEAR_FLAG_MASK];
         }
 
         public static TypeInfo GetTypeInfo<T>()
         {
-            return s_TypeInfos[TypeInfo<T>.Index & CLEAR_FLAG_MASK];
+            return s_TypeInfos[TypeInfo<T>.Id & CLEAR_FLAG_MASK];
         }
 
         public static TypeInfo GetTypeInfo(Type type)
         {
-            var typeIndex = GetTypeIndex(type);
+            var typeIndex = GetTypeId(type);
             return s_TypeInfos[typeIndex & CLEAR_FLAG_MASK];
         }
 

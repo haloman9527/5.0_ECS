@@ -17,7 +17,7 @@ using UnityEngine;
 
 namespace CZToolKit.ECS.Examples
 {
-    public class CustomSystem : ComponentSystem, IUpdate
+    public class CustomSystem : ComponentSystem
     {
         protected override void Update()
         {

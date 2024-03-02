@@ -22,7 +22,6 @@ namespace CZToolKit.ECS
 {
     public struct TypeInfo
     {
-        public readonly int index;
         public readonly int id;
         public readonly int hash;
         public readonly int componentSize;
@@ -30,10 +29,9 @@ namespace CZToolKit.ECS
         public readonly bool isZeroSize;
         public readonly bool isManagedComponentType;
 
-        public TypeInfo(int typeIndex, int typeId, int typeHash, int componentSize, int alignInBytes, bool isZeroSize, bool isManagedComponentType)
+        public TypeInfo(int id, int typeHash, int componentSize, int alignInBytes, bool isZeroSize, bool isManagedComponentType)
         {
-            this.index = typeIndex;
-            this.id = typeId;
+            this.id = id;
             this.hash = typeHash;
             this.componentSize = componentSize;
             this.alignInBytes = alignInBytes;
@@ -49,7 +47,7 @@ namespace CZToolKit.ECS
 
     public class TypeInfo<TComponent>
     {
-        public readonly static int Index;
+        public readonly static int Id;
         public readonly static int Size;
         public readonly static int HashCode;
         public readonly static bool IsManagedType;
@@ -58,7 +56,7 @@ namespace CZToolKit.ECS
         {
             var typeInfo = TypeManager.GetTypeInfo<TComponent>();
 
-            Index = typeInfo.index;
+            Id = typeInfo.id;
             Size = typeInfo.componentSize;
             HashCode = typeInfo.hash;
             IsManagedType = typeInfo.isManagedComponentType;

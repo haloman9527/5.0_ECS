@@ -3,9 +3,9 @@
 /***
  *
  *  Title:
- *  
+ *
  *  Description:
- *  
+ *
  *  Date:
  *  Version:
  *  Writer: 半只龙虾人
@@ -25,17 +25,17 @@ namespace CZToolKit.ECS
 {
     public unsafe struct ComponentsContainer : IDisposable
     {
-        public TypeInfo componentTypeInfo;
+        public TypeInfo typeInfo;
         public IntPtr componentsPtr;
 
-        public ComponentsContainer(TypeInfo componentTypeInfo, int capacity)
+        public ComponentsContainer(TypeInfo typeInfp, int capacity)
         {
-            this.componentTypeInfo = componentTypeInfo;
+            this.typeInfo = typeInfp;
             var components = new UnsafeParallelHashMap<Entity, IntPtr>(capacity, Allocator.Persistent);
-            var componentsSize = UnsafeUtility.SizeOf<UnsafeParallelHashMap<Entity, IntPtr>>();
-            var componentsAlign = UnsafeUtility.AlignOf<UnsafeParallelHashMap<Entity, IntPtr>>();
-            var ptr = UnsafeUtility.Malloc(componentsSize, componentsAlign, Allocator.Persistent);
-            UnsafeUtility.CopyStructureToPtr(ref components, ptr);
+            var componentsSize = UnsafeUtil.SizeOf<UnsafeParallelHashMap<Entity, IntPtr>>();
+            var componentsAlign = UnsafeUtil.AlignOf<UnsafeParallelHashMap<Entity, IntPtr>>();
+            var ptr = UnsafeUtil.Malloc(componentsSize, componentsAlign, Allocator.Persistent);
+            UnsafeUtil.CopyStructureToPtr(ref components, ptr);
             componentsPtr = new IntPtr(ptr);
         }
 
@@ -57,6 +57,12 @@ namespace CZToolKit.ECS
             return *((T*)components[entity]);
         }
 
+        public object Get(Entity entity)
+        {
+            ref var components = ref UnsafeUtil.AsRef<UnsafeParallelHashMap<Entity, IntPtr>>((void*)componentsPtr);
+            return UnsafeUtil.Read(components[entity]);
+        }
+
         public bool TryGet<T>(Entity entity, out T value) where T : unmanaged, IComponent
         {
             ref var components = ref UnsafeUtil.AsRef<UnsafeParallelHashMap<Entity, IntPtr>>((void*)componentsPtr);
@@ -70,10 +76,10 @@ namespace CZToolKit.ECS
             return false;
         }
 
-        public void Set<T>(Entity entity, T component) where T : struct, IComponent
+        public void Set<T>(Entity entity, ref T component) where T : struct, IComponent
         {
-            var p = UnsafeUtility.Malloc(componentTypeInfo.componentSize, 4, Allocator.Persistent);
-            UnsafeUtility.CopyStructureToPtr(ref component, p);
+            var p = UnsafeUtil.Malloc(typeInfo.componentSize, 4, Allocator.Persistent);
+            UnsafeUtil.CopyStructureToPtr(ref component, p);
             ref var components = ref UnsafeUtil.AsRef<UnsafeParallelHashMap<Entity, IntPtr>>((void*)componentsPtr);
             components[entity] = new IntPtr(p);
         }
@@ -87,13 +93,7 @@ namespace CZToolKit.ECS
         {
             ref var components = ref UnsafeUtil.AsRef<UnsafeParallelHashMap<Entity, IntPtr>>((void*)componentsPtr);
             var ptr = (void*)components[entity];
-            var typeInfo = TypeManager.GetTypeInfo(componentTypeInfo.id);
-            if (typeInfo.isManagedComponentType)
-            {
-                // UnsafeUtil.Read<IManagedComponent>(ptr);
-            }
-
-            UnsafeUtility.Free(ptr, Allocator.Persistent);
+            UnsafeUtil.Free(ptr, Allocator.Persistent);
             components.Remove(entity);
         }
 
@@ -115,7 +115,7 @@ namespace CZToolKit.ECS
             var ptrs = components.GetValueArray(Allocator.Temp);
             foreach (var ptr in ptrs)
             {
-                UnsafeUtility.Free((void*)ptr, Allocator.Persistent);
+                UnsafeUtil.Free((void*)ptr, Allocator.Persistent);
             }
 
             components.Clear();
@@ -127,7 +127,7 @@ namespace CZToolKit.ECS
             var ptrs = components.GetValueArray(Allocator.Temp);
             foreach (var ptr in ptrs)
             {
-                UnsafeUtility.Free((void*)ptr, Allocator.Persistent);
+                UnsafeUtil.Free((void*)ptr, Allocator.Persistent);
             }
 
             components.Dispose();

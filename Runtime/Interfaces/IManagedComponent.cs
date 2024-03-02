@@ -3,9 +3,9 @@
 /***
  *
  *  Title:
- *  
+ *
  *  Description:
- *  
+ *
  *  Date:
  *  Version:
  *  Writer: 半只龙虾人
@@ -20,16 +20,6 @@ namespace CZToolKit.ECS
 {
     public interface IManagedComponent : IComponent
     {
-        int Id { get; set; }
-
-        void SetValue(object value);
-
-        object GetValue();
-    
-        void Alloc(World world);
-
-        void Release();
+        uint Id { get; set; }
     }
 }
-
-// 如果是IManagedComponent，在添加这个组件的时候，分配一个Id

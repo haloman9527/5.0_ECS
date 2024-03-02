@@ -3,9 +3,9 @@
 /***
  *
  *  Title:
- *  
+ *
  *  Description:
- *  
+ *
  *  Date:
  *  Version:
  *  Writer: 半只龙虾人
@@ -26,16 +26,18 @@ namespace CZToolKit.ECS
     public partial class World
     {
         #region Const
-        
+
         #endregion
-        
+
         #region Static
 
         private static Dictionary<int, MethodInfo> SetMethods = new Dictionary<int, MethodInfo>();
         private static Dictionary<int, MethodInfo> GetMethods = new Dictionary<int, MethodInfo>();
         private static Dictionary<int, MethodInfo> TryGetMethods = new Dictionary<int, MethodInfo>();
-        
+
         #endregion
+
+        public readonly ECSReferences references = new ECSReferences();
 
         private NativeParallelHashMap<int, ComponentsContainer> componentContainers =
             new NativeParallelHashMap<int, ComponentsContainer>(128, Allocator.Persistent);
@@ -64,10 +66,10 @@ namespace CZToolKit.ECS
 
         public ComponentsContainer NewComponentContainer(Type componentType, int defaultSize)
         {
-            var typeIndex = TypeManager.GetTypeIndex(componentType);
+            var typeIndex = TypeManager.GetTypeId(componentType);
             if (typeIndex == -1)
                 throw new Exception($"The type [{componentType.Name}] is unsupported Type!");
-            
+
             var typeInfo = TypeManager.GetTypeInfo(typeIndex);
             var componentContainer = (ComponentsContainer)Activator.CreateInstance(typeof(ComponentsContainer),
                 new object[] { typeInfo.id, typeInfo.componentSize, defaultSize });
@@ -82,22 +84,22 @@ namespace CZToolKit.ECS
 
         public bool ExistsComponentContainer<T>() where T : unmanaged, IComponent
         {
-            return componentContainers.ContainsKey(TypeInfo<T>.Index);
+            return componentContainers.ContainsKey(TypeInfo<T>.Id);
         }
 
         public bool ExistsComponentContainer(Type componentType)
         {
-            return componentContainers.ContainsKey(TypeManager.GetTypeIndex(componentType));
+            return componentContainers.ContainsKey(TypeManager.GetTypeId(componentType));
         }
 
         public ComponentsContainer GetComponentContainer<T>()
         {
-            return componentContainers[TypeInfo<T>.Index];
+            return componentContainers[TypeInfo<T>.Id];
         }
 
         public ComponentsContainer GetComponentContainer(Type componentType)
         {
-            return componentContainers[TypeManager.GetTypeIndex(componentType)];
+            return componentContainers[TypeManager.GetTypeId(componentType)];
         }
 
         #region Has
@@ -111,7 +113,7 @@ namespace CZToolKit.ECS
 
         public bool HasComponent(Entity entity, Type componentType)
         {
-            if (!componentContainers.TryGetValue(TypeManager.GetTypeIndex(componentType), out var components))
+            if (!componentContainers.TryGetValue(TypeManager.GetTypeId(componentType), out var components))
                 return false;
             return components.Contains(entity);
         }
@@ -127,7 +129,7 @@ namespace CZToolKit.ECS
 
         public ref T RefComponent<T>(Entity entity) where T : unmanaged, IComponent
         {
-            if (!componentContainers.TryGetValue(TypeInfo<T>.Index, out var components))
+            if (!componentContainers.TryGetValue(TypeInfo<T>.Id, out var components))
                 throw new Exception();
             return ref components.Ref<T>(entity);
         }
@@ -138,17 +140,17 @@ namespace CZToolKit.ECS
 
         public T GetComponent<T>(Entity entity) where T : unmanaged, IComponent
         {
-            if (!componentContainers.TryGetValue(TypeInfo<T>.Index, out var components))
+            if (!componentContainers.TryGetValue(TypeInfo<T>.Id, out var components))
                 throw new Exception();
             return components.Get<T>(entity);
         }
 
         public IComponent GetComponent(Entity entity, Type componentType)
         {
-            var typeIndex = TypeManager.GetTypeIndex(componentType);
+            var typeIndex = TypeManager.GetTypeId(componentType);
             if (typeIndex == -1)
                 throw new Exception($"The type [{componentType.Name}] is unsupported Type!");
-            
+
             if (!componentContainers.TryGetValue(typeIndex, out var components))
                 components = NewComponentContainer(componentType);
             if (!GetMethods.TryGetValue(typeIndex, out var method))
@@ -166,7 +168,7 @@ namespace CZToolKit.ECS
 
         public bool TryGetComponent<T>(Entity entity, out T component) where T : unmanaged, IComponent
         {
-            if (!componentContainers.TryGetValue(TypeInfo<T>.Index, out var components))
+            if (!componentContainers.TryGetValue(TypeInfo<T>.Id, out var components))
             {
                 component = default;
                 return false;
@@ -177,10 +179,10 @@ namespace CZToolKit.ECS
 
         public bool TryGetComponent(Entity entity, Type componentType, out IComponent component)
         {
-            var typeIndex = TypeManager.GetTypeIndex(componentType);
+            var typeIndex = TypeManager.GetTypeId(componentType);
             if (typeIndex == -1)
                 throw new Exception($"The type [{componentType.Name}] is unsupported Type!");
-            
+
             if (!componentContainers.TryGetValue(typeIndex, out var components))
                 components = NewComponentContainer(componentType);
             if (!TryGetMethods.TryGetValue(typeIndex, out var method))
@@ -199,26 +201,26 @@ namespace CZToolKit.ECS
 
         #region Set
 
-        public void SetComponent<T>(Entity entity, T component) where T : unmanaged, IComponent
+        public void SetComponent<T>(Entity entity, ref T component) where T : unmanaged, IComponent
         {
             var typeInfo = TypeManager.GetTypeInfo<T>();
             if (typeInfo.isManagedComponentType)
             {
-                ((IManagedComponent)component).Alloc(this);
+                ((IManagedComponent)component).Id = references.Alloc();
             }
-            
-            if (!componentContainers.TryGetValue(typeInfo.index, out var components))
+
+            if (!componentContainers.TryGetValue(typeInfo.id, out var components))
                 components = NewComponentContainer<T>();
-            components.Set(entity, component);
+            components.Set(entity, ref component);
         }
 
         public void SetComponent(Entity entity, IComponent component)
         {
             var componentType = component.GetType();
-            var typeIndex = TypeManager.GetTypeIndex(componentType);
+            var typeIndex = TypeManager.GetTypeId(componentType);
             if (typeIndex == -1)
                 throw new Exception($"The type [{componentType.Name}] is unsupported Type!");
-            
+
             if (!componentContainers.TryGetValue(typeIndex, out var components))
                 components = NewComponentContainer(componentType);
             if (!SetMethods.TryGetValue(typeIndex, out var method))
@@ -239,14 +241,21 @@ namespace CZToolKit.ECS
             var typeInfo = TypeManager.GetTypeInfo(componentType);
             if (!componentContainers.TryGetValue(typeInfo.id, out var components))
                 return;
+            if (typeInfo.isManagedComponentType)
+            {
+                var managedComponent = components.Get(entity) as IManagedComponent;
+                if (managedComponent != null)
+                {
+                    references.Release(managedComponent.Id);
+                }
+            }
+
             components.Del(entity);
         }
 
-        public void RemoveComponent<T>(Entity entity)
+        public void RemoveComponent<T>(Entity entity) where T : IComponent
         {
-            if (!componentContainers.TryGetValue(TypeInfo<T>.Index, out var components))
-                return;
-            components.Del(entity);
+            RemoveComponent(entity, typeof(T));
         }
 
         #endregion

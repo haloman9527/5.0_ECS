@@ -21,29 +21,14 @@ using UnityEngine;
 
 namespace CZToolKit.ECS
 {
-    public struct GameObjectComponent : IComponent
+    public struct GameObjectComponent : IManagedComponent
     {
         private uint id;
 
-        public uint ID
+        public uint Id
         {
-            get { return id; }
-        }
-
-        public GameObjectComponent(GameObject gameObject)
-        {
-            this.id = ECSReferences.Set(gameObject);
-        }
-
-        public GameObject Value
-        {
-            get { return ECSReferences.Get(id) as GameObject; }
-            set { id = ECSReferences.Set(Value); }
-        }
-
-        public void Release()
-        {
-            ECSReferences.Release(id);
+            get { return id;}
+            set { id = value; }
         }
     }
 }

@@ -13,7 +13,10 @@ namespace CZToolKit.ECS
         {
             Entity = World.DefaultWorld.NewEntity();
 
-            World.DefaultWorld.SetComponent(Entity, new GameObjectComponent(gameObject));
+            var goc = new GameObjectComponent();
+            World.DefaultWorld.SetComponent(Entity, ref goc);
+            goc.SetValue(World.DefaultWorld, gameObject);
+            
             World.DefaultWorld.SetComponent(Entity, new PositionComponent() { value = transform.position });
             World.DefaultWorld.SetComponent(Entity, new RotationComponent() { value = transform.rotation });
             World.DefaultWorld.SetComponent(Entity, new ScaleComponent() { value = transform.localScale });
