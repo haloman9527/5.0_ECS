@@ -4,7 +4,7 @@ using CZToolKit.UnsafeEx;
 
 namespace CZToolKit.ECS
 {
-    public static class TypeManager
+    public static partial class TypeManager
     {
         #region Const
 
@@ -26,9 +26,14 @@ namespace CZToolKit.ECS
         public const int MANAGED_COMPONENT_FLAG = 1 << 30;
 
         /// <summary>
-        /// 清理标志位.
+        /// 标志位.
         /// </summary>
-        public const int CLEAR_FLAG_MASK = int.MaxValue >> 2;
+        public const int FLAG_MASK = int.MaxValue << (32 - 2);
+
+        /// <summary>
+        /// 下标位.
+        /// </summary>
+        public const int INDEX_MASK = ~FLAG_MASK;
 
         #endregion
 
@@ -53,8 +58,23 @@ namespace CZToolKit.ECS
             s_Types = new List<Type>(MAXIMUN_TYPE_COUNT);
 
             var managedComponentType = typeof(IManagedComponent);
-            foreach (var type in Util_TypeCache.AllTypes)
+            for (int i = 0; i < Util_TypeCache.AllTypes.Count; i++)
             {
+                var type = (Type)null;
+                var fixedType = GetFixedTypeByIndex(s_TypeCount);
+                if (fixedType == null)
+                {
+                    type = Util_TypeCache.AllTypes[i];
+                    var fixedIndex = GetFixedIndexByType(type);
+                    if (fixedIndex >= 0)
+                        continue;
+                }
+                else
+                {
+                    type = fixedType;
+                    i--;
+                }
+
                 if (!type.IsValueType)
                     continue;
 
@@ -67,25 +87,31 @@ namespace CZToolKit.ECS
                 if (!UnsafeUtil.IsUnmanaged(type))
                     continue;
 
-                var typeId = s_TypeCount;
                 var typeHash = type.GetHashCode();
+                if (s_TypeHashToTypeId.ContainsKey(typeHash))
+                    continue;
+                
+                s_Types.Add(type);
+
+                var typeIndex = s_TypeCount;
+                var typeId = s_TypeCount;
                 var componentSize = UnsafeUtil.SizeOf(type);
                 var alighInBytes = CalculateAlignmentInChunk(componentSize);
                 var isZeroSize = componentSize == 0;
                 var isManagedComponentType = managedComponentType.IsAssignableFrom(type);
+                
                 if (isZeroSize)
                     typeId |= ZERO_SIZE_FLAG;
 
                 if (isManagedComponentType)
                     typeId |= MANAGED_COMPONENT_FLAG;
 
-                var typeInfo = new TypeInfo(typeId, typeHash, componentSize, alighInBytes, isZeroSize, isManagedComponentType);
-                s_Types.Add(type);
+                var typeInfo = new TypeInfo(typeIndex, typeId, componentSize, alighInBytes, isZeroSize, isManagedComponentType);
                 s_TypeInfos[s_TypeCount] = typeInfo;
-                s_TypeHashToTypeId[type.GetHashCode()] = typeId;
+                s_TypeHashToTypeId[typeHash] = typeId;
                 s_TypeCount++;
             }
-
+            
             s_Initialized = true;
         }
 
@@ -117,28 +143,41 @@ namespace CZToolKit.ECS
 
         public static Type GetType(int typeId)
         {
-            return s_Types[typeId & CLEAR_FLAG_MASK];
+            return s_Types[typeId & FLAG_MASK];
         }
 
         public static TypeInfo GetTypeInfo(int typeId)
         {
-            return s_TypeInfos[typeId & CLEAR_FLAG_MASK];
+            return s_TypeInfos[typeId & FLAG_MASK];
         }
 
         public static TypeInfo GetTypeInfo<T>()
         {
-            return s_TypeInfos[TypeInfo<T>.Id & CLEAR_FLAG_MASK];
+            return s_TypeInfos[TypeInfo<T>.Id & FLAG_MASK];
         }
 
         public static TypeInfo GetTypeInfo(Type type)
         {
             var typeIndex = GetTypeId(type);
-            return s_TypeInfos[typeIndex & CLEAR_FLAG_MASK];
+            return s_TypeInfos[typeIndex & FLAG_MASK];
         }
 
         private static bool IsPowerOfTwo(int value)
         {
             return (value & (value - 1)) == 0;
+        }
+    }
+
+    public static partial class TypeManager
+    {
+        public static Type GetFixedTypeByIndex(int index)
+        {
+            return null;
+        }
+        
+        public static int GetFixedIndexByType(Type type)
+        {
+            return -1;
         }
     }
 }

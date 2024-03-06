@@ -22,17 +22,17 @@ namespace CZToolKit.ECS
 {
     public struct TypeInfo
     {
+        public readonly int index;
         public readonly int id;
-        public readonly int hash;
         public readonly int componentSize;
         public readonly int alignInBytes;
         public readonly bool isZeroSize;
         public readonly bool isManagedComponentType;
 
-        public TypeInfo(int id, int typeHash, int componentSize, int alignInBytes, bool isZeroSize, bool isManagedComponentType)
+        public TypeInfo(int index, int id, int componentSize, int alignInBytes, bool isZeroSize, bool isManagedComponentType)
         {
+            this.index = index;
             this.id = id;
-            this.hash = typeHash;
             this.componentSize = componentSize;
             this.alignInBytes = alignInBytes;
             this.isZeroSize = isZeroSize;
@@ -49,7 +49,7 @@ namespace CZToolKit.ECS
     {
         public readonly static int Id;
         public readonly static int Size;
-        public readonly static int HashCode;
+        public readonly static bool IsZeroSize;
         public readonly static bool IsManagedType;
 
         static TypeInfo()
@@ -58,7 +58,7 @@ namespace CZToolKit.ECS
 
             Id = typeInfo.id;
             Size = typeInfo.componentSize;
-            HashCode = typeInfo.hash;
+            IsZeroSize = typeInfo.isZeroSize;
             IsManagedType = typeInfo.isManagedComponentType;
         }
     }
