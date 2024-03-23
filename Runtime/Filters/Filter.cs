@@ -13,6 +13,8 @@
  *
  */
 #endregion
+
+using System.Collections.Generic;
 using Unity.Collections;
 
 namespace CZToolKit.ECS

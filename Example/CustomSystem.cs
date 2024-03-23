@@ -34,9 +34,16 @@ namespace CZToolKit.ECS.Examples
         public override void Execute()
         {
             filter.ForeachWithEntity((Entity e, ref CustomComponent c) => { Debug.Log(c.num); });
+            
+            filter.ForeachWithEntity((Entity e, ref CustomComponent2 c) =>
+            {
+                Debug.Log(c.GetValue()?.num);
+            });
+            
             if (Input.GetButtonDown("Jump"))
             {
                 filter.ForeachWithEntity((Entity e, ref CustomComponent c) => { c.num += 1; });
+                filter.ForeachWithEntity((Entity e, ref CustomComponent2 c) => { c.GetValue().num += 1; });
             }
         }
     }

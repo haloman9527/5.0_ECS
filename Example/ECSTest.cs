@@ -3,9 +3,9 @@
 /***
  *
  *  Title:
- *  
+ *
  *  Description:
- *  
+ *
  *  Date:
  *  Version:
  *  Writer: 半只龙虾人
@@ -16,6 +16,7 @@
 
 #endregion
 
+using System;
 using System.Diagnostics;
 using UnityEngine;
 
@@ -23,31 +24,37 @@ namespace CZToolKit.ECS.Examples
 {
     public class ECSTest : MonoBehaviour
     {
-        private Entity ent;
+        private CustomWorld world;
         public int entityCount = 10000;
 
-        void Awake()
+        private void Update()
         {
-            World.DefaultWorld.systems.Add(new CustomSystem(World.DefaultWorld));
-            for (int i = 0; i < entityCount; i++)
-            {
-                var entity = World.DefaultWorld.NewEntity();
-                World.DefaultWorld.SetComponent(entity, new CustomComponent() { num = 10 });
-                // World.DefaultWorld.SetComponent<S>(entity, new S());
-            }
+            world?.logicSystems.Execute();
+        }
+
+        private void OnDestroy()
+        {
+            world?.Dispose();
         }
 
         [Sirenix.OdinInspector.Button]
         public void A()
-        {TypeManager.Init(true);
-            return;
-            if (ent == default)
+        {
+            if (world != null)
             {
-                ent = World.DefaultWorld.NewEntity();
-                World.DefaultWorld.SetComponent(ent, new CustomComponent() { num = 10 });
+                this.world.Dispose();
             }
+            world = new CustomWorld("Default");
+            world.logicSystems.Add(new CustomSystem(world));
+            
+            var ent = world.CreateEntity();
+            var component = new CustomComponent() { num = 10 };
+            var component2 = new CustomComponent2() ;
+            world.SetComponent(ent, ref component);
+            world.SetComponent(ent, ref component2);
+            component2.SetValue(new B());
 
-            var container = World.DefaultWorld.GetComponentContainer<CustomComponent>();
+            var container = world.GetComponentContainer<CustomComponent>();
 
             Stopwatch sw = new Stopwatch();
             sw.Start();
@@ -78,6 +85,15 @@ namespace CZToolKit.ECS.Examples
 
             sw2.Stop();
             UnityEngine.Debug.Log(sw2.ElapsedMilliseconds);
+        }
+    }
+
+    public class CustomWorld : World
+    {
+        public readonly Systems logicSystems = new Systems();
+        
+        public CustomWorld(string name) : base(name)
+        {
         }
     }
 }

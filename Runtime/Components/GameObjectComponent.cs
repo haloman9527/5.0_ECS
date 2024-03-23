@@ -21,14 +21,10 @@ using UnityEngine;
 
 namespace CZToolKit.ECS
 {
-    public struct GameObjectComponent : IManagedComponent
+    public struct GameObjectComponent : IManagedComponent<GameObject>
     {
-        private uint id;
-
-        public uint Id
-        {
-            get { return id;}
-            set { id = value; }
-        }
+        public uint Id { get; set; }
+        
+        public int WorldId { get; set; }
     }
 }

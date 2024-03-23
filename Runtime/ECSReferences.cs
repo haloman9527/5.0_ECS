@@ -53,27 +53,4 @@ namespace CZToolKit.ECS
             map.Clear();
         }
     }
-
-    public static class ECSReferencesEx
-    {
-        public static object GetValue(this IManagedComponent component, World world)
-        {
-            return world.references.Get(component.Id);
-        }
-
-        public static T GetValue<T>(this IManagedComponent component, World world) where T : class
-        {
-            return (T)GetValue(component, world);
-        }
-
-        public static void SetValue(this IManagedComponent component, World world, object value)
-        {
-            world.references.Set(component.Id, value);
-        }
-
-        public static void Release(this IManagedComponent component, World world, object value)
-        {
-            world.references.Release(component.Id);
-        }
-    }
 }

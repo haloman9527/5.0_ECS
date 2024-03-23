@@ -3,9 +3,9 @@
 /***
  *
  *  Title:
- *  
+ *
  *  Description:
- *  
+ *
  *  Date:
  *  Version:
  *  Writer: 半只龙虾人
@@ -16,13 +16,11 @@
 
 #endregion
 
-using System;
-using System.Collections.Generic;
 using Unity.Collections;
 
 namespace CZToolKit.ECS
 {
-    public partial class World : IDisposable
+    public partial class World
     {
         private IndexGenerator entityIndexGenerator = new IndexGenerator();
         private NativeParallelHashMap<int, Entity> entities = new NativeParallelHashMap<int, Entity>(256, Allocator.Persistent);
@@ -32,10 +30,10 @@ namespace CZToolKit.ECS
             get { return entities; }
         }
 
-        public Entity NewEntity()
+        public Entity CreateEntity()
         {
             var index = entityIndexGenerator.Next();
-            var entity = new Entity(index);
+            var entity = new Entity(this.id, index);
             entities.Add(index, entity);
             return entity;
         }
@@ -47,8 +45,6 @@ namespace CZToolKit.ECS
 
         public void DestroyEntity(Entity entity)
         {
-            if (entity.index == singleton.index)
-                throw new Exception("Can't Destory Singleton Entity!!!");
             entities.Remove(entity.index);
             foreach (var components in componentContainers.GetValueArray(Allocator.Temp))
             {
@@ -65,16 +61,11 @@ namespace CZToolKit.ECS
             }
         }
 
-        public void DestroyEntities()
+        private void DisposeAllEntities()
         {
             entities.Clear();
-            foreach (var components in componentContainers.GetValueArray(Allocator.Temp))
-            {
-                components.Dispose();
-            }
-
-            componentContainers.Clear();
-            references.Clear();
+            entities.Dispose();
+            s_WorldIDGenerator.Reset();
         }
     }
 }

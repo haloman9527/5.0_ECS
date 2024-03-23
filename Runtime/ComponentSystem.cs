@@ -20,7 +20,7 @@ namespace CZToolKit.ECS
 {
     public abstract class ComponentSystem : ISystem
     {
-        private bool active;
+        private bool active = true;
 
         public bool Active
         {
@@ -28,6 +28,6 @@ namespace CZToolKit.ECS
             set => active = value;
         }
 
-        public virtual void Execute() { }
+        public abstract void Execute();
     }
 }

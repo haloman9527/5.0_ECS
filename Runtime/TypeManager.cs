@@ -39,7 +39,7 @@ namespace CZToolKit.ECS
 
         private static bool s_Initialized;
         private static TypeInfo[] s_TypeInfos;
-        private static Dictionary<int, int> s_TypeHashToTypeId;
+        private static Dictionary<Type, int> s_TypeToTypeId;
         private static int s_TypeCount;
         private static List<Type> s_Types;
 
@@ -54,7 +54,7 @@ namespace CZToolKit.ECS
                 return;
 
             s_TypeInfos = new TypeInfo[MAXIMUN_TYPE_COUNT];
-            s_TypeHashToTypeId = new Dictionary<int, int>(MAXIMUN_TYPE_COUNT);
+            s_TypeToTypeId = new Dictionary<Type, int>(MAXIMUN_TYPE_COUNT);
             s_Types = new List<Type>(MAXIMUN_TYPE_COUNT);
 
             var managedComponentType = typeof(IManagedComponent);
@@ -85,10 +85,12 @@ namespace CZToolKit.ECS
                     continue;
 
                 if (!UnsafeUtil.IsUnmanaged(type))
+                {
+                    Log.Error($"{type.FullName}不属于非托管类型");
                     continue;
+                }
 
-                var typeHash = type.GetHashCode();
-                if (s_TypeHashToTypeId.ContainsKey(typeHash))
+                if (s_TypeToTypeId.ContainsKey(type))
                     continue;
                 
                 s_Types.Add(type);
@@ -100,15 +102,15 @@ namespace CZToolKit.ECS
                 var isZeroSize = componentSize == 0;
                 var isManagedComponentType = managedComponentType.IsAssignableFrom(type);
                 
-                if (isZeroSize)
-                    typeId |= ZERO_SIZE_FLAG;
-
-                if (isManagedComponentType)
-                    typeId |= MANAGED_COMPONENT_FLAG;
+                // if (isZeroSize)
+                //     typeId |= ZERO_SIZE_FLAG;
+                //
+                // if (isManagedComponentType)
+                //     typeId |= MANAGED_COMPONENT_FLAG;
 
                 var typeInfo = new TypeInfo(typeIndex, typeId, componentSize, alighInBytes, isZeroSize, isManagedComponentType);
                 s_TypeInfos[s_TypeCount] = typeInfo;
-                s_TypeHashToTypeId[typeHash] = typeId;
+                s_TypeToTypeId[type] = typeId;
                 s_TypeCount++;
             }
             
@@ -131,35 +133,41 @@ namespace CZToolKit.ECS
 
         public static int GetTypeId(Type type)
         {
-            if (s_TypeHashToTypeId.TryGetValue(type.GetHashCode(), out var id))
+            if (s_TypeToTypeId.TryGetValue(type, out var id))
                 return id;
             return -1;
         }
 
         public static int GetTypeId<T>()
         {
-            return TypeInfo<T>.Id;
+            if (s_TypeToTypeId.TryGetValue(typeof(T), out var id))
+            {
+                return id;
+            }
+
+            return -1;
         }
 
         public static Type GetType(int typeId)
         {
-            return s_Types[typeId & FLAG_MASK];
+            return s_Types[typeId & INDEX_MASK];
         }
 
         public static TypeInfo GetTypeInfo(int typeId)
         {
-            return s_TypeInfos[typeId & FLAG_MASK];
+            return s_TypeInfos[typeId & INDEX_MASK];
         }
 
         public static TypeInfo GetTypeInfo<T>()
         {
-            return s_TypeInfos[TypeInfo<T>.Id & FLAG_MASK];
+            var typeId = GetTypeId<T>();
+            return s_TypeInfos[typeId & INDEX_MASK];
         }
 
         public static TypeInfo GetTypeInfo(Type type)
         {
-            var typeIndex = GetTypeId(type);
-            return s_TypeInfos[typeIndex & FLAG_MASK];
+            var typeId = GetTypeId(type);
+            return s_TypeInfos[typeId & INDEX_MASK];
         }
 
         private static bool IsPowerOfTwo(int value)

@@ -20,37 +20,35 @@ using Unity.Collections;
 
 namespace CZToolKit.ECS
 {
-    public delegate void ForeachWithEntityAction<C0>(Entity entity, ref C0 c0) where C0 : struct, IComponent;
+    public delegate void ForeachAction<C0>(ref C0 c0) where C0 : struct, IComponent;
 
-    public delegate void ForeachWithEntityAction<C0, C1>(Entity entity, ref C0 c0, ref C1 c1) where C0 : struct, IComponent where C1 : struct, IComponent;
+    public delegate void ForeachAction<C0, C1>(ref C0 c0, ref C1 c1) where C0 : struct, IComponent where C1 : struct, IComponent;
 
-    public delegate void ForeachWithEntityAction<C0, C1, C2>(Entity entity, ref C0 c0, ref C1 c1, ref C2 c2) where C0 : struct, IComponent where C1 : struct, IComponent where C2 : struct, IComponent;
+    public delegate void ForeachAction<C0, C1, C2>(ref C0 c0, ref C1 c1, ref C2 c2) where C0 : struct, IComponent where C1 : struct, IComponent where C2 : struct, IComponent;
 
-    public delegate void ForeachWithEntityAction<C0, C1, C2, C3>(Entity entity, ref C0 c0, ref C1 c1, ref C2 c2, ref C3 c3) where C0 : struct, IComponent where C1 : struct, IComponent where C2 : struct, IComponent where C3 : struct, IComponent;
+    public delegate void ForeachAction<C0, C1, C2, C3>(ref C0 c0, ref C1 c1, ref C2 c2, ref C3 c3) where C0 : struct, IComponent where C1 : struct, IComponent where C2 : struct, IComponent where C3 : struct, IComponent;
 
-    public delegate void ForeachWithEntityAction<C0, C1, C2, C3, C4>(Entity entity, ref C0 c0, ref C1 c1, ref C2 c2, ref C3 c3, ref C4 c4) where C0 : struct, IComponent where C1 : struct, IComponent where C2 : struct, IComponent where C3 : struct, IComponent where C4 : struct, IComponent;
+    public delegate void ForeachAction<C0, C1, C2, C3, C4>(ref C0 c0, ref C1 c1, ref C2 c2, ref C3 c3, ref C4 c4) where C0 : struct, IComponent where C1 : struct, IComponent where C2 : struct, IComponent where C3 : struct, IComponent where C4 : struct, IComponent;
 
-    public delegate void ForeachWithEntityAction<C0, C1, C2, C3, C4, C5>(Entity entity, ref C0 c0, ref C1 c1, ref C2 c2, ref C3 c3, ref C4 c4, ref C5 c5) where C0 : struct, IComponent where C1 : struct, IComponent where C2 : struct, IComponent where C3 : struct, IComponent where C4 : struct, IComponent where C5 : struct, IComponent;
+    public delegate void ForeachAction<C0, C1, C2, C3, C4, C5>(ref C0 c0, ref C1 c1, ref C2 c2, ref C3 c3, ref C4 c4, ref C5 c5) where C0 : struct, IComponent where C1 : struct, IComponent where C2 : struct, IComponent where C3 : struct, IComponent where C4 : struct, IComponent where C5 : struct, IComponent;
 
     public partial class Filter
     {
-        public void ForeachWithEntity<C0>(ForeachWithEntityAction<C0> action)
+        public void ForeachWithEntity<C0>(ForeachAction<C0> action)
             where C0 : unmanaged, IComponent
         {
             if (!world.ExistsComponentContainer<C0>())
                 return;
-            var componentPool0 = world.GetComponentContainer<C0>();
-            if (componentPool0.Count() <= 0)
+            var container0 = world.GetComponentContainer<C0>();
+            if (container0.Count() <= 0)
                 return;
-            foreach (var entity in world.Entities.GetValueArray(Allocator.Temp))
+            foreach (var entity in container0.GetEntities(Allocator.Temp))
             {
-                if (!componentPool0.Contains(entity))
-                    continue;
-                action(entity, ref componentPool0.Ref<C0>(entity));
+                action(ref container0.Ref<C0>(entity));
             }
         }
 
-        public void ForeachWithEntity<C0, C1>(ForeachWithEntityAction<C0, C1> action)
+        public void ForeachWithEntity<C0, C1>(ForeachAction<C0, C1> action)
             where C0 : unmanaged, IComponent
             where C1 : unmanaged, IComponent
         {
@@ -64,19 +62,17 @@ namespace CZToolKit.ECS
             var container1 = world.GetComponentContainer<C1>();
             if (container1.Count() <= 0)
                 return;
-            foreach (var entity in world.Entities.GetValueArray(Allocator.Temp))
+            foreach (var entity in container0.GetEntities(Allocator.Temp))
             {
-                if (!container0.Contains(entity))
-                    continue;
                 if (!container1.Contains(entity))
                     continue;
-                action(entity,
+                action(
                     ref container0.Ref<C0>(entity),
                     ref container1.Ref<C1>(entity));
             }
         }
 
-        public void ForeachWithEntity<C0, C1, C2>(ForeachWithEntityAction<C0, C1, C2> action)
+        public void ForeachWithEntity<C0, C1, C2>(ForeachAction<C0, C1, C2> action)
             where C0 : unmanaged, IComponent
             where C1 : unmanaged, IComponent
             where C2 : unmanaged, IComponent
@@ -96,22 +92,20 @@ namespace CZToolKit.ECS
             var container2 = world.GetComponentContainer<C2>();
             if (container2.Count() <= 0)
                 return;
-            foreach (var entity in world.Entities.GetValueArray(Allocator.Temp))
+            foreach (var entity in container0.GetEntities(Allocator.Temp))
             {
-                if (!container0.Contains(entity))
-                    continue;
                 if (!container1.Contains(entity))
                     continue;
                 if (!container2.Contains(entity))
                     continue;
-                action(entity,
+                action(
                     ref container0.Ref<C0>(entity),
                     ref container1.Ref<C1>(entity),
                     ref container2.Ref<C2>(entity));
             }
         }
 
-        public void ForeachWithEntity<C0, C1, C2, C3>(ForeachWithEntityAction<C0, C1, C2, C3> action)
+        public void ForeachWithEntity<C0, C1, C2, C3>(ForeachAction<C0, C1, C2, C3> action)
             where C0 : unmanaged, IComponent
             where C1 : unmanaged, IComponent
             where C2 : unmanaged, IComponent
@@ -137,17 +131,15 @@ namespace CZToolKit.ECS
             var container3 = world.GetComponentContainer<C3>();
             if (container3.Count() <= 0)
                 return;
-            foreach (var entity in world.Entities.GetValueArray(Allocator.Temp))
+            foreach (var entity in container0.GetEntities(Allocator.Temp))
             {
-                if (!container0.Contains(entity))
-                    continue;
                 if (!container1.Contains(entity))
                     continue;
                 if (!container2.Contains(entity))
                     continue;
                 if (!container3.Contains(entity))
                     continue;
-                action(entity,
+                action(
                     ref container0.Ref<C0>(entity),
                     ref container1.Ref<C1>(entity),
                     ref container2.Ref<C2>(entity),
@@ -155,7 +147,7 @@ namespace CZToolKit.ECS
             }
         }
 
-        public void ForeachWithEntity<C0, C1, C2, C3, C4>(ForeachWithEntityAction<C0, C1, C2, C3, C4> action)
+        public void ForeachWithEntity<C0, C1, C2, C3, C4>(ForeachAction<C0, C1, C2, C3, C4> action)
             where C0 : unmanaged, IComponent
             where C1 : unmanaged, IComponent
             where C2 : unmanaged, IComponent
@@ -187,10 +179,8 @@ namespace CZToolKit.ECS
             var container4 = world.GetComponentContainer<C4>();
             if (container4.Count() <= 0)
                 return;
-            foreach (var entity in world.Entities.GetValueArray(Allocator.Temp))
+            foreach (var entity in container0.GetEntities(Allocator.Temp))
             {
-                if (!container0.Contains(entity))
-                    continue;
                 if (!container1.Contains(entity))
                     continue;
                 if (!container2.Contains(entity))
@@ -199,7 +189,7 @@ namespace CZToolKit.ECS
                     continue;
                 if (!container4.Contains(entity))
                     continue;
-                action(entity,
+                action(
                     ref container0.Ref<C0>(entity),
                     ref container1.Ref<C1>(entity),
                     ref container2.Ref<C2>(entity),
@@ -208,7 +198,7 @@ namespace CZToolKit.ECS
             }
         }
 
-        public void ForeachWithEntity<C0, C1, C2, C3, C4, C5>(ForeachWithEntityAction<C0, C1, C2, C3, C4, C5> action)
+        public void ForeachWithEntity<C0, C1, C2, C3, C4, C5>(ForeachAction<C0, C1, C2, C3, C4, C5> action)
             where C0 : unmanaged, IComponent
             where C1 : unmanaged, IComponent
             where C2 : unmanaged, IComponent
@@ -246,10 +236,8 @@ namespace CZToolKit.ECS
             var container5 = world.GetComponentContainer<C5>();
             if (container5.Count() <= 0)
                 return;
-            foreach (var entity in world.Entities.GetValueArray(Allocator.Temp))
+            foreach (var entity in container0.GetEntities(Allocator.Temp))
             {
-                if (!container0.Contains(entity))
-                    continue;
                 if (!container1.Contains(entity))
                     continue;
                 if (!container2.Contains(entity))
@@ -260,7 +248,7 @@ namespace CZToolKit.ECS
                     continue;
                 if (!container5.Contains(entity))
                     continue;
-                action(entity,
+                action(
                     ref container0.Ref<C0>(entity),
                     ref container1.Ref<C1>(entity),
                     ref container2.Ref<C2>(entity),

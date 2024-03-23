@@ -23,4 +23,15 @@ namespace CZToolKit.ECS.Examples
     {
         public int num;
     }
+    
+    public struct CustomComponent2 : IManagedComponent<B>
+    {
+        public int WorldId { get; set; }
+        public uint Id { get; set; }
+    }
+
+    public class B
+    {
+        public int num;
+    }
 }
