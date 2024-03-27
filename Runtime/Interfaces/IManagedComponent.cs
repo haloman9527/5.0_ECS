@@ -18,11 +18,12 @@
 
 namespace CZToolKit.ECS
 {
+    
     public interface IManagedComponent : IComponent
     {
         int WorldId { get; set; }
-        
-        uint Id { get; set; }
+
+        int EntityId { get; set; }
     }
 
     public interface IManagedComponent<T> : IManagedComponent where T : class

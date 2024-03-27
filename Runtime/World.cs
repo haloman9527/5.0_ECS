@@ -55,16 +55,14 @@ namespace CZToolKit.ECS
         #endregion
 
         public readonly int id;
-        public readonly string name;
 
         public bool IsDisposed
         {
             get { return id == 0; }
         }
 
-        public World(string name)
+        public World()
         {
-            this.name = name;
             this.id = s_WorldIDGenerator.Next();
             s_AllWorlds.Add(this);
             s_AllWorldsMap.Add(this.id, this);

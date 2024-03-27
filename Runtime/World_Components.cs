@@ -17,6 +17,7 @@
 #endregion
 
 using System;
+using CZToolKit.UnsafeEx;
 using Unity.Collections;
 
 namespace CZToolKit.ECS
@@ -143,27 +144,25 @@ namespace CZToolKit.ECS
         public void SetComponent<TC, TR>(Entity entity, TC component, TR value) where TC : unmanaged, IManagedComponent<TR> where TR : class
         {
             component.WorldId = this.id;
-            component.Id = references.Alloc();
+            component.EntityId = entity.id;
 
             var typeInfo = TypeManager.GetTypeInfo<TC>();
             if (!componentContainers.TryGetValue(typeInfo.id, out var components))
                 components = NewComponentContainer<TC>();
             components.Set(entity, ref component);
-            SetComponent(entity, component);
-            references.Set(component.Id, value);
+            references.Set(typeInfo.id, component.EntityId, value);
         }
 
         public void SetComponent<TC, TR>(Entity entity, ref TC component, TR value) where TC : unmanaged, IManagedComponent<TR> where TR : class
         {
             component.WorldId = this.id;
-            component.Id = references.Alloc();
+            component.EntityId = entity.id;
 
             var typeInfo = TypeManager.GetTypeInfo<TC>();
             if (!componentContainers.TryGetValue(typeInfo.id, out var components))
                 components = NewComponentContainer<TC>();
             components.Set(entity, ref component);
-            SetComponent(entity, component);
-            references.Set(component.Id, value);
+            references.Set(typeInfo.id, component.EntityId, value);
         }
 
         #endregion
@@ -177,19 +176,22 @@ namespace CZToolKit.ECS
                 return;
             if (typeInfo.isManagedComponentType)
             {
-                var managedComponent = components.Get(entity) as IManagedComponent;
-                if (managedComponent != null)
-                {
-                    references.Release(managedComponent.Id);
-                }
+                references.Release(typeInfo.id, entity.id);
             }
-
             components.Del(entity);
         }
 
-        public void RemoveComponent<T>(Entity entity) where T : IComponent
+        public void RemoveComponent<T>(Entity entity) where T : unmanaged, IComponent
         {
-            RemoveComponent(entity, typeof(T));
+            var typeInfo = TypeManager.GetTypeInfo(typeof(T));
+            if (!componentContainers.TryGetValue(typeInfo.id, out var components))
+                return;
+            if (typeInfo.isManagedComponentType)
+            {
+                references.Release(typeInfo.id, entity.id);
+            }
+
+            components.Del(entity);
         }
 
         #endregion

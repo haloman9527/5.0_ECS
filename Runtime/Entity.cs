@@ -23,12 +23,12 @@ namespace CZToolKit.ECS
     public struct Entity : IEquatable<Entity>, IComparable<Entity>
     {
         public readonly int worldId;
-        public readonly int index;
+        public readonly int id;
 
-        internal Entity(int worldId, int index)
+        internal Entity(int worldId, int id)
         {
             this.worldId = worldId;
-            this.index = index;
+            this.id = id;
         }
 
         public World World
@@ -38,17 +38,17 @@ namespace CZToolKit.ECS
 
         public static bool operator ==(in Entity lhs, in Entity rhs)
         {
-            return lhs.worldId == rhs.worldId && lhs.index == rhs.index;
+            return lhs.worldId == rhs.worldId && lhs.id == rhs.id;
         }
 
         public static bool operator !=(in Entity lhs, in Entity rhs)
         {
-            return lhs.worldId != rhs.worldId || lhs.index != rhs.index;
+            return lhs.worldId != rhs.worldId || lhs.id != rhs.id;
         }
 
         public int CompareTo(Entity other)
         {
-            return this.index.CompareTo(other.index);
+            return this.id.CompareTo(other.id);
         }
 
         public override bool Equals(object other)
@@ -58,17 +58,17 @@ namespace CZToolKit.ECS
 
         public bool Equals(Entity other)
         {
-            return this.worldId == other.worldId && this.index == other.index;
+            return this.worldId == other.worldId && this.id == other.id;
         }
 
         public override int GetHashCode()
         {
-            return int.MinValue + index;
+            return int.MinValue + id;
         }
 
         public override string ToString()
         {
-            return $"World:{worldId}  Entity:{index}";
+            return $"World:{worldId}  Entity:{id}";
         }
     }
 }

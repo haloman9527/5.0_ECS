@@ -39,7 +39,8 @@ namespace CZToolKit.ECS
 
         private static bool s_Initialized;
         private static TypeInfo[] s_TypeInfos;
-        private static Dictionary<Type, int> s_TypeToTypeId;
+        private static Dictionary<Type, int> s_ComponentTypeIdMap;
+        private static Dictionary<Type, Type> s_ManagedTypeMap;
         private static int s_TypeCount;
         private static List<Type> s_Types;
 
@@ -54,7 +55,8 @@ namespace CZToolKit.ECS
                 return;
 
             s_TypeInfos = new TypeInfo[MAXIMUN_TYPE_COUNT];
-            s_TypeToTypeId = new Dictionary<Type, int>(MAXIMUN_TYPE_COUNT);
+            s_ComponentTypeIdMap = new Dictionary<Type, int>(MAXIMUN_TYPE_COUNT);
+            s_ManagedTypeMap = new Dictionary<Type, Type>();
             s_Types = new List<Type>(MAXIMUN_TYPE_COUNT);
 
             var managedComponentType = typeof(IManagedComponent);
@@ -90,9 +92,9 @@ namespace CZToolKit.ECS
                     continue;
                 }
 
-                if (s_TypeToTypeId.ContainsKey(type))
+                if (s_ComponentTypeIdMap.ContainsKey(type))
                     continue;
-                
+
                 s_Types.Add(type);
 
                 var typeIndex = s_TypeCount;
@@ -101,19 +103,63 @@ namespace CZToolKit.ECS
                 var alighInBytes = CalculateAlignmentInChunk(componentSize);
                 var isZeroSize = componentSize == 0;
                 var isManagedComponentType = managedComponentType.IsAssignableFrom(type);
-                
+                var worldIdOffset = 0;
+                var idOffset = 0;
+
+                if (isManagedComponentType)
+                {
+                    var worldIdField = type.GetField(nameof(ManagedComponentBridge.worldId));
+
+                    if (worldIdField == null)
+                    {
+                        Log.Error($"{type.FullName}需要包含int worldId字段");
+                        continue;
+                    }
+
+                    var idField = type.GetField(nameof(ManagedComponentBridge.entityId));
+                    if (idField == null)
+                    {
+                        Log.Error($"{type.FullName}需要包含uint {nameof(ManagedComponentBridge.entityId)}字段");
+                        continue;
+                    }
+
+                    var interfaces = type.GetInterfaces();
+                    for (int j = 0; j < interfaces.Length; j++)
+                    {
+                        var interfaceType = interfaces[j];
+
+                        if (interfaceType == managedComponentType)
+                        {
+                            continue;
+                        }
+
+                        if (!managedComponentType.IsAssignableFrom(interfaceType))
+                        {
+                            continue;
+                        }
+
+                        s_ManagedTypeMap[type] = interfaceType.GetGenericArguments()[0];
+
+                        break;
+                    }
+
+                    worldIdOffset = UnsafeUtil.GetFieldOffset(worldIdField);
+                    idOffset = UnsafeUtil.GetFieldOffset(idField);
+                }
+
                 // if (isZeroSize)
                 //     typeId |= ZERO_SIZE_FLAG;
                 //
                 // if (isManagedComponentType)
                 //     typeId |= MANAGED_COMPONENT_FLAG;
 
-                var typeInfo = new TypeInfo(typeIndex, typeId, componentSize, alighInBytes, isZeroSize, isManagedComponentType);
+                var typeInfo = new TypeInfo(typeIndex, typeId, componentSize, alighInBytes, isZeroSize, isManagedComponentType, worldIdOffset, idOffset);
+
                 s_TypeInfos[s_TypeCount] = typeInfo;
-                s_TypeToTypeId[type] = typeId;
+                s_ComponentTypeIdMap[type] = typeId;
                 s_TypeCount++;
             }
-            
+
             s_Initialized = true;
         }
 
@@ -133,14 +179,14 @@ namespace CZToolKit.ECS
 
         public static int GetTypeId(Type type)
         {
-            if (s_TypeToTypeId.TryGetValue(type, out var id))
+            if (s_ComponentTypeIdMap.TryGetValue(type, out var id))
                 return id;
             return -1;
         }
 
         public static int GetTypeId<T>()
         {
-            if (s_TypeToTypeId.TryGetValue(typeof(T), out var id))
+            if (s_ComponentTypeIdMap.TryGetValue(typeof(T), out var id))
             {
                 return id;
             }
@@ -151,6 +197,17 @@ namespace CZToolKit.ECS
         public static Type GetType(int typeId)
         {
             return s_Types[typeId & INDEX_MASK];
+        }
+
+        public static Type GetManagedType(int typeId)
+        {
+            var t = s_Types[typeId & INDEX_MASK];
+            if (s_ManagedTypeMap.TryGetValue(t, out var type))
+            {
+                return type;
+            }
+
+            return null;
         }
 
         public static TypeInfo GetTypeInfo(int typeId)
@@ -182,7 +239,7 @@ namespace CZToolKit.ECS
         {
             return null;
         }
-        
+
         public static int GetFixedIndexByType(Type type)
         {
             return -1;

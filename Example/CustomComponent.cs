@@ -1,10 +1,11 @@
 #region 注 释
+
 /***
  *
  *  Title:
- *  
+ *
  *  Description:
- *  
+ *
  *  Date:
  *  Version:
  *  Writer: 半只龙虾人
@@ -12,6 +13,7 @@
  *  Blog: https://www.haloman.net/
  *
  */
+
 #endregion
 
 using System.Runtime.InteropServices;
@@ -23,11 +25,23 @@ namespace CZToolKit.ECS.Examples
     {
         public int num;
     }
-    
+
     public struct CustomComponent2 : IManagedComponent<B>
     {
-        public int WorldId { get; set; }
-        public uint Id { get; set; }
+        public int worldId;
+        public int entityId;
+
+        public int WorldId
+        {
+            get => worldId;
+            set => worldId = value;
+        }
+
+        public int EntityId
+        {
+            get => entityId;
+            set => entityId = value;
+        }
     }
 
     public class B

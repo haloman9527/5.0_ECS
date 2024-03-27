@@ -16,6 +16,7 @@
 
 #endregion
 
+using CZToolKit.UnsafeEx;
 using Unity.Collections;
 
 namespace CZToolKit.ECS
@@ -40,21 +41,17 @@ namespace CZToolKit.ECS
 
         public bool Exists(Entity entity)
         {
-            return entities.ContainsKey(entity.index);
+            return entities.ContainsKey(entity.id);
         }
 
         public void DestroyEntity(Entity entity)
         {
-            entities.Remove(entity.index);
+            entities.Remove(entity.id);
             foreach (var components in componentContainers.GetValueArray(Allocator.Temp))
             {
                 if (components.typeInfo.isManagedComponentType)
                 {
-                    var managedComponent = components.Get(entity) as IManagedComponent;
-                    if (managedComponent != null)
-                    {
-                        references.Release(managedComponent.Id);
-                    }
+                    references.Release(components.typeInfo.id, entity.id);
                 }
 
                 components.Del(entity);

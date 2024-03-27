@@ -44,7 +44,7 @@ namespace CZToolKit.ECS.Examples
             {
                 this.world.Dispose();
             }
-            world = new CustomWorld("Default");
+            world = new CustomWorld();
             world.logicSystems.Add(new CustomSystem(world));
             
             var ent = world.CreateEntity();
@@ -56,7 +56,7 @@ namespace CZToolKit.ECS.Examples
 
             var container = world.GetComponentContainer<CustomComponent>();
 
-            Stopwatch sw = new Stopwatch();
+            var sw = new Stopwatch();
             sw.Start();
             for (int i = 0; i < 1000000; i++)
             {
@@ -91,9 +91,5 @@ namespace CZToolKit.ECS.Examples
     public class CustomWorld : World
     {
         public readonly Systems logicSystems = new Systems();
-        
-        public CustomWorld(string name) : base(name)
-        {
-        }
     }
 }

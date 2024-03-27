@@ -57,10 +57,10 @@ namespace CZToolKit.ECS
             return *((T*)components[entity]);
         }
 
-        public object Get(Entity entity)
+        public IntPtr GetPointer(Entity entity)
         {
             ref var components = ref UnsafeUtil.AsRef<UnsafeParallelHashMap<Entity, IntPtr>>((void*)componentsPtr);
-            return UnsafeUtil.Read(components[entity]);
+            return components[entity];
         }
 
         public bool TryGet<T>(Entity entity, out T value) where T : unmanaged, IComponent

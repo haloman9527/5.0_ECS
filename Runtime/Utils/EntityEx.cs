@@ -4,14 +4,16 @@
     {
         public static T GetValue<T>(this IManagedComponent<T> component) where T : class
         {
+            var typeInfo = TypeManager.GetTypeInfo(component.GetType());
             var world = World.GetWorld(component.WorldId);
-            return world.references.Get(component.Id) as T;
+            return world?.references.Get(typeInfo.id, component.EntityId) as T;
         }
 
         public static void SetValue<T>(this IManagedComponent<T> component, T value) where T : class
         {
+            var typeInfo = TypeManager.GetTypeInfo(component.GetType());
             var world = World.GetWorld(component.WorldId);
-            world.references.Set(component.Id, value);
+            world.references.Set(typeInfo.id, component.EntityId, value);
         }
 
         // public static object GetValue(this IManagedComponent component, World world)
@@ -23,11 +25,6 @@
         // {
         //     world.references.Set(component.Id, value);
         // }
-
-        public static void Release(this IManagedComponent component, World world)
-        {
-            world.references.Release(component.Id);
-        }
 
         public static bool IsValid(this Entity entity)
         {
@@ -67,7 +64,7 @@
 
         public static void RemoveComponent<T>(this Entity entity) where T : unmanaged, IComponent
         {
-            entity.World.RemoveComponent<T>(entity);
+            entity.World.RemoveComponent(entity, typeof(T));
         }
 
         public static bool HasComponent<T>(this Entity entity) where T : unmanaged, IComponent

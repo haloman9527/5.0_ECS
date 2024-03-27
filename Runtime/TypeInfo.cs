@@ -28,8 +28,10 @@ namespace CZToolKit.ECS
         public readonly int alignInBytes;
         public readonly bool isZeroSize;
         public readonly bool isManagedComponentType;
+        public readonly int worldIdOffset;
+        public readonly int idOffset;
 
-        public TypeInfo(int index, int id, int componentSize, int alignInBytes, bool isZeroSize, bool isManagedComponentType)
+        public TypeInfo(int index, int id, int componentSize, int alignInBytes, bool isZeroSize, bool isManagedComponentType, int worldIdOffset, int idOffset)
         {
             this.index = index;
             this.id = id;
@@ -37,6 +39,8 @@ namespace CZToolKit.ECS
             this.alignInBytes = alignInBytes;
             this.isZeroSize = isZeroSize;
             this.isManagedComponentType = isManagedComponentType;
+            this.worldIdOffset = worldIdOffset;
+            this.idOffset = idOffset;
         }
 
         public Type Type

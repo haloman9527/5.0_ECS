@@ -22,35 +22,49 @@ namespace CZToolKit.ECS
 {
     public class ECSReferences
     {
-        private uint lastIndex = 0;
-        private Dictionary<uint, object> map = new Dictionary<uint, object>();
+        private Dictionary<int, Dictionary<int, object>> map = new Dictionary<int, Dictionary<int, object>>();
 
-        public uint Alloc()
+        public void Set(int compnentId, int entityId, object data)
         {
-            lastIndex++;
-            map[lastIndex] = null;
-            return lastIndex;
-        }
-        
-        public void Set(uint id, object data)
-        {
-            map[id] = data;
+            if (!map.TryGetValue(compnentId, out var container))
+            {
+                map[compnentId] = container = new Dictionary<int, object>();
+            }
+
+            container[entityId] = data;
         }
 
-        public object Get(uint id)
+        public object Get(int compnentId, int entityId)
         {
-            return map[id];
+            if (!map.TryGetValue(compnentId, out var container))
+            {
+                return null;
+            }
+
+            if (!container.TryGetValue(entityId, out var o))
+            {
+                return null;
+            }
+
+            return o;
         }
 
-        public void Release(uint id)
+        public void Release(int compnentId, int entityId)
         {
-            map.Remove(id);
+            if (!map.TryGetValue(compnentId, out var container))
+            {
+                return;
+            }
+
+            container.Remove(entityId);
         }
-        
+
         public void Clear()
         {
-            lastIndex = 0;
-            map.Clear();
+            foreach (var container in map.Values)
+            {
+                container.Clear();
+            }
         }
     }
 }
