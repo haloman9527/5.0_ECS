@@ -29,6 +29,13 @@ namespace CZToolKit.ECS
         private NativeParallelHashMap<int, ComponentsContainer> componentContainers =
             new NativeParallelHashMap<int, ComponentsContainer>(128, Allocator.Persistent);
 
+        private IWorldOperationListener worldOperationListener;
+
+        public void SetWorldOperationListener(IWorldOperationListener worldOperationListener)
+        {
+            this.worldOperationListener = worldOperationListener;
+        }
+
         private NativeParallelHashMap<int, ComponentsContainer> ComponentContainers
         {
             get { return componentContainers; }
@@ -129,16 +136,38 @@ namespace CZToolKit.ECS
         {
             var typeInfo = TypeManager.GetTypeInfo<T>();
             if (!componentContainers.TryGetValue(typeInfo.id, out var components))
+            {
                 components = NewComponentContainer<T>();
+            }
+            else
+            {
+                if (components.Contains(entity))
+                {
+                    RemoveComponent<T>(entity);
+                }
+            }
+
             components.Set(entity, ref component);
+            worldOperationListener?.OnSetComponent(this, entity, typeInfo);
         }
 
         public void SetComponent<T>(Entity entity, T component) where T : unmanaged, IComponent
         {
             var typeInfo = TypeManager.GetTypeInfo<T>();
             if (!componentContainers.TryGetValue(typeInfo.id, out var components))
+            {
                 components = NewComponentContainer<T>();
+            }
+            else
+            {
+                if (components.Contains(entity))
+                {
+                    RemoveComponent<T>(entity);
+                }
+            }
+
             components.Set(entity, ref component);
+            worldOperationListener?.OnSetComponent(this, entity, typeInfo);
         }
 
         public void SetComponent<TC, TR>(Entity entity, TC component, TR value) where TC : unmanaged, IManagedComponent<TR> where TR : class
@@ -148,9 +177,20 @@ namespace CZToolKit.ECS
 
             var typeInfo = TypeManager.GetTypeInfo<TC>();
             if (!componentContainers.TryGetValue(typeInfo.id, out var components))
+            {
                 components = NewComponentContainer<TC>();
+            }
+            else
+            {
+                if (components.Contains(entity))
+                {
+                    RemoveComponent<TC>(entity);
+                }
+            }
+
             components.Set(entity, ref component);
             references.Set(typeInfo.id, component.EntityId, value);
+            worldOperationListener?.OnSetComponent(this, entity, typeInfo);
         }
 
         public void SetComponent<TC, TR>(Entity entity, ref TC component, TR value) where TC : unmanaged, IManagedComponent<TR> where TR : class
@@ -160,9 +200,20 @@ namespace CZToolKit.ECS
 
             var typeInfo = TypeManager.GetTypeInfo<TC>();
             if (!componentContainers.TryGetValue(typeInfo.id, out var components))
+            {
                 components = NewComponentContainer<TC>();
+            }
+            else
+            {
+                if (components.Contains(entity))
+                {
+                    RemoveComponent<TC>(entity);
+                }
+            }
+
             components.Set(entity, ref component);
             references.Set(typeInfo.id, component.EntityId, value);
+            worldOperationListener?.OnSetComponent(this, entity, typeInfo);
         }
 
         #endregion
@@ -174,11 +225,15 @@ namespace CZToolKit.ECS
             var typeInfo = TypeManager.GetTypeInfo(componentType);
             if (!componentContainers.TryGetValue(typeInfo.id, out var components))
                 return;
+
+            worldOperationListener?.BeforeRemoveComponent(this, entity, typeInfo);
             if (typeInfo.isManagedComponentType)
             {
                 references.Release(typeInfo.id, entity.id);
             }
+
             components.Del(entity);
+            worldOperationListener?.AfterRemoveComponent(this, entity, typeInfo);
         }
 
         public void RemoveComponent<T>(Entity entity) where T : unmanaged, IComponent
@@ -186,18 +241,23 @@ namespace CZToolKit.ECS
             var typeInfo = TypeManager.GetTypeInfo(typeof(T));
             if (!componentContainers.TryGetValue(typeInfo.id, out var components))
                 return;
+
+            worldOperationListener?.BeforeRemoveComponent(this, entity, typeInfo);
             if (typeInfo.isManagedComponentType)
             {
                 references.Release(typeInfo.id, entity.id);
             }
 
             components.Del(entity);
+            worldOperationListener?.AfterRemoveComponent(this, entity, typeInfo);
         }
 
         #endregion
 
         private void RemoveAllComponents()
         {
+            worldOperationListener?.BeforeWorldDispose(this);
+
             foreach (var components in componentContainers.GetValueArray(Allocator.Temp))
             {
                 components.Dispose();
@@ -206,6 +266,8 @@ namespace CZToolKit.ECS
             componentContainers.Clear();
             componentContainers.Dispose();
             references.Clear();
+
+            worldOperationListener?.AfterWorldDispose(this);
         }
     }
 }

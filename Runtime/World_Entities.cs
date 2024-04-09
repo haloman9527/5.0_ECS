@@ -16,7 +16,6 @@
 
 #endregion
 
-using CZToolKit.UnsafeEx;
 using Unity.Collections;
 
 namespace CZToolKit.ECS
@@ -36,6 +35,7 @@ namespace CZToolKit.ECS
             var index = entityIndexGenerator.Next();
             var entity = new Entity(this.id, index);
             entities.Add(index, entity);
+            worldOperationListener?.OnCreateEntity(this, entity);
             return entity;
         }
 
@@ -46,6 +46,11 @@ namespace CZToolKit.ECS
 
         public void DestroyEntity(Entity entity)
         {
+            if (!entities.ContainsKey(entity.id))
+            {
+                return;
+            }
+            worldOperationListener?.OnDestroyEntity(this, entity);
             entities.Remove(entity.id);
             foreach (var components in componentContainers.GetValueArray(Allocator.Temp))
             {

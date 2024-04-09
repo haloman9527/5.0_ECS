@@ -54,6 +54,11 @@ namespace CZToolKit.ECS
         public T Get<T>(Entity entity) where T : unmanaged, IComponent
         {
             ref var components = ref UnsafeUtil.AsRef<UnsafeParallelHashMap<Entity, IntPtr>>((void*)componentsPtr);
+            if (!components.ContainsKey(entity))
+            {
+                return default;
+            }
+            
             return *((T*)components[entity]);
         }
 
@@ -77,11 +82,19 @@ namespace CZToolKit.ECS
         }
 
         public void Set<T>(Entity entity, ref T component) where T : struct, IComponent
-        {
-            var p = UnsafeUtil.Malloc(typeInfo.componentSize, 4, Allocator.Persistent);
-            UnsafeUtil.CopyStructureToPtr(ref component, p);
+        {            
             ref var components = ref UnsafeUtil.AsRef<UnsafeParallelHashMap<Entity, IntPtr>>((void*)componentsPtr);
-            components[entity] = new IntPtr(p);
+            if (components.ContainsKey(entity))
+            {
+                var p = components[entity];
+                UnsafeUtil.CopyStructureToPtr(ref component, p.ToPointer());
+            }
+            else
+            {
+                var p = UnsafeUtil.Malloc(typeInfo.componentSize, 4, Allocator.Persistent);
+                UnsafeUtil.CopyStructureToPtr(ref component, p);
+                components[entity] = new IntPtr(p);
+            }
         }
 
         public ref UnsafeParallelHashMap<Entity, IntPtr> GetMap()

@@ -4,15 +4,20 @@
     {
         public static T GetValue<T>(this IManagedComponent<T> component) where T : class
         {
-            var typeInfo = TypeManager.GetTypeInfo(component.GetType());
             var world = World.GetWorld(component.WorldId);
-            return world?.references.Get(typeInfo.id, component.EntityId) as T;
+            if (world == null)
+            {
+                return null;
+            }
+            
+            var typeInfo = TypeManager.GetTypeInfo(component.GetType());
+            return world.references.Get(typeInfo.id, component.EntityId) as T;
         }
 
         public static void SetValue<T>(this IManagedComponent<T> component, T value) where T : class
         {
-            var typeInfo = TypeManager.GetTypeInfo(component.GetType());
             var world = World.GetWorld(component.WorldId);
+            var typeInfo = TypeManager.GetTypeInfo(component.GetType());
             world.references.Set(typeInfo.id, component.EntityId, value);
         }
 
@@ -35,6 +40,11 @@
         public static T GetComponent<T>(this Entity entity) where T : unmanaged, IComponent
         {
             return entity.World.GetComponent<T>(entity);
+        }
+
+        public static bool TryGetComponent<T>(this Entity entity, out T component) where T : unmanaged, IComponent
+        {
+            return entity.World.TryGetComponent<T>(entity, out component);
         }
 
         public static ref T RefComponent<T>(this Entity entity) where T : unmanaged, IComponent

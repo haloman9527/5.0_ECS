@@ -63,7 +63,7 @@ namespace CZToolKit.ECS
 
         public override int GetHashCode()
         {
-            return int.MinValue + id;
+            return id;
         }
 
         public override string ToString()
