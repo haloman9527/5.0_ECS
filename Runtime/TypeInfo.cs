@@ -47,6 +47,9 @@ namespace CZToolKit.ECS
         {
             get { return TypeManager.GetType(id); }
         }
+        
+        public static implicit operator TypeInfo(Type d) => TypeManager.GetTypeInfo(d);
+        public static explicit operator Type(TypeInfo b) => TypeManager.GetType(b.id);
     }
 
     public class TypeInfo<TComponent>
