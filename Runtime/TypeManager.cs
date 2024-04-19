@@ -59,7 +59,7 @@ namespace CZToolKit.ECS
             s_ManagedTypeMap = new Dictionary<Type, Type>();
             s_Types = new List<Type>(MAXIMUN_TYPE_COUNT);
 
-            var managedComponentType = typeof(IManagedComponent);
+            AddComponentType(typeof(Entity));
             for (int i = 0; i < Util_TypeCache.AllTypes.Count; i++)
             {
                 var type = (Type)null;
@@ -95,72 +95,79 @@ namespace CZToolKit.ECS
                 if (s_ComponentTypeIdMap.ContainsKey(type))
                     continue;
 
-                s_Types.Add(type);
-
-                var typeIndex = s_TypeCount;
-                var typeId = s_TypeCount;
-                var componentSize = UnsafeUtil.SizeOf(type);
-                var alighInBytes = CalculateAlignmentInChunk(componentSize);
-                var isZeroSize = componentSize == 0;
-                var isManagedComponentType = managedComponentType.IsAssignableFrom(type);
-                var worldIdOffset = 0;
-                var idOffset = 0;
-
-                if (isManagedComponentType)
-                {
-                    var worldIdField = type.GetField(nameof(ManagedComponentBridge.worldId));
-
-                    if (worldIdField == null)
-                    {
-                        Log.Error($"{type.FullName}需要包含int worldId字段");
-                        continue;
-                    }
-
-                    var idField = type.GetField(nameof(ManagedComponentBridge.entityId));
-                    if (idField == null)
-                    {
-                        Log.Error($"{type.FullName}需要包含uint {nameof(ManagedComponentBridge.entityId)}字段");
-                        continue;
-                    }
-
-                    var interfaces = type.GetInterfaces();
-                    for (int j = 0; j < interfaces.Length; j++)
-                    {
-                        var interfaceType = interfaces[j];
-
-                        if (interfaceType == managedComponentType)
-                        {
-                            continue;
-                        }
-
-                        if (!managedComponentType.IsAssignableFrom(interfaceType))
-                        {
-                            continue;
-                        }
-
-                        s_ManagedTypeMap[type] = interfaceType.GetGenericArguments()[0];
-
-                        break;
-                    }
-
-                    worldIdOffset = UnsafeUtil.GetFieldOffset(worldIdField);
-                    idOffset = UnsafeUtil.GetFieldOffset(idField);
-                }
-
-                // if (isZeroSize)
-                //     typeId |= ZERO_SIZE_FLAG;
-                //
-                // if (isManagedComponentType)
-                //     typeId |= MANAGED_COMPONENT_FLAG;
-
-                var typeInfo = new TypeInfo(typeIndex, typeId, componentSize, alighInBytes, isZeroSize, isManagedComponentType, worldIdOffset, idOffset);
-
-                s_TypeInfos[s_TypeCount] = typeInfo;
-                s_ComponentTypeIdMap[type] = typeId;
-                s_TypeCount++;
+                AddComponentType(type);
             }
 
             s_Initialized = true;
+        }
+
+        private static void AddComponentType(Type type)
+        {
+            var managedComponentType = typeof(IManagedComponent);
+
+            s_Types.Add(type);
+
+            var typeIndex = s_TypeCount;
+            var typeId = s_TypeCount;
+            var componentSize = UnsafeUtil.SizeOf(type);
+            var alighInBytes = CalculateAlignmentInChunk(componentSize);
+            var isZeroSize = componentSize == 0;
+            var isManagedComponentType = managedComponentType.IsAssignableFrom(type);
+            var worldIdOffset = 0;
+            var idOffset = 0;
+
+            if (isManagedComponentType)
+            {
+                var worldIdField = type.GetField(nameof(ManagedComponentBridge.worldId));
+
+                if (worldIdField == null)
+                {
+                    Log.Error($"{type.FullName}需要包含int worldId字段");
+                    return;
+                }
+
+                var idField = type.GetField(nameof(ManagedComponentBridge.entityId));
+                if (idField == null)
+                {
+                    Log.Error($"{type.FullName}需要包含uint {nameof(ManagedComponentBridge.entityId)}字段");
+                    return;
+                }
+
+                var interfaces = type.GetInterfaces();
+                for (int j = 0; j < interfaces.Length; j++)
+                {
+                    var interfaceType = interfaces[j];
+
+                    if (interfaceType == managedComponentType)
+                    {
+                        continue;
+                    }
+
+                    if (!managedComponentType.IsAssignableFrom(interfaceType))
+                    {
+                        continue;
+                    }
+
+                    s_ManagedTypeMap[type] = interfaceType.GetGenericArguments()[0];
+
+                    break;
+                }
+
+                worldIdOffset = UnsafeUtil.GetFieldOffset(worldIdField);
+                idOffset = UnsafeUtil.GetFieldOffset(idField);
+            }
+
+            if (isZeroSize)
+                typeId |= ZERO_SIZE_FLAG;
+
+            if (isManagedComponentType)
+                typeId |= MANAGED_COMPONENT_FLAG;
+
+            var typeInfo = new TypeInfo(typeIndex, typeId, componentSize, alighInBytes, isZeroSize, isManagedComponentType, worldIdOffset, idOffset);
+
+            s_TypeInfos[s_TypeCount] = typeInfo;
+            s_ComponentTypeIdMap[type] = typeId;
+            s_TypeCount++;
         }
 
         private static int CalculateAlignmentInChunk(int sizeOfTypeInBytes)

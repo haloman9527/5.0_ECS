@@ -10,30 +10,43 @@ namespace CZToolKit.ECS
         public const int DEFAULT_CHUNKS_LENGTH = 4;
 
         public TypeInfo* sortedTypes;
+        public int* offsets;
         public int typesCount;
         public int archetypeHash;
-        public int chunkSize;
+        public int componentsSize;
         public UnsafeParallelHashMap<int, int> typeInArchetypeIndexMap;
-        public NativeArray<Chunk> chunks;
+        public UnsafePtrList<Chunk> chunks;
+        public UnsafePtrList<Chunk> chunksWithEmptySlots;
 
-        public Archetype(TypeInfo* sortedTypes, int count)
+        // public Archetype(TypeInfo* sortedTypes, int count)
+        // {
+        //     this.sortedTypes = sortedTypes;
+        //     this.typesCount = count;
+        //
+        //     this.archetypeHash = 0;
+        //     this.chunkSize = 0;
+        //
+        //     this.typeInArchetypeIndexMap = new UnsafeParallelHashMap<int, int>(count, Allocator.Persistent);
+        //     this.chunks = new UnsafeList<Chunk>(DEFAULT_CHUNKS_LENGTH, Allocator.Persistent);
+        //
+        //     for (int i = 0; i < count; i++)
+        //     {
+        //         var typeInfo = (sortedTypes + i);
+        //         this.archetypeHash ^= typeInfo->id;
+        //         this.chunkSize += typeInfo->componentSize;
+        //         this.typeInArchetypeIndexMap[typeInfo->id] = i;
+        //     }
+        // }
+
+        internal Chunk* GetExistingChunkWithEmptySlots()
         {
-            this.sortedTypes = sortedTypes;
-            this.typesCount = count;
-
-            this.archetypeHash = 0;
-            this.chunkSize = 0;
-
-            this.typeInArchetypeIndexMap = new UnsafeParallelHashMap<int, int>(count, Allocator.Persistent);
-            this.chunks = new NativeArray<Chunk>(DEFAULT_CHUNKS_LENGTH, Allocator.Persistent);
-
-            for (int i = 0; i < count; i++)
+            if (chunksWithEmptySlots.Length != 0)
             {
-                var typeInfo = (sortedTypes + i);
-                this.archetypeHash ^= typeInfo->id;
-                this.chunkSize += typeInfo->componentSize;
-                this.typeInArchetypeIndexMap[typeInfo->id] = i;
+                var chunk = chunksWithEmptySlots.Ptr[0];
+                return chunk;
             }
+
+            return null;
         }
 
         public int GetTypeInArchetypeIndex(int typeId)
@@ -42,20 +55,26 @@ namespace CZToolKit.ECS
             {
                 return -1;
             }
-        
+
             return typeInArchetypeIndex;
         }
-        
+
         public int GetTypeInArchetypeIndex(TypeInfo typeInfo)
         {
             var typeId = typeInfo.id;
             return GetTypeInArchetypeIndex(typeId);
         }
-        
+
         public int GetTypeInArchetypeIndex(Type type)
         {
             var typeId = TypeManager.GetTypeId(type);
             return GetTypeInArchetypeIndex(typeId);
+        }
+
+        public void Reset()
+        {
+            typeInArchetypeIndexMap.Clear();
+            chunks.Clear();
         }
 
         public void Dispose()
@@ -69,6 +88,7 @@ namespace CZToolKit.ECS
     public unsafe struct Chunk
     {
         public const int CHUNK_SIZE = 16 * 1024;
+
         // NOTE: SequenceNumber is not part of the serialized header.
         //       It is cleared on write to disk, it is a global in memory sequence ID used for comparing chunks.
         public const int SERIALIZED_HEADER_SIZE = 40;
@@ -76,36 +96,29 @@ namespace CZToolKit.ECS
         public const int BUFFER_SIZE = CHUNK_SIZE - BUFFER_OFFSET;
         public const int MAXIMUM_ENTITIES_PER_CHUNK = BUFFER_SIZE / 8;
 
-        [FieldOffset(0)]
-        public Archetype* archetype;
-        
-        [FieldOffset(8)]
-        public int capacity;
-        
-        [FieldOffset(12)]
-        public int count;
+        [FieldOffset(0)] public Archetype* archetype;
+
+        [FieldOffset(8)] public int capacity;
+
+        [FieldOffset(12)] public int count;
 
         /// <summary>
         /// The index of this Chunk within its ArchetypeChunkData's chunk list
         /// </summary>
-        [FieldOffset(16)]
-        public int listIndex;
+        [FieldOffset(16)] public int listIndex;
 
         // Special chunk behaviors
-        [FieldOffset(20)]
-        public uint flags;
-        
+        [FieldOffset(20)] public uint flags;
+
         // SequenceNumber is a unique number for each chunk, across all worlds. (Chunk* is not guranteed unique, in particular because chunk allocations are pooled)
-        [FieldOffset(SERIALIZED_HEADER_SIZE)]
-        public ulong sequenceNumber;
-        
-        [FieldOffset(BUFFER_OFFSET)]
-        public fixed byte buffer[BUFFER_SIZE];
-        
+        [FieldOffset(SERIALIZED_HEADER_SIZE)] public ulong sequenceNumber;
+
+        [FieldOffset(BUFFER_OFFSET)] public fixed byte buffer[BUFFER_SIZE];
+
         public int UnusedCount => capacity - count;
     }
 
-    public unsafe class TypeInArchetype
+    public unsafe struct TypeInArchetype
     {
         public Archetype* archetype;
         public int typeId;
@@ -113,7 +126,7 @@ namespace CZToolKit.ECS
         public int offsetInChunk;
     }
 
-    public unsafe class EntityInChunk
+    public unsafe struct EntityInChunk
     {
         public Chunk* chunk;
         public int indexInChunk;

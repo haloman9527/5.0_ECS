@@ -50,6 +50,41 @@ namespace CZToolKit.ECS
         
         public static implicit operator TypeInfo(Type d) => TypeManager.GetTypeInfo(d);
         public static explicit operator Type(TypeInfo b) => TypeManager.GetType(b.id);
+        
+        public static bool operator<(TypeInfo lhs, TypeInfo rhs)
+        {
+            return lhs.index < rhs.index;
+        }
+
+        public static bool operator>(TypeInfo lhs, TypeInfo rhs)
+        {
+            return rhs < lhs;
+        }
+
+        public static bool operator==(TypeInfo lhs, TypeInfo rhs)
+        {
+            return lhs.index == rhs.index;
+        }
+
+        public static bool operator!=(TypeInfo lhs, TypeInfo rhs)
+        {
+            return lhs.index != rhs.index;
+        }
+
+        public bool Equals(TypeInfo other)
+        {
+            return id == other.id;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is TypeInfo && (TypeInfo)obj == this;
+        }
+
+        public override int GetHashCode()
+        {
+            return id;
+        }
     }
 
     public class TypeInfo<TComponent>
