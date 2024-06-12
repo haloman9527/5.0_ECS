@@ -35,7 +35,7 @@ namespace CZToolKit.ECS
             var index = entityIndexGenerator.Next();
             var entity = new Entity(this.id, index);
             entities.Add(index, entity);
-            worldOperationListener?.OnCreateEntity(this, entity);
+            worldOperationListener?.AfterCreateEntity(this, entity);
             return entity;
         }
 
@@ -44,30 +44,50 @@ namespace CZToolKit.ECS
             return entities.ContainsKey(entity.id);
         }
 
+        public Entity GetEntity(int entityId)
+        {
+            entities.TryGetValue(entityId, out var entity);
+            return entity;
+        }
+
         public void DestroyEntity(Entity entity)
         {
             if (!entities.ContainsKey(entity.id))
             {
                 return;
             }
-            worldOperationListener?.OnDestroyEntity(this, entity);
-            entities.Remove(entity.id);
+            worldOperationListener?.BeforeDestroyEntity(this, entity);
             foreach (var components in componentContainers.GetValueArray(Allocator.Temp))
             {
+                worldOperationListener?.BeforeRemoveComponent(this, entity, components.typeInfo);
                 if (components.typeInfo.isManagedComponentType)
                 {
                     references.Release(components.typeInfo.id, entity.id);
                 }
 
                 components.Del(entity);
+                worldOperationListener?.AfterRemoveComponent(this, entity, components.typeInfo);
             }
+            entities.Remove(entity.id);
+        }
+
+        public void DestroyEntity(int entityId)
+        {
+            if (!entities.TryGetValue(entityId, out var entity))
+            {
+                return;
+            }
+
+            DestroyEntity(entity);
         }
 
         private void DisposeAllEntities()
         {
+            worldOperationListener?.BeforeWorldDispose(this);
             entities.Clear();
             entities.Dispose();
             s_WorldIDGenerator.Reset();
+            worldOperationListener?.AfterWorldDispose(this);
         }
     }
 }
