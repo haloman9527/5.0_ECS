@@ -34,7 +34,7 @@
         public static bool IsValid(this Entity entity)
         {
             var world = entity.World;
-            return world.Exists(entity);
+            return world != null && world.Exists(entity);
         }
 
         public static T GetComponent<T>(this Entity entity) where T : unmanaged, IComponent

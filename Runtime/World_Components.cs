@@ -80,9 +80,9 @@ namespace CZToolKit.ECS
 
         #region Has
 
-        public bool HasComponent(Entity entity, int typeHash)
+        public bool HasComponent(Entity entity, int componentTypeId)
         {
-            if (!componentContainers.TryGetValue(typeHash, out var components))
+            if (!componentContainers.TryGetValue(componentTypeId, out var components))
                 return false;
             return components.Contains(entity);
         }

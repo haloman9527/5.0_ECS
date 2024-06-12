@@ -3,11 +3,11 @@ namespace CZToolKit.ECS
 {
     public interface IWorldOperationListener
     {
-        void OnCreateEntity(World world, Entity entity);
+        void AfterCreateEntity(World world, Entity entity);
 
-        void OnDestroyEntity(World world, Entity entity);
+        void BeforeDestroyEntity(World world, Entity entity);
         
-        void OnSetComponent(World world, Entity entity, TypeInfo component);
+        void OnSetComponent(World world, Entity entity, TypeInfo componentType);
 
         void BeforeRemoveComponent(World world, Entity entity, TypeInfo componentType);
 
