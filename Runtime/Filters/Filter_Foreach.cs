@@ -34,7 +34,7 @@ namespace CZToolKit.ECS
 
     public partial class Filter
     {
-        public void ForeachWithEntity<C0>(ForeachAction<C0> action)
+        public void ForeachWithoutEntity<C0>(ForeachAction<C0> action)
             where C0 : unmanaged, IComponent
         {
             if (!world.ExistsComponentContainer<C0>())
@@ -48,7 +48,7 @@ namespace CZToolKit.ECS
             }
         }
 
-        public void ForeachWithEntity<C0, C1>(ForeachAction<C0, C1> action)
+        public void ForeachWithoutEntity<C0, C1>(ForeachAction<C0, C1> action)
             where C0 : unmanaged, IComponent
             where C1 : unmanaged, IComponent
         {
@@ -72,7 +72,7 @@ namespace CZToolKit.ECS
             }
         }
 
-        public void ForeachWithEntity<C0, C1, C2>(ForeachAction<C0, C1, C2> action)
+        public void ForeachWithoutEntity<C0, C1, C2>(ForeachAction<C0, C1, C2> action)
             where C0 : unmanaged, IComponent
             where C1 : unmanaged, IComponent
             where C2 : unmanaged, IComponent
@@ -105,7 +105,7 @@ namespace CZToolKit.ECS
             }
         }
 
-        public void ForeachWithEntity<C0, C1, C2, C3>(ForeachAction<C0, C1, C2, C3> action)
+        public void ForeachWithoutEntity<C0, C1, C2, C3>(ForeachAction<C0, C1, C2, C3> action)
             where C0 : unmanaged, IComponent
             where C1 : unmanaged, IComponent
             where C2 : unmanaged, IComponent
@@ -147,7 +147,7 @@ namespace CZToolKit.ECS
             }
         }
 
-        public void ForeachWithEntity<C0, C1, C2, C3, C4>(ForeachAction<C0, C1, C2, C3, C4> action)
+        public void ForeachWithoutEntity<C0, C1, C2, C3, C4>(ForeachAction<C0, C1, C2, C3, C4> action)
             where C0 : unmanaged, IComponent
             where C1 : unmanaged, IComponent
             where C2 : unmanaged, IComponent
@@ -198,7 +198,7 @@ namespace CZToolKit.ECS
             }
         }
 
-        public void ForeachWithEntity<C0, C1, C2, C3, C4, C5>(ForeachAction<C0, C1, C2, C3, C4, C5> action)
+        public void ForeachWithoutEntity<C0, C1, C2, C3, C4, C5>(ForeachAction<C0, C1, C2, C3, C4, C5> action)
             where C0 : unmanaged, IComponent
             where C1 : unmanaged, IComponent
             where C2 : unmanaged, IComponent
