@@ -56,6 +56,8 @@ namespace CZToolKit.ECS
 
         public readonly int id;
 
+        public readonly Entity singleton;
+
         public bool IsDisposed
         {
             get { return id == 0; }
@@ -66,6 +68,7 @@ namespace CZToolKit.ECS
             this.id = s_WorldIDGenerator.Next();
             s_AllWorlds.Add(this);
             s_AllWorldsMap.Add(this.id, this);
+            this.singleton = this.CreateEntity();
         }
 
         public virtual void Dispose()
