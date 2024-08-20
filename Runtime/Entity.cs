@@ -68,7 +68,7 @@ namespace CZToolKit.ECS
 
         public override string ToString()
         {
-            return $"World:{worldId}  Entity:{id}";
+            return $"(World:{worldId} Entity:{id})";
         }
     }
 }

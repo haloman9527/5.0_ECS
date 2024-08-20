@@ -106,14 +106,19 @@ namespace CZToolKit.ECS
         public T GetComponent<T>(Entity entity) where T : unmanaged, IComponent
         {
             if (!componentContainers.TryGetValue(TypeInfo<T>.Id, out var components))
-                throw new Exception();
+            {
+                return default;
+                // throw new Exception($"实体{entity.ToString()}没有{typeof(T)}组件");
+            }
             return components.Get<T>(entity);
         }
 
         public ref T RefComponent<T>(Entity entity) where T : unmanaged, IComponent
         {
             if (!componentContainers.TryGetValue(TypeInfo<T>.Id, out var components))
-                throw new Exception();
+            {
+                throw new Exception($"实体{entity.ToString()}没有{typeof(T)}组件");
+            }
             return ref components.Ref<T>(entity);
         }
 
@@ -180,12 +185,9 @@ namespace CZToolKit.ECS
             {
                 components = NewComponentContainer<TC>();
             }
-            else
+            else if (components.Contains(entity))
             {
-                if (components.Contains(entity))
-                {
-                    RemoveComponent<TC>(entity);
-                }
+                RemoveComponent<TC>(entity);
             }
 
             components.Set(entity, ref component);
