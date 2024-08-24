@@ -25,12 +25,12 @@ namespace CZToolKit.ECS
 {
     public unsafe struct ComponentsContainer : IDisposable
     {
-        public TypeInfo typeInfo;
-        public IntPtr componentsPtr;
+        public readonly TypeInfo typeInfo;
+        public readonly IntPtr componentsPtr;
 
-        public ComponentsContainer(TypeInfo typeInfp, int capacity)
+        public ComponentsContainer(TypeInfo typeInfo, int capacity)
         {
-            this.typeInfo = typeInfp;
+            this.typeInfo = typeInfo;
             var components = new UnsafeParallelHashMap<Entity, IntPtr>(capacity, Allocator.Persistent);
             var componentsSize = UnsafeUtil.SizeOf<UnsafeParallelHashMap<Entity, IntPtr>>();
             var componentsAlign = UnsafeUtil.AlignOf<UnsafeParallelHashMap<Entity, IntPtr>>();

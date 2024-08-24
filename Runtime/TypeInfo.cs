@@ -3,9 +3,9 @@
 /***
  *
  *  Title:
- *  
+ *
  *  Description:
- *  
+ *
  *  Date:
  *  Version:
  *  Writer: 半只龙虾人
@@ -22,77 +22,40 @@ namespace CZToolKit.ECS
 {
     public struct TypeInfo
     {
-        public readonly int index;
-        public readonly int id;
-        public readonly int componentSize;
-        public readonly int alignInBytes;
-        public readonly bool isZeroSize;
-        public readonly bool isManagedComponentType;
-        public readonly int worldIdOffset;
-        public readonly int idOffset;
+        public int index;
+        public int id;
+        public int componentSize;
+        public int alignInBytes;
+        public bool isZeroSize;
+        public bool isManagedComponentType;
+        public int worldIdOffset;
+        public int idOffset;
 
-        public TypeInfo(int index, int id, int componentSize, int alignInBytes, bool isZeroSize, bool isManagedComponentType, int worldIdOffset, int idOffset)
-        {
-            this.index = index;
-            this.id = id;
-            this.componentSize = componentSize;
-            this.alignInBytes = alignInBytes;
-            this.isZeroSize = isZeroSize;
-            this.isManagedComponentType = isManagedComponentType;
-            this.worldIdOffset = worldIdOffset;
-            this.idOffset = idOffset;
-        }
+        public Type Type => TypeManager.GetType(id);
 
-        public Type Type
-        {
-            get { return TypeManager.GetType(id); }
-        }
-        
         public static implicit operator TypeInfo(Type d) => TypeManager.GetTypeInfo(d);
         public static explicit operator Type(TypeInfo b) => TypeManager.GetType(b.id);
-        
-        public static bool operator<(TypeInfo lhs, TypeInfo rhs)
-        {
-            return lhs.index < rhs.index;
-        }
 
-        public static bool operator>(TypeInfo lhs, TypeInfo rhs)
-        {
-            return rhs < lhs;
-        }
+        public static bool operator <(TypeInfo lhs, TypeInfo rhs) => lhs.index < rhs.index;
 
-        public static bool operator==(TypeInfo lhs, TypeInfo rhs)
-        {
-            return lhs.index == rhs.index;
-        }
+        public static bool operator >(TypeInfo lhs, TypeInfo rhs) => rhs < lhs;
 
-        public static bool operator!=(TypeInfo lhs, TypeInfo rhs)
-        {
-            return lhs.index != rhs.index;
-        }
+        public static bool operator ==(TypeInfo lhs, TypeInfo rhs) => lhs.index == rhs.index;
 
-        public bool Equals(TypeInfo other)
-        {
-            return id == other.id;
-        }
+        public static bool operator !=(TypeInfo lhs, TypeInfo rhs) => lhs.index != rhs.index;
+        public bool Equals(TypeInfo other) => id == other.id;
 
-        public override bool Equals(object obj)
-        {
-            return obj is TypeInfo && (TypeInfo)obj == this;
-        }
+        public override bool Equals(object obj) => obj is TypeInfo && (TypeInfo)obj == this;
 
-        public override int GetHashCode()
-        {
-            return id;
-        }
+        public override int GetHashCode() => id;
     }
 
     public class TypeInfo<TComponent>
     {
-        public readonly static int Id;
-        public readonly static int Size;
-        public readonly static bool IsZeroSize;
-        public readonly static bool IsManagedType;
+        public static readonly int Id;
+        public static readonly int Size;
+        public static readonly bool IsZeroSize;
+        public static readonly bool IsManagedType;
 
         static TypeInfo()
         {

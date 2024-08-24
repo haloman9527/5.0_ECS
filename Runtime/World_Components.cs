@@ -36,10 +36,7 @@ namespace CZToolKit.ECS
             this.worldOperationListener = worldOperationListener;
         }
 
-        private NativeParallelHashMap<int, ComponentsContainer> ComponentContainers
-        {
-            get { return componentContainers; }
-        }
+        public NativeParallelHashMap<int, ComponentsContainer> ComponentContainers => componentContainers;
 
         private ComponentsContainer NewComponentContainer<T>(int capacity) where T : unmanaged, IComponent
         {

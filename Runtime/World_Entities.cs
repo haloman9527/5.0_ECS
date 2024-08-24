@@ -25,10 +25,7 @@ namespace CZToolKit.ECS
         private IndexGenerator entityIndexGenerator = new IndexGenerator();
         private NativeParallelHashMap<int, Entity> entities = new NativeParallelHashMap<int, Entity>(256, Allocator.Persistent);
 
-        public NativeParallelHashMap<int, Entity> Entities
-        {
-            get { return entities; }
-        }
+        public NativeParallelHashMap<int, Entity> Entities => entities;
 
         public Entity CreateEntity()
         {

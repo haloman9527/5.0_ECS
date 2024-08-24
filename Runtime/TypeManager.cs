@@ -103,16 +103,14 @@ namespace CZToolKit.ECS
 
         private static void AddComponentType(Type type)
         {
-            var managedComponentType = typeof(IManagedComponent);
-
             s_Types.Add(type);
 
             var typeIndex = s_TypeCount;
             var typeId = s_TypeCount;
             var componentSize = UnsafeUtil.SizeOf(type);
-            var alighInBytes = CalculateAlignmentInChunk(componentSize);
+            var alignInBytes = CalculateAlignmentInChunk(componentSize);
             var isZeroSize = componentSize == 0;
-            var isManagedComponentType = managedComponentType.IsAssignableFrom(type);
+            var isManagedComponentType = typeof(IManagedComponent).IsAssignableFrom(type);
             var worldIdOffset = 0;
             var idOffset = 0;
 
@@ -138,12 +136,12 @@ namespace CZToolKit.ECS
                 {
                     var interfaceType = interfaces[j];
 
-                    if (interfaceType == managedComponentType)
+                    if (interfaceType == typeof(IManagedComponent))
                     {
                         continue;
                     }
 
-                    if (!managedComponentType.IsAssignableFrom(interfaceType))
+                    if (!typeof(IManagedComponent).IsAssignableFrom(interfaceType))
                     {
                         continue;
                     }
@@ -163,7 +161,18 @@ namespace CZToolKit.ECS
             if (isManagedComponentType)
                 typeId |= MANAGED_COMPONENT_FLAG;
 
-            var typeInfo = new TypeInfo(typeIndex, typeId, componentSize, alighInBytes, isZeroSize, isManagedComponentType, worldIdOffset, idOffset);
+            var typeInfo = new TypeInfo()
+            {
+                index = typeIndex,
+                id = typeId,
+                componentSize = componentSize,
+                alignInBytes = alignInBytes,
+                isZeroSize = isZeroSize,
+                isManagedComponentType = isManagedComponentType,
+                worldIdOffset = worldIdOffset,
+                idOffset = idOffset,
+            };
+
 
             s_TypeInfos[s_TypeCount] = typeInfo;
             s_ComponentTypeIdMap[type] = typeId;

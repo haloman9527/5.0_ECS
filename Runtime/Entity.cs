@@ -31,11 +31,10 @@ namespace CZToolKit.ECS
             this.id = id;
         }
 
-        public World World
-        {
-            get { return World.GetWorld(worldId); }
-        }
+        public World World => World.GetWorld(worldId);
 
+        public static Entity Empty => new Entity(0, 0);
+        
         public static bool operator ==(in Entity lhs, in Entity rhs)
         {
             return lhs.worldId == rhs.worldId && lhs.id == rhs.id;
