@@ -2,6 +2,25 @@
 {
     public static class EntityEx
     {
+        public static T GetValue<C, T>(this C component) where C : unmanaged, IManagedComponent where T : class
+        {
+            var world = World.GetWorld(component.WorldId);
+            if (world == null)
+            {
+                return null;
+            }
+
+            var typeInfo = TypeManager.GetTypeInfo(component.GetType());
+            return world.references.Get(typeInfo.id, component.EntityId) as T;
+        }
+
+        public static void SetValue<C, T>(this C component, T value) where C : unmanaged, IManagedComponent where T : class
+        {
+            var world = World.GetWorld(component.WorldId);
+            var typeInfo = TypeManager.GetTypeInfo(component.GetType());
+            world.references.Set(typeInfo.id, component.EntityId, value);
+        }
+
         public static T GetValue<T>(this IManagedComponent<T> component) where T : class
         {
             var world = World.GetWorld(component.WorldId);
@@ -9,7 +28,7 @@
             {
                 return null;
             }
-            
+
             var typeInfo = TypeManager.GetTypeInfo(component.GetType());
             return world.references.Get(typeInfo.id, component.EntityId) as T;
         }
@@ -21,15 +40,24 @@
             world.references.Set(typeInfo.id, component.EntityId, value);
         }
 
-        // public static object GetValue(this IManagedComponent component, World world)
-        // {
-        //     return world.references.Get(component.Id);
-        // }
-        //
-        // public static void SetValue(this IManagedComponent component, World world, object value)
-        // {
-        //     world.references.Set(component.Id, value);
-        // }
+        public static object GetValue(this IManagedComponent component)
+        {
+            var world = World.GetWorld(component.WorldId);
+            if (world == null)
+            {
+                return null;
+            }
+
+            var typeInfo = TypeManager.GetTypeInfo(component.GetType());
+            return world.references.Get(typeInfo.id, component.EntityId);
+        }
+
+        public static void SetValue(this IManagedComponent component, object value)
+        {
+            var world = World.GetWorld(component.WorldId);
+            var typeInfo = TypeManager.GetTypeInfo(component.GetType());
+            world.references.Set(typeInfo.id, component.EntityId, value);
+        }
 
         public static bool IsValid(this Entity entity)
         {
