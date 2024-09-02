@@ -90,12 +90,12 @@
             entity.World.SetComponent(entity, component);
         }
 
-        public static void SetComponent<TC, TR>(this Entity entity, TC component, TR value) where TC : unmanaged, IManagedComponent<TR> where TR : class
+        public static void SetComponent<C, R>(this Entity entity, C component, R value) where C : unmanaged, IManagedComponent<R> where R : class
         {
             entity.World.SetComponent(entity, component, value);
         }
 
-        public static void SetComponent<TC, TR>(this Entity entity, ref TC component, TR value) where TC : unmanaged, IManagedComponent<TR> where TR : class
+        public static void SetComponent<C, R>(this Entity entity, ref C component, R value) where C : unmanaged, IManagedComponent<R> where R : class
         {
             entity.World.SetComponent(entity, ref component, value);
         }
