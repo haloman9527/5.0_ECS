@@ -30,7 +30,7 @@ namespace CZToolKit.ECS
         public Entity CreateEntity()
         {
             var index = entityIndexGenerator.Next();
-            var entity = new Entity(this.id, index);
+            var entity = new Entity(this.Id, index);
             entities.Add(index, entity);
             worldOperationListener?.AfterCreateEntity(this, entity);
             return entity;

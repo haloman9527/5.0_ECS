@@ -26,13 +26,12 @@ namespace CZToolKit.ECS
         #region Static
 
         private static IndexGenerator s_WorldIDGenerator = new IndexGenerator();
-        private readonly static List<World> s_AllWorlds = new List<World>();
-        private readonly static Dictionary<int, World> s_AllWorldsMap = new Dictionary<int, World>();
+        private static readonly List<World> s_AllWorlds = new List<World>();
+        private static readonly Dictionary<int, World> s_AllWorldsMap = new Dictionary<int, World>();
 
-        public static IReadOnlyList<World> AllWorlds
-        {
-            get { return s_AllWorlds; }
-        }
+        public static World DefaultWorld => s_AllWorlds[0];
+
+        public static IReadOnlyList<World> AllWorlds => s_AllWorlds;
 
         public static World GetWorld(int worldId)
         {
@@ -54,27 +53,23 @@ namespace CZToolKit.ECS
 
         #endregion
 
-        public readonly int id;
+        public int Id { get; private set; }
+        public Entity Singleton { get; private set; }
 
-        public readonly Entity singleton;
-
-        public bool IsDisposed
-        {
-            get { return id == 0; }
-        }
+        public bool IsDisposed => Id == 0;
 
         public World()
         {
-            this.id = s_WorldIDGenerator.Next();
+            this.Id = s_WorldIDGenerator.Next();
             s_AllWorlds.Add(this);
-            s_AllWorldsMap.Add(this.id, this);
-            this.singleton = this.CreateEntity();
+            s_AllWorldsMap.Add(this.Id, this);
+            this.Singleton = this.CreateEntity();
         }
 
         public virtual void Dispose()
         {
             s_AllWorlds.Remove(this);
-            s_AllWorldsMap.Remove(this.id);
+            s_AllWorldsMap.Remove(this.Id);
 
             DisposeAllEntities();
             RemoveAllComponents();

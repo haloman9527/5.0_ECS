@@ -174,7 +174,7 @@ namespace CZToolKit.ECS
 
         public void SetComponent<TC, TR>(Entity entity, TC component, TR value) where TC : unmanaged, IManagedComponent<TR> where TR : class
         {
-            component.WorldId = this.id;
+            component.WorldId = this.Id;
             component.EntityId = entity.id;
 
             var typeInfo = TypeManager.GetTypeInfo<TC>();
@@ -194,7 +194,7 @@ namespace CZToolKit.ECS
 
         public void SetComponent<TC, TR>(Entity entity, ref TC component, TR value) where TC : unmanaged, IManagedComponent<TR> where TR : class
         {
-            component.WorldId = this.id;
+            component.WorldId = this.Id;
             component.EntityId = entity.id;
 
             var typeInfo = TypeManager.GetTypeInfo<TC>();

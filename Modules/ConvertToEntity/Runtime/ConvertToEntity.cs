@@ -3,31 +3,21 @@
 namespace CZToolKit.ECS
 {
     [DisallowMultipleComponent]
-    public class ConvertToEntity : MonoBehaviour
+    public class EntityPreset : MonoBehaviour
     {
-        [SerializeField] 
-        private bool destroyOnAwake;
-        public Entity Entity { get; private set; }
-
-        private void Awake()
+        public void GenerateEntity(World world)
         {
-            // Entity = World.DefaultWorld.CreateEntity();
-            //
-            // var goc = new GameObjectComponent();
-            // World.DefaultWorld.SetComponent(Entity, ref goc);
-            // goc.SetValue(World.DefaultWorld, gameObject);
-            //
-            // World.DefaultWorld.SetComponent(Entity, new PositionComponent() { value = transform.position });
-            // World.DefaultWorld.SetComponent(Entity, new RotationComponent() { value = transform.rotation });
-            // World.DefaultWorld.SetComponent(Entity, new ScaleComponent() { value = transform.localScale });
-            //
-            // foreach (var convert in GetComponents<ComponentConverter>())
-            // {
-            //     convert.ConvertToComponent(World.DefaultWorld, Entity);
-            // }
-            //
-            // if (destroyOnAwake)
-            //     GameObject.Destroy(this);
+            var entity = world.CreateEntity();
+
+            foreach (var task in GetComponents<IEntityBuildTask>())
+            {
+                task.Execute(world, in entity);
+            }
         }
+    }
+
+    public interface IEntityBuildTask
+    {
+        void Execute(World world, in Entity entity);
     }
 }
