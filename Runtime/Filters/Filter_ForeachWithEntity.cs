@@ -32,7 +32,7 @@ namespace CZToolKit.ECS
 
     public delegate void ForeachWithEntityAction<C0, C1, C2, C3, C4, C5>(Entity entity, ref C0 c0, ref C1 c1, ref C2 c2, ref C3 c3, ref C4 c4, ref C5 c5) where C0 : struct, IComponent where C1 : struct, IComponent where C2 : struct, IComponent where C3 : struct, IComponent where C4 : struct, IComponent where C5 : struct, IComponent;
 
-    public partial class Filter
+    public partial struct Query
     {
         public void ForeachWithEntity<C0>(ForeachWithEntityAction<C0> action)
             where C0 : unmanaged, IComponent

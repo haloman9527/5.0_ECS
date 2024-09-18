@@ -252,6 +252,10 @@ namespace CZToolKit.ECS
         }
 
         #endregion
+        
+        #region Query
+
+        #endregion
 
         private void RemoveAllComponents()
         {

@@ -19,11 +19,11 @@ using Unity.Collections;
 
 namespace CZToolKit.ECS
 {
-    public partial class Filter
+    public partial struct Query
     {
         private readonly World world;
 
-        public Filter(World world)
+        public Query(World world)
         {
             this.world = world;
         }

@@ -23,12 +23,12 @@ namespace CZToolKit.ECS.Examples
     public class CustomSystem : ComponentSystem
     {
         private World world;
-        private Filter filter;
+        private Query filter;
 
         public CustomSystem(World world)
         {
             this.world = world;
-            this.filter = new Filter(world);
+            this.filter = new Query(world);
         }
 
         public override void Execute()
