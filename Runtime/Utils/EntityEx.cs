@@ -1,4 +1,4 @@
-﻿namespace CZToolKit.ECS
+﻿namespace Jiange.ECS
 {
     public static class EntityEx
     {

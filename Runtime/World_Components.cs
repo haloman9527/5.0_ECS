@@ -17,10 +17,10 @@
 #endregion
 
 using System;
-using CZToolKit.UnsafeEx;
+using Jiange.UnsafeEx;
 using Unity.Collections;
 
-namespace CZToolKit.ECS
+namespace Jiange.ECS
 {
     public partial class World
     {

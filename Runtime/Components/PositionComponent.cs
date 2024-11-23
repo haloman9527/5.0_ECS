@@ -15,7 +15,7 @@
 #endregion
 using UnityEngine;
 
-namespace CZToolKit.ECS
+namespace Jiange.ECS
 {
     public struct PositionComponent : IComponent
     {

@@ -18,7 +18,7 @@
 
 using UnityEngine;
 
-namespace CZToolKit.ECS.Examples
+namespace Jiange.ECS.Examples
 {
     public class CustomSystem : ComponentSystem
     {

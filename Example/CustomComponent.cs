@@ -19,7 +19,7 @@
 using System.Runtime.InteropServices;
 using Unity.Burst;
 
-namespace CZToolKit.ECS.Examples
+namespace Jiange.ECS.Examples
 {
     public struct CustomComponent : IComponent
     {

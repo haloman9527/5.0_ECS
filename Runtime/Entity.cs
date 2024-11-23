@@ -18,7 +18,7 @@
 
 using System;
 
-namespace CZToolKit.ECS
+namespace Jiange.ECS
 {
     public struct Entity : IEquatable<Entity>, IComparable<Entity>
     {

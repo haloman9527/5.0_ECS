@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 
-namespace CZToolKit.ECS
+namespace Jiange.ECS
 {
     public unsafe struct Archetype : IDisposable
     {

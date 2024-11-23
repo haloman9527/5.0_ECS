@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace CZToolKit.ECS
+namespace Jiange.ECS
 {
     [DisallowMultipleComponent]
     public class EntityPreset : MonoBehaviour

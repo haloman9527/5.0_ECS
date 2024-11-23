@@ -16,7 +16,7 @@
 
 #endregion
 
-namespace CZToolKit.ECS
+namespace Jiange.ECS
 {
     
     public interface IManagedComponent : IComponent

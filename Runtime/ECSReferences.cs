@@ -18,7 +18,7 @@
 
 using System.Collections.Generic;
 
-namespace CZToolKit.ECS
+namespace Jiange.ECS
 {
     public class ECSReferences
     {

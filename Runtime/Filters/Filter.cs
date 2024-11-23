@@ -17,7 +17,7 @@
 using System.Collections.Generic;
 using Unity.Collections;
 
-namespace CZToolKit.ECS
+namespace Jiange.ECS
 {
     public partial struct Query
     {

@@ -20,7 +20,7 @@ using System;
 using System.Diagnostics;
 using UnityEngine;
 
-namespace CZToolKit.ECS.Examples
+namespace Jiange.ECS.Examples
 {
     public class ECSTest : MonoBehaviour
     {

@@ -1,5 +1,6 @@
 {
-    "name": "CZToolKit.ECS",
+    "name": "Jiange.ECS",
+    "rootNamespace": "",
     "references": [
         "GUID:5957643ee62fb75498d29ee03d7011ef",
         "GUID:e0cd26848372d4e5c891c569017e11f1",

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using CZToolKit.UnsafeEx;
+using Jiange.UnsafeEx;
 
-namespace CZToolKit.ECS
+namespace Jiange.ECS
 {
     public static partial class TypeManager
     {

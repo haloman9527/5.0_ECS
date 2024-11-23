@@ -18,7 +18,7 @@
 
 using System;
 
-namespace CZToolKit.ECS
+namespace Jiange.ECS
 {
     public struct TypeInfo
     {
