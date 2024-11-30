@@ -15,7 +15,7 @@
 #endregion
 using UnityEngine;
 
-namespace Jiange.ECS
+namespace Moyo.ECS
 {
     public struct ScaleComponent : IComponent
     {

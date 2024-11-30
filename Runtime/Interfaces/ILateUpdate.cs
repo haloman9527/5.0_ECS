@@ -14,7 +14,7 @@
  */
 #endregion
 
-namespace Jiange.ECS
+namespace Moyo.ECS
 {
     public interface ILateUpdate { }
 }

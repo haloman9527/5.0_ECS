@@ -16,7 +16,7 @@
 
 #endregion
 
-namespace Jiange.ECS
+namespace Moyo.ECS
 {
     public abstract class ComponentSystem : ISystem
     {

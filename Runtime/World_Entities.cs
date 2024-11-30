@@ -18,7 +18,7 @@
 
 using Unity.Collections;
 
-namespace Jiange.ECS
+namespace Moyo.ECS
 {
     public partial class World
     {

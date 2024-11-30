@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using Jiange.UnsafeEx;
+using Moyo.UnsafeEx;
 
-namespace Jiange.ECS
+namespace Moyo.ECS
 {
     public static partial class TypeManager
     {

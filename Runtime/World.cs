@@ -19,7 +19,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Jiange.ECS
+namespace Moyo.ECS
 {
     public partial class World : IDisposable
     {

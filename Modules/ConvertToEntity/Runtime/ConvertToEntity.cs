@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Jiange.ECS
+namespace Moyo.ECS
 {
     [DisallowMultipleComponent]
     public class EntityPreset : MonoBehaviour

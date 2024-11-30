@@ -14,7 +14,7 @@
  */
 #endregion
 
-namespace Jiange.ECS
+namespace Moyo.ECS
 {
     public interface IJobForeachWithEntity_EC<C0> where C0 : unmanaged, IComponent
     {

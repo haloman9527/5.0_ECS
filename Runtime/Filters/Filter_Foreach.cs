@@ -18,7 +18,7 @@
 
 using Unity.Collections;
 
-namespace Jiange.ECS
+namespace Moyo.ECS
 {
     public delegate void ForeachAction<C0>(ref C0 c0) where C0 : struct, IComponent;
 

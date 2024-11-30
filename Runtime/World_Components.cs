@@ -17,10 +17,10 @@
 #endregion
 
 using System;
-using Jiange.UnsafeEx;
+using Moyo.UnsafeEx;
 using Unity.Collections;
 
-namespace Jiange.ECS
+namespace Moyo.ECS
 {
     public partial class World
     {

@@ -1,4 +1,4 @@
-﻿namespace Jiange.ECS
+﻿namespace Moyo.ECS
 {
     public static class EntityEx
     {

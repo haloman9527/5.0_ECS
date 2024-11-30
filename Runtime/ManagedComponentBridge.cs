@@ -1,5 +1,5 @@
 ﻿
-namespace Jiange.ECS
+namespace Moyo.ECS
 {
     public struct ManagedComponentBridge
     {

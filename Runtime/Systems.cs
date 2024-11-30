@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Jiange.ECS
+namespace Moyo.ECS
 {
     public class Systems : ComponentSystem
     {

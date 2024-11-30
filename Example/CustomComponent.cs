@@ -19,7 +19,7 @@
 using System.Runtime.InteropServices;
 using Unity.Burst;
 
-namespace Jiange.ECS.Examples
+namespace Moyo.ECS.Examples
 {
     public struct CustomComponent : IComponent
     {

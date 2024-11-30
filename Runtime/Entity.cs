@@ -18,7 +18,7 @@
 
 using System;
 
-namespace Jiange.ECS
+namespace Moyo.ECS
 {
     public struct Entity : IEquatable<Entity>, IComparable<Entity>
     {
