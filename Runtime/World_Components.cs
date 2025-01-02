@@ -93,7 +93,7 @@ namespace Moyo.ECS
 
         public bool HasComponent<T>(Entity entity) where T : unmanaged, IComponent
         {
-            return HasComponent(entity, typeof(T));
+            return HasComponent(entity, TypeCache<T>.TYPE);
         }
 
         #endregion
@@ -105,7 +105,7 @@ namespace Moyo.ECS
             if (!componentContainers.TryGetValue(TypeInfo<T>.Id, out var components))
             {
                 return default;
-                // throw new Exception($"实体{entity.ToString()}没有{typeof(T)}组件");
+                // throw new Exception($"实体{entity.ToString()}没有{TypeCache<T>.TYPE}组件");
             }
             return components.Get<T>(entity);
         }
@@ -114,7 +114,7 @@ namespace Moyo.ECS
         {
             if (!componentContainers.TryGetValue(TypeInfo<T>.Id, out var components))
             {
-                throw new Exception($"实体{entity.ToString()}没有{typeof(T)}组件");
+                throw new Exception($"实体{entity.ToString()}没有{TypeCache<T>.TYPE}组件");
             }
             return ref components.Ref<T>(entity);
         }
@@ -237,7 +237,7 @@ namespace Moyo.ECS
 
         public void RemoveComponent<T>(Entity entity) where T : unmanaged, IComponent
         {
-            var typeInfo = TypeManager.GetTypeInfo(typeof(T));
+            var typeInfo = TypeManager.GetTypeInfo(TypeCache<T>.TYPE);
             if (!componentContainers.TryGetValue(typeInfo.id, out var components))
                 return;
 

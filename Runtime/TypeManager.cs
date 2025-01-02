@@ -60,13 +60,13 @@ namespace Moyo.ECS
             s_Types = new List<Type>(MAXIMUN_TYPE_COUNT);
 
             AddComponentType(typeof(Entity));
-            for (int i = 0; i < Util_TypeCache.AllTypes.Count; i++)
+            for (int i = 0; i < TypesCache.AllTypes.Count; i++)
             {
                 var type = (Type)null;
                 var fixedType = GetFixedTypeByIndex(s_TypeCount);
                 if (fixedType == null)
                 {
-                    type = Util_TypeCache.AllTypes[i];
+                    type = TypesCache.AllTypes[i];
                     var fixedIndex = GetFixedIndexByType(type);
                     if (fixedIndex >= 0)
                         continue;
@@ -202,7 +202,7 @@ namespace Moyo.ECS
 
         public static int GetTypeId<T>()
         {
-            if (s_ComponentTypeIdMap.TryGetValue(typeof(T), out var id))
+            if (s_ComponentTypeIdMap.TryGetValue(TypeCache<T>.TYPE, out var id))
             {
                 return id;
             }

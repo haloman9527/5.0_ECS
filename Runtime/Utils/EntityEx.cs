@@ -102,7 +102,7 @@
 
         public static void RemoveComponent<T>(this Entity entity) where T : unmanaged, IComponent
         {
-            entity.World.RemoveComponent(entity, typeof(T));
+            entity.World.RemoveComponent(entity, TypeCache<T>.TYPE);
         }
 
         public static bool HasComponent<T>(this Entity entity) where T : unmanaged, IComponent
