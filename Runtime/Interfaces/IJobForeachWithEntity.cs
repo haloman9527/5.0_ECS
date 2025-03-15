@@ -14,7 +14,7 @@
  */
 #endregion
 
-namespace Moyo.ECS
+namespace Atom.ECS
 {
     public interface IJobForeachWithEntity_EC<C0> where C0 : unmanaged, IComponent
     {

@@ -1,4 +1,4 @@
-﻿namespace Moyo.ECS
+﻿namespace Atom.ECS
 {
     public static class EntityEx
     {

@@ -14,7 +14,7 @@
  */
 #endregion
 
-namespace Moyo.ECS
+namespace Atom.ECS
 {
     public interface IComponent { }
 }

@@ -18,7 +18,7 @@
 
 using UnityEngine;
 
-namespace Moyo.ECS.Examples
+namespace Atom.ECS.Examples
 {
     public class CustomSystem : ComponentSystem
     {

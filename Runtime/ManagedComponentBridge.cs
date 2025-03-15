@@ -1,5 +1,5 @@
 ﻿
-namespace Moyo.ECS
+namespace Atom.ECS
 {
     public struct ManagedComponentBridge
     {

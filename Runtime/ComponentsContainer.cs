@@ -17,11 +17,11 @@
 #endregion
 
 using System;
-using Moyo.UnsafeEx;
+using Atom.UnsafeEx;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 
-namespace Moyo.ECS
+namespace Atom.ECS
 {
     public unsafe struct ComponentsContainer : IDisposable
     {

@@ -18,7 +18,7 @@
 
 using Unity.Collections;
 
-namespace Moyo.ECS
+namespace Atom.ECS
 {
     public partial class World
     {

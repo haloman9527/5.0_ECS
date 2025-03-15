@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Moyo.ECS
+namespace Atom.ECS
 {
     [DisallowMultipleComponent]
     public class EntityPreset : MonoBehaviour

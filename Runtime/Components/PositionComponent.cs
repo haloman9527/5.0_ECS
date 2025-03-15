@@ -15,7 +15,7 @@
 #endregion
 using UnityEngine;
 
-namespace Moyo.ECS
+namespace Atom.ECS
 {
     public struct PositionComponent : IComponent
     {

@@ -16,7 +16,7 @@
 
 #endregion
 
-namespace Moyo.ECS
+namespace Atom.ECS
 {
     public abstract class ComponentSystem : ISystem
     {

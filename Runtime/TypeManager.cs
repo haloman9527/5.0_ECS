@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using Moyo.UnsafeEx;
+using Atom.UnsafeEx;
 
-namespace Moyo.ECS
+namespace Atom.ECS
 {
     public static partial class TypeManager
     {

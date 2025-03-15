@@ -18,7 +18,7 @@
 
 using System;
 
-namespace Moyo.ECS
+namespace Atom.ECS
 {
     public struct Entity : IEquatable<Entity>, IComparable<Entity>
     {

@@ -20,7 +20,7 @@ using System;
 using System.Diagnostics;
 using UnityEngine;
 
-namespace Moyo.ECS.Examples
+namespace Atom.ECS.Examples
 {
     public class ECSTest : MonoBehaviour
     {

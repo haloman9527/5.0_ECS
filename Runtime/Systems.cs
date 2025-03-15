@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Moyo.ECS
+namespace Atom.ECS
 {
     public class Systems : ComponentSystem
     {

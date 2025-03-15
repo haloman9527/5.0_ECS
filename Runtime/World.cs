@@ -19,7 +19,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Moyo.ECS
+namespace Atom.ECS
 {
     public partial class World : IDisposable
     {
