@@ -78,6 +78,15 @@ namespace Atom.ECS
 
     public partial struct Query
     {
+        public void ForeachWithJob<Job>(Job job)
+            where Job : struct, IJob
+        {
+            foreach (var entity in world.Entities.GetValueArray(Allocator.Temp))
+            {
+                job.Execute(entity);
+            }
+        }
+        
         public void ForeachWithJob<Job, C0>(Job job)
             where Job : struct, IJob<C0>
             where C0 : unmanaged, IComponent
