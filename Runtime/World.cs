@@ -25,9 +25,7 @@ namespace Atom.ECS
     {
         #region Static
 
-        private static IndexGenerator s_WorldIDGenerator = new IndexGenerator();
         private static readonly List<World> s_AllWorlds = new List<World>();
-        private static readonly Dictionary<int, World> s_AllWorldsMap = new Dictionary<int, World>();
 
         public static World DefaultWorld => s_AllWorlds[0];
 
@@ -35,8 +33,12 @@ namespace Atom.ECS
 
         public static World GetWorld(int worldId)
         {
-            s_AllWorldsMap.TryGetValue(worldId, out var world);
-            return world;
+            if (worldId < 0 || worldId > s_AllWorlds.Count)
+            {
+                return null;
+            }
+
+            return s_AllWorlds[worldId - 1];
         }
 
         public static void DisposeAllWorld()
@@ -47,8 +49,6 @@ namespace Atom.ECS
             }
 
             s_AllWorlds.Clear();
-            s_AllWorldsMap.Clear();
-            s_WorldIDGenerator.Reset();
         }
 
         #endregion
@@ -60,19 +60,31 @@ namespace Atom.ECS
 
         public World()
         {
-            this.Id = s_WorldIDGenerator.Next();
-            s_AllWorlds.Add(this);
-            s_AllWorldsMap.Add(this.Id, this);
+            lock (s_AllWorlds)
+            {
+                for (int i = 0; i < s_AllWorlds.Count; i++)
+                {
+                    if (s_AllWorlds[i] == null)
+                    {
+                        this.Id = i + 1;
+                        s_AllWorlds[i] = this;
+                        return;
+                    }
+                }
+
+                s_AllWorlds.Add(this);
+                this.Id = s_AllWorlds.Count;
+            }
+
             this.Singleton = this.CreateEntity();
         }
 
         public virtual void Dispose()
         {
-            s_AllWorlds.Remove(this);
-            s_AllWorldsMap.Remove(this.Id);
-
+            s_AllWorlds[this.Id - 1] = null;
             DisposeAllEntities();
             RemoveAllComponents();
+            this.Id = 0;
         }
     }
 }

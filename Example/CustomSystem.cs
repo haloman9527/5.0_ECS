@@ -37,13 +37,13 @@ namespace Atom.ECS.Examples
             
             filter.ForeachWithEntity((Entity e, ref CustomComponent2 c) =>
             {
-                Debug.Log(c.GetValue()?.num);
+                Debug.Log(c.GetRefValue<CustomComponent2, B>()?.num);
             });
             
             if (Input.GetButtonDown("Jump"))
             {
                 filter.ForeachWithEntity((Entity e, ref CustomComponent c) => { c.num += 1; });
-                filter.ForeachWithEntity((Entity e, ref CustomComponent2 c) => { c.GetValue().num += 1; });
+                filter.ForeachWithEntity((Entity e, ref CustomComponent2 c) => { c.GetRefValue<CustomComponent2, B>().num += 1; });
             }
         }
     }

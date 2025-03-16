@@ -36,9 +36,9 @@ namespace Atom.ECS
             return entity;
         }
 
-        public bool Exists(Entity entity)
+        public bool Valid(Entity entity)
         {
-            return entities.ContainsKey(entity.id);
+            return entity.worldId == this.Id && entities.ContainsKey(entity.id);
         }
 
         public Entity GetEntity(int entityId)
@@ -83,7 +83,6 @@ namespace Atom.ECS
             worldOperationListener?.BeforeWorldDispose(this);
             entities.Clear();
             entities.Dispose();
-            s_WorldIDGenerator.Reset();
             worldOperationListener?.AfterWorldDispose(this);
         }
     }

@@ -1,4 +1,4 @@
-#region 注 释
+﻿#region 注 释
 
 /***
  *
@@ -50,9 +50,8 @@ namespace Atom.ECS.Examples
             var ent = world.CreateEntity();
             var component = new CustomComponent() { num = 10 };
             var component2 = new CustomComponent2() ;
-            world.SetComponent(ent, ref component);
-            world.SetComponent(ent, ref component2);
-            component2.SetValue(new B());
+            world.SetComponent(ent, component);
+            world.SetComponent(ent, component2, new B());
 
             var container = world.GetComponentContainer<CustomComponent>();
 

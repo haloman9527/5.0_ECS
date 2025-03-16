@@ -107,6 +107,7 @@ namespace Atom.ECS
                 return default;
                 // throw new Exception($"实体{entity.ToString()}没有{TypeCache<T>.TYPE}组件");
             }
+
             return components.Get<T>(entity);
         }
 
@@ -116,6 +117,7 @@ namespace Atom.ECS
             {
                 throw new Exception($"实体{entity.ToString()}没有{TypeCache<T>.TYPE}组件");
             }
+
             return ref components.Ref<T>(entity);
         }
 
@@ -130,22 +132,42 @@ namespace Atom.ECS
             return components.TryGet(entity, out component);
         }
 
+        public V GetRefValue<C, V>(Entity entity) where C : unmanaged, IManagedComponent<V> where V : class
+        {
+            return this.references.Get(TypeInfo<C>.Id, entity.id) as V;
+        }
+
+        public object GetRefValue<C>(Entity entity) where C : unmanaged, IManagedComponent
+        {
+            return this.references.Get(TypeInfo<C>.Id, entity.id);
+        }
+
+        public V GetRefValue<C, V>(C component) where C : unmanaged, IManagedComponent<V> where V : class
+        {
+            return this.references.Get(TypeInfo<C>.Id, component.EntityId) as V;
+        }
+
+        public object GetRefValue<C>(C component) where C : unmanaged, IManagedComponent
+        {
+            return this.references.Get(TypeInfo<C>.Id, component.EntityId);
+        }
+
         #endregion
 
         #region Set
 
-        public void SetComponent<T>(Entity entity, ref T component) where T : unmanaged, IComponent
+        public void SetComponent<C>(Entity entity, C component) where C : unmanaged, IComponent
         {
-            var typeInfo = TypeManager.GetTypeInfo<T>();
+            var typeInfo = TypeInfo<C>.CachedTypeInfo;
             if (!componentContainers.TryGetValue(typeInfo.id, out var components))
             {
-                components = NewComponentContainer<T>();
+                components = NewComponentContainer<C>();
             }
             else
             {
                 if (components.Contains(entity))
                 {
-                    RemoveComponent<T>(entity);
+                    RemoveComponent<C>(entity);
                 }
             }
 
@@ -153,66 +175,44 @@ namespace Atom.ECS
             worldOperationListener?.OnSetComponent(this, entity, typeInfo);
         }
 
-        public void SetComponent<T>(Entity entity, T component) where T : unmanaged, IComponent
-        {
-            var typeInfo = TypeManager.GetTypeInfo<T>();
-            if (!componentContainers.TryGetValue(typeInfo.id, out var components))
-            {
-                components = NewComponentContainer<T>();
-            }
-            else
-            {
-                if (components.Contains(entity))
-                {
-                    RemoveComponent<T>(entity);
-                }
-            }
-
-            components.Set(entity, ref component);
-            worldOperationListener?.OnSetComponent(this, entity, typeInfo);
-        }
-
-        public void SetComponent<TC, TR>(Entity entity, TC component, TR value) where TC : unmanaged, IManagedComponent<TR> where TR : class
+        public void SetComponent<C, V>(Entity entity, C component, V refValue) where C : unmanaged, IManagedComponent<V> where V : class
         {
             component.WorldId = this.Id;
             component.EntityId = entity.id;
 
-            var typeInfo = TypeManager.GetTypeInfo<TC>();
+            var typeInfo = TypeInfo<C>.CachedTypeInfo;
             if (!componentContainers.TryGetValue(typeInfo.id, out var components))
             {
-                components = NewComponentContainer<TC>();
+                components = NewComponentContainer<C>();
             }
             else if (components.Contains(entity))
             {
-                RemoveComponent<TC>(entity);
+                RemoveComponent<C>(entity);
             }
 
             components.Set(entity, ref component);
-            references.Set(typeInfo.id, component.EntityId, value);
+            references.Set(typeInfo.id, component.EntityId, refValue);
             worldOperationListener?.OnSetComponent(this, entity, typeInfo);
         }
 
-        public void SetComponent<TC, TR>(Entity entity, ref TC component, TR value) where TC : unmanaged, IManagedComponent<TR> where TR : class
+        public void SetRefValue<C>(Entity entity, object refValue) where C : unmanaged, IManagedComponent
         {
-            component.WorldId = this.Id;
-            component.EntityId = entity.id;
+            references.Set(TypeInfo<C>.Id, entity.id, refValue);
+        }
 
-            var typeInfo = TypeManager.GetTypeInfo<TC>();
-            if (!componentContainers.TryGetValue(typeInfo.id, out var components))
-            {
-                components = NewComponentContainer<TC>();
-            }
-            else
-            {
-                if (components.Contains(entity))
-                {
-                    RemoveComponent<TC>(entity);
-                }
-            }
+        public void SetRefValue<C, V>(Entity entity, V refValue) where C : unmanaged, IManagedComponent<V> where V : class
+        {
+            references.Set(TypeInfo<C>.Id, entity.id, refValue);
+        }
 
-            components.Set(entity, ref component);
-            references.Set(typeInfo.id, component.EntityId, value);
-            worldOperationListener?.OnSetComponent(this, entity, typeInfo);
+        public void SetRefValue<C>(C component, object refValue) where C : unmanaged, IManagedComponent
+        {
+            references.Set(TypeInfo<C>.Id, component.EntityId, refValue);
+        }
+
+        public void SetRefValue<C, V>(C component, V refValue) where C : unmanaged, IManagedComponent<V> where V : class
+        {
+            references.Set(TypeInfo<C>.Id, component.EntityId, refValue);
         }
 
         #endregion
@@ -250,10 +250,6 @@ namespace Atom.ECS
             components.Del(entity);
             worldOperationListener?.AfterRemoveComponent(this, entity, typeInfo);
         }
-
-        #endregion
-        
-        #region Query
 
         #endregion
 

@@ -26,7 +26,7 @@ namespace Atom.ECS
         int EntityId { get; set; }
     }
 
-    public interface IManagedComponent<T> : IManagedComponent where T : class
+    public interface IManagedComponent<V> : IManagedComponent where V : class
     {
     }
 }

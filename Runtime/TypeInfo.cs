@@ -52,6 +52,7 @@ namespace Atom.ECS
 
     public class TypeInfo<TComponent>
     {
+        public static readonly TypeInfo CachedTypeInfo;
         public static readonly int Id;
         public static readonly int Size;
         public static readonly bool IsZeroSize;
@@ -59,12 +60,12 @@ namespace Atom.ECS
 
         static TypeInfo()
         {
-            var typeInfo = TypeManager.GetTypeInfo<TComponent>();
+            CachedTypeInfo = TypeManager.GetTypeInfo<TComponent>();
 
-            Id = typeInfo.id;
-            Size = typeInfo.componentSize;
-            IsZeroSize = typeInfo.isZeroSize;
-            IsManagedType = typeInfo.isManagedComponentType;
+            Id = CachedTypeInfo.id;
+            Size = CachedTypeInfo.componentSize;
+            IsZeroSize = CachedTypeInfo.isZeroSize;
+            IsManagedType = CachedTypeInfo.isManagedComponentType;
         }
     }
 }

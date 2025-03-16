@@ -2,67 +2,15 @@
 {
     public static class EntityEx
     {
-        public static T GetValue<C, T>(this C component) where C : unmanaged, IManagedComponent where T : class
-        {
-            var world = World.GetWorld(component.WorldId);
-            if (world == null)
-            {
-                return null;
-            }
-
-            var typeInfo = TypeManager.GetTypeInfo(component.GetType());
-            return world.references.Get(typeInfo.id, component.EntityId) as T;
-        }
-
-        public static void SetValue<C, T>(this C component, T value) where C : unmanaged, IManagedComponent where T : class
-        {
-            var world = World.GetWorld(component.WorldId);
-            var typeInfo = TypeManager.GetTypeInfo(component.GetType());
-            world.references.Set(typeInfo.id, component.EntityId, value);
-        }
-
-        public static T GetValue<T>(this IManagedComponent<T> component) where T : class
-        {
-            var world = World.GetWorld(component.WorldId);
-            if (world == null)
-            {
-                return null;
-            }
-
-            var typeInfo = TypeManager.GetTypeInfo(component.GetType());
-            return world.references.Get(typeInfo.id, component.EntityId) as T;
-        }
-
-        public static void SetValue<T>(this IManagedComponent<T> component, T value) where T : class
-        {
-            var world = World.GetWorld(component.WorldId);
-            var typeInfo = TypeManager.GetTypeInfo(component.GetType());
-            world.references.Set(typeInfo.id, component.EntityId, value);
-        }
-
-        public static object GetValue(this IManagedComponent component)
-        {
-            var world = World.GetWorld(component.WorldId);
-            if (world == null)
-            {
-                return null;
-            }
-
-            var typeInfo = TypeManager.GetTypeInfo(component.GetType());
-            return world.references.Get(typeInfo.id, component.EntityId);
-        }
-
-        public static void SetValue(this IManagedComponent component, object value)
-        {
-            var world = World.GetWorld(component.WorldId);
-            var typeInfo = TypeManager.GetTypeInfo(component.GetType());
-            world.references.Set(typeInfo.id, component.EntityId, value);
-        }
-
         public static bool IsValid(this Entity entity)
         {
             var world = entity.World;
-            return world != null && world.Exists(entity);
+            return world != null && world.Valid(entity);
+        }
+
+        public static bool HasComponent<T>(this Entity entity) where T : unmanaged, IComponent
+        {
+            return entity.World.HasComponent<T>(entity);
         }
 
         public static T GetComponent<T>(this Entity entity) where T : unmanaged, IComponent
@@ -80,24 +28,14 @@
             return ref entity.World.RefComponent<T>(entity);
         }
 
-        public static void SetComponent<T>(this Entity entity, ref T component) where T : unmanaged, IComponent
-        {
-            entity.World.SetComponent(entity, ref component);
-        }
-
         public static void SetComponent<T>(this Entity entity, T component) where T : unmanaged, IComponent
         {
             entity.World.SetComponent(entity, component);
         }
 
-        public static void SetComponent<C, R>(this Entity entity, C component, R value) where C : unmanaged, IManagedComponent<R> where R : class
+        public static void SetComponent<C, V>(this Entity entity, C component, V refValue) where C : unmanaged, IManagedComponent<V> where V : class
         {
-            entity.World.SetComponent(entity, component, value);
-        }
-
-        public static void SetComponent<C, R>(this Entity entity, ref C component, R value) where C : unmanaged, IManagedComponent<R> where R : class
-        {
-            entity.World.SetComponent(entity, ref component, value);
+            entity.World.SetComponent(entity, component, refValue);
         }
 
         public static void RemoveComponent<T>(this Entity entity) where T : unmanaged, IComponent
@@ -105,9 +43,36 @@
             entity.World.RemoveComponent(entity, TypeCache<T>.TYPE);
         }
 
-        public static bool HasComponent<T>(this Entity entity) where T : unmanaged, IComponent
+        public static void SetRefValue<C, V>(this Entity entity, V value) where C : unmanaged, IManagedComponent<V> where V : class
         {
-            return entity.World.HasComponent<T>(entity);
+            entity.World.SetRefValue<C, V>(entity, value);
+        }
+
+        public static void SetRefValue<C, V>(this C component, V value) where C : unmanaged, IManagedComponent<V> where V : class
+        {
+            var world = World.GetWorld(component.WorldId);
+            if (world == null)
+            {
+                return;
+            }
+
+            world.SetRefValue(component, value);
+        }
+
+        public static V GetRefValue<C, V>(this Entity entity) where C : unmanaged, IManagedComponent<V> where V : class
+        {
+            return entity.World.GetRefValue<C, V>(entity);
+        }
+
+        public static V GetRefValue<C, V>(this C component) where C : unmanaged, IManagedComponent<V> where V : class
+        {
+            var world = World.GetWorld(component.WorldId);
+            if (world == null)
+            {
+                return null;
+            }
+
+            return world.GetRefValue<C, V>(component);
         }
     }
 }
