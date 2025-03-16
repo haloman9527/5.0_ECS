@@ -20,35 +20,83 @@ using Unity.Collections;
 
 namespace Atom.ECS
 {
-    public delegate void ForeachAction<C0>(ref C0 c0) where C0 : struct, IComponent;
+    public interface IJob
+    {
+        void Execute(Entity entity);
+    }
 
-    public delegate void ForeachAction<C0, C1>(ref C0 c0, ref C1 c1) where C0 : struct, IComponent where C1 : struct, IComponent;
+    public interface IJob<C0>
+        where C0 : struct, IComponent
+    {
+        void Execute(Entity entity, ref C0 c0);
+    }
 
-    public delegate void ForeachAction<C0, C1, C2>(ref C0 c0, ref C1 c1, ref C2 c2) where C0 : struct, IComponent where C1 : struct, IComponent where C2 : struct, IComponent;
+    public interface IJob<C0, C1>
+        where C0 : struct, IComponent
+        where C1 : struct, IComponent
+    {
+        void Execute(Entity entity, ref C0 c0, ref C1 c1);
+    }
 
-    public delegate void ForeachAction<C0, C1, C2, C3>(ref C0 c0, ref C1 c1, ref C2 c2, ref C3 c3) where C0 : struct, IComponent where C1 : struct, IComponent where C2 : struct, IComponent where C3 : struct, IComponent;
+    public interface IJob<C0, C1, C2>
+        where C0 : struct, IComponent
+        where C1 : struct, IComponent
+        where C2 : struct, IComponent
+    {
+        void Execute(Entity entity, ref C0 c0, ref C1 c1, ref C2 c2);
+    }
 
-    public delegate void ForeachAction<C0, C1, C2, C3, C4>(ref C0 c0, ref C1 c1, ref C2 c2, ref C3 c3, ref C4 c4) where C0 : struct, IComponent where C1 : struct, IComponent where C2 : struct, IComponent where C3 : struct, IComponent where C4 : struct, IComponent;
+    public interface IJob<C0, C1, C2, C3>
+        where C0 : struct, IComponent
+        where C1 : struct, IComponent
+        where C2 : struct, IComponent
+        where C3 : struct, IComponent
+    {
+        void Execute(Entity entity, ref C0 c0, ref C1 c1, ref C2 c2, ref C3 c3);
+    }
 
-    public delegate void ForeachAction<C0, C1, C2, C3, C4, C5>(ref C0 c0, ref C1 c1, ref C2 c2, ref C3 c3, ref C4 c4, ref C5 c5) where C0 : struct, IComponent where C1 : struct, IComponent where C2 : struct, IComponent where C3 : struct, IComponent where C4 : struct, IComponent where C5 : struct, IComponent;
+    public interface IJob<C0, C1, C2, C3, C4>
+        where C0 : struct, IComponent
+        where C1 : struct, IComponent
+        where C2 : struct, IComponent
+        where C3 : struct, IComponent
+        where C4 : struct, IComponent
+    {
+        void Execute(Entity entity, ref C0 c0, ref C1 c1, ref C2 c2, ref C3 c3, ref C4 c4);
+    }
+
+    public interface IJob<C0, C1, C2, C3, C4, C5>
+        where C0 : struct, IComponent
+        where C1 : struct, IComponent
+        where C2 : struct, IComponent
+        where C3 : struct, IComponent
+        where C4 : struct, IComponent
+        where C5 : struct, IComponent
+    {
+        void Execute(Entity entity, ref C0 c0, ref C1 c1, ref C2 c2, ref C3 c3, ref C4 c4, ref C5 c5);
+    }
 
     public partial struct Query
     {
-        public void ForeachWithoutEntity<C0>(ForeachAction<C0> action)
+        public void ForeachWithJob<Job, C0>(Job job)
+            where Job : struct, IJob<C0>
             where C0 : unmanaged, IComponent
         {
             if (!world.ExistsComponentContainer<C0>())
                 return;
-            var container0 = world.GetComponentContainer<C0>();
-            if (container0.Count() <= 0)
+            var componentPool0 = world.GetComponentContainer<C0>();
+            if (componentPool0.Count() <= 0)
                 return;
-            foreach (var entity in container0.GetEntities(Allocator.Temp))
+            foreach (var entity in world.Entities.GetValueArray(Allocator.Temp))
             {
-                action(ref container0.Ref<C0>(entity));
+                if (!componentPool0.Contains(entity))
+                    continue;
+                job.Execute(entity, ref componentPool0.Ref<C0>(entity));
             }
         }
 
-        public void ForeachWithoutEntity<C0, C1>(ForeachAction<C0, C1> action)
+        public void ForeachWithJob<Job, C0, C1>(Job action)
+            where Job : struct, IJob<C0, C1>
             where C0 : unmanaged, IComponent
             where C1 : unmanaged, IComponent
         {
@@ -62,17 +110,20 @@ namespace Atom.ECS
             var container1 = world.GetComponentContainer<C1>();
             if (container1.Count() <= 0)
                 return;
-            foreach (var entity in container0.GetEntities(Allocator.Temp))
+            foreach (var entity in world.Entities.GetValueArray(Allocator.Temp))
             {
+                if (!container0.Contains(entity))
+                    continue;
                 if (!container1.Contains(entity))
                     continue;
-                action(
+                action.Execute(entity,
                     ref container0.Ref<C0>(entity),
                     ref container1.Ref<C1>(entity));
             }
         }
 
-        public void ForeachWithoutEntity<C0, C1, C2>(ForeachAction<C0, C1, C2> action)
+        public void ForeachWithJob<Job, C0, C1, C2>(Job action)
+            where Job : struct, IJob<C0, C1, C2>
             where C0 : unmanaged, IComponent
             where C1 : unmanaged, IComponent
             where C2 : unmanaged, IComponent
@@ -92,20 +143,23 @@ namespace Atom.ECS
             var container2 = world.GetComponentContainer<C2>();
             if (container2.Count() <= 0)
                 return;
-            foreach (var entity in container0.GetEntities(Allocator.Temp))
+            foreach (var entity in world.Entities.GetValueArray(Allocator.Temp))
             {
+                if (!container0.Contains(entity))
+                    continue;
                 if (!container1.Contains(entity))
                     continue;
                 if (!container2.Contains(entity))
                     continue;
-                action(
+                action.Execute(entity,
                     ref container0.Ref<C0>(entity),
                     ref container1.Ref<C1>(entity),
                     ref container2.Ref<C2>(entity));
             }
         }
 
-        public void ForeachWithoutEntity<C0, C1, C2, C3>(ForeachAction<C0, C1, C2, C3> action)
+        public void ForeachWithJob<Job, C0, C1, C2, C3>(Job action)
+            where Job : struct, IJob<C0, C1, C2, C3>
             where C0 : unmanaged, IComponent
             where C1 : unmanaged, IComponent
             where C2 : unmanaged, IComponent
@@ -131,15 +185,17 @@ namespace Atom.ECS
             var container3 = world.GetComponentContainer<C3>();
             if (container3.Count() <= 0)
                 return;
-            foreach (var entity in container0.GetEntities(Allocator.Temp))
+            foreach (var entity in world.Entities.GetValueArray(Allocator.Temp))
             {
+                if (!container0.Contains(entity))
+                    continue;
                 if (!container1.Contains(entity))
                     continue;
                 if (!container2.Contains(entity))
                     continue;
                 if (!container3.Contains(entity))
                     continue;
-                action(
+                action.Execute(entity,
                     ref container0.Ref<C0>(entity),
                     ref container1.Ref<C1>(entity),
                     ref container2.Ref<C2>(entity),
@@ -147,7 +203,8 @@ namespace Atom.ECS
             }
         }
 
-        public void ForeachWithoutEntity<C0, C1, C2, C3, C4>(ForeachAction<C0, C1, C2, C3, C4> action)
+        public void ForeachWithJob<Job, C0, C1, C2, C3, C4>(Job action)
+            where Job : struct, IJob<C0, C1, C2, C3, C4>
             where C0 : unmanaged, IComponent
             where C1 : unmanaged, IComponent
             where C2 : unmanaged, IComponent
@@ -179,8 +236,10 @@ namespace Atom.ECS
             var container4 = world.GetComponentContainer<C4>();
             if (container4.Count() <= 0)
                 return;
-            foreach (var entity in container0.GetEntities(Allocator.Temp))
+            foreach (var entity in world.Entities.GetValueArray(Allocator.Temp))
             {
+                if (!container0.Contains(entity))
+                    continue;
                 if (!container1.Contains(entity))
                     continue;
                 if (!container2.Contains(entity))
@@ -189,7 +248,7 @@ namespace Atom.ECS
                     continue;
                 if (!container4.Contains(entity))
                     continue;
-                action(
+                action.Execute(entity,
                     ref container0.Ref<C0>(entity),
                     ref container1.Ref<C1>(entity),
                     ref container2.Ref<C2>(entity),
@@ -198,7 +257,8 @@ namespace Atom.ECS
             }
         }
 
-        public void ForeachWithoutEntity<C0, C1, C2, C3, C4, C5>(ForeachAction<C0, C1, C2, C3, C4, C5> action)
+        public void ForeachWithJob<Job, C0, C1, C2, C3, C4, C5>(Job action)
+            where Job : struct, IJob<C0, C1, C2, C3, C4, C5>
             where C0 : unmanaged, IComponent
             where C1 : unmanaged, IComponent
             where C2 : unmanaged, IComponent
@@ -236,8 +296,10 @@ namespace Atom.ECS
             var container5 = world.GetComponentContainer<C5>();
             if (container5.Count() <= 0)
                 return;
-            foreach (var entity in container0.GetEntities(Allocator.Temp))
+            foreach (var entity in world.Entities.GetValueArray(Allocator.Temp))
             {
+                if (!container0.Contains(entity))
+                    continue;
                 if (!container1.Contains(entity))
                     continue;
                 if (!container2.Contains(entity))
@@ -248,7 +310,7 @@ namespace Atom.ECS
                     continue;
                 if (!container5.Contains(entity))
                     continue;
-                action(
+                action.Execute(entity,
                     ref container0.Ref<C0>(entity),
                     ref container1.Ref<C1>(entity),
                     ref container2.Ref<C2>(entity),
