@@ -33,7 +33,7 @@ namespace Atom.ECS
 
         public static World GetWorld(int worldId)
         {
-            if (worldId < 0 || worldId > s_AllWorlds.Count)
+            if (worldId <= 0 || worldId > s_AllWorlds.Count)
             {
                 return null;
             }
@@ -56,7 +56,7 @@ namespace Atom.ECS
         public int Id { get; private set; }
         public Entity Singleton { get; private set; }
 
-        public bool IsDisposed => Id == 0;
+        public bool IsDisposed => Id <= 0;
 
         public World()
         {

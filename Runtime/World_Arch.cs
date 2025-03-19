@@ -17,7 +17,6 @@
 // #endregion
 //
 // using System;
-// using Atom.UnsafeEx;
 // using Unity.Collections;
 // using Unity.Collections.LowLevel.Unsafe;
 //
@@ -148,7 +147,7 @@
 //
 //         public Chunk* GetCleanChunk(Archetype* archetype)
 //         {
-//             var chunk = (Chunk*)UnsafeUtil.Malloc(sizeof(Chunk));
+//             var chunk = (Chunk*)UnsafeUtil.Malloc(sizeof(Chunk), 4, Allocator.Persistent);
 //             chunk->archetype = archetype;
 //             chunk->capacity = Chunk.BUFFER_SIZE / archetype->componentsSize;
 //             chunk->listIndex = archetype->chunks.Length;

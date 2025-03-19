@@ -17,7 +17,6 @@
 #endregion
 
 using System;
-using Atom.UnsafeEx;
 using Unity.Collections;
 
 namespace Atom.ECS
@@ -65,7 +64,7 @@ namespace Atom.ECS
             return componentContainers.ContainsKey(TypeManager.GetTypeId(componentType));
         }
 
-        public ComponentsContainer GetComponentContainer<T>()
+        public ComponentsContainer GetComponents<T>()
         {
             return componentContainers[TypeInfo<T>.Id];
         }

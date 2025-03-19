@@ -86,21 +86,21 @@ namespace Atom.ECS
                 job.Execute(entity);
             }
         }
-        
+
         public void ForeachWithJob<Job, C0>(Job job)
             where Job : struct, IJob<C0>
             where C0 : unmanaged, IComponent
         {
             if (!world.ExistsComponentContainer<C0>())
                 return;
-            var componentPool0 = world.GetComponentContainer<C0>();
-            if (componentPool0.Count() <= 0)
+            var components0 = new ComponentsOperator(world.GetComponents<C0>());
+            if (components0.Count() <= 0)
                 return;
             foreach (var entity in world.Entities.GetValueArray(Allocator.Temp))
             {
-                if (!componentPool0.Contains(entity))
+                if (!components0.Contains(entity))
                     continue;
-                job.Execute(entity, ref componentPool0.Ref<C0>(entity));
+                job.Execute(entity, ref components0.Ref<C0>(entity));
             }
         }
 
@@ -113,21 +113,21 @@ namespace Atom.ECS
                 return;
             if (!world.ExistsComponentContainer<C1>())
                 return;
-            var container0 = world.GetComponentContainer<C0>();
-            if (container0.Count() <= 0)
+            var components0 = new ComponentsOperator(world.GetComponents<C0>());
+            if (components0.Count() <= 0)
                 return;
-            var container1 = world.GetComponentContainer<C1>();
-            if (container1.Count() <= 0)
+            var components1 = new ComponentsOperator(world.GetComponents<C1>());
+            if (components1.Count() <= 0)
                 return;
             foreach (var entity in world.Entities.GetValueArray(Allocator.Temp))
             {
-                if (!container0.Contains(entity))
+                if (!components0.Contains(entity))
                     continue;
-                if (!container1.Contains(entity))
+                if (!components1.Contains(entity))
                     continue;
                 action.Execute(entity,
-                    ref container0.Ref<C0>(entity),
-                    ref container1.Ref<C1>(entity));
+                    ref components0.Ref<C0>(entity),
+                    ref components1.Ref<C1>(entity));
             }
         }
 
@@ -143,27 +143,27 @@ namespace Atom.ECS
                 return;
             if (!world.ExistsComponentContainer<C2>())
                 return;
-            var container0 = world.GetComponentContainer<C0>();
-            if (container0.Count() <= 0)
+            var components0 = new ComponentsOperator(world.GetComponents<C0>());
+            if (components0.Count() <= 0)
                 return;
-            var container1 = world.GetComponentContainer<C1>();
-            if (container1.Count() <= 0)
+            var components1 = new ComponentsOperator(world.GetComponents<C1>());
+            if (components1.Count() <= 0)
                 return;
-            var container2 = world.GetComponentContainer<C2>();
-            if (container2.Count() <= 0)
+            var components2 = new ComponentsOperator(world.GetComponents<C2>());
+            if (components2.Count() <= 0)
                 return;
             foreach (var entity in world.Entities.GetValueArray(Allocator.Temp))
             {
-                if (!container0.Contains(entity))
+                if (!components0.Contains(entity))
                     continue;
-                if (!container1.Contains(entity))
+                if (!components1.Contains(entity))
                     continue;
-                if (!container2.Contains(entity))
+                if (!components2.Contains(entity))
                     continue;
                 action.Execute(entity,
-                    ref container0.Ref<C0>(entity),
-                    ref container1.Ref<C1>(entity),
-                    ref container2.Ref<C2>(entity));
+                    ref components0.Ref<C0>(entity),
+                    ref components1.Ref<C1>(entity),
+                    ref components2.Ref<C2>(entity));
             }
         }
 
@@ -182,33 +182,33 @@ namespace Atom.ECS
                 return;
             if (!world.ExistsComponentContainer<C3>())
                 return;
-            var container0 = world.GetComponentContainer<C0>();
-            if (container0.Count() <= 0)
+            var components0 = new ComponentsOperator(world.GetComponents<C0>());
+            if (components0.Count() <= 0)
                 return;
-            var container1 = world.GetComponentContainer<C1>();
-            if (container1.Count() <= 0)
+            var components1 = new ComponentsOperator(world.GetComponents<C1>());
+            if (components1.Count() <= 0)
                 return;
-            var container2 = world.GetComponentContainer<C2>();
-            if (container2.Count() <= 0)
+            var components2 = new ComponentsOperator(world.GetComponents<C2>());
+            if (components2.Count() <= 0)
                 return;
-            var container3 = world.GetComponentContainer<C3>();
-            if (container3.Count() <= 0)
+            var components3 = new ComponentsOperator(world.GetComponents<C3>());
+            if (components3.Count() <= 0)
                 return;
             foreach (var entity in world.Entities.GetValueArray(Allocator.Temp))
             {
-                if (!container0.Contains(entity))
+                if (!components0.Contains(entity))
                     continue;
-                if (!container1.Contains(entity))
+                if (!components1.Contains(entity))
                     continue;
-                if (!container2.Contains(entity))
+                if (!components2.Contains(entity))
                     continue;
-                if (!container3.Contains(entity))
+                if (!components3.Contains(entity))
                     continue;
                 action.Execute(entity,
-                    ref container0.Ref<C0>(entity),
-                    ref container1.Ref<C1>(entity),
-                    ref container2.Ref<C2>(entity),
-                    ref container3.Ref<C3>(entity));
+                    ref components0.Ref<C0>(entity),
+                    ref components1.Ref<C1>(entity),
+                    ref components2.Ref<C2>(entity),
+                    ref components3.Ref<C3>(entity));
             }
         }
 
@@ -230,39 +230,39 @@ namespace Atom.ECS
                 return;
             if (!world.ExistsComponentContainer<C4>())
                 return;
-            var container0 = world.GetComponentContainer<C0>();
-            if (container0.Count() <= 0)
+            var components0 = new ComponentsOperator(world.GetComponents<C0>());
+            if (components0.Count() <= 0)
                 return;
-            var container1 = world.GetComponentContainer<C1>();
-            if (container1.Count() <= 0)
+            var components1 = new ComponentsOperator(world.GetComponents<C1>());
+            if (components1.Count() <= 0)
                 return;
-            var container2 = world.GetComponentContainer<C2>();
-            if (container2.Count() <= 0)
+            var components2 = new ComponentsOperator(world.GetComponents<C2>());
+            if (components2.Count() <= 0)
                 return;
-            var container3 = world.GetComponentContainer<C3>();
-            if (container3.Count() <= 0)
+            var components3 = new ComponentsOperator(world.GetComponents<C3>());
+            if (components3.Count() <= 0)
                 return;
-            var container4 = world.GetComponentContainer<C4>();
-            if (container4.Count() <= 0)
+            var components4 = new ComponentsOperator(world.GetComponents<C4>());
+            if (components4.Count() <= 0)
                 return;
             foreach (var entity in world.Entities.GetValueArray(Allocator.Temp))
             {
-                if (!container0.Contains(entity))
+                if (!components0.Contains(entity))
                     continue;
-                if (!container1.Contains(entity))
+                if (!components1.Contains(entity))
                     continue;
-                if (!container2.Contains(entity))
+                if (!components2.Contains(entity))
                     continue;
-                if (!container3.Contains(entity))
+                if (!components3.Contains(entity))
                     continue;
-                if (!container4.Contains(entity))
+                if (!components4.Contains(entity))
                     continue;
                 action.Execute(entity,
-                    ref container0.Ref<C0>(entity),
-                    ref container1.Ref<C1>(entity),
-                    ref container2.Ref<C2>(entity),
-                    ref container3.Ref<C3>(entity),
-                    ref container4.Ref<C4>(entity));
+                    ref components0.Ref<C0>(entity),
+                    ref components1.Ref<C1>(entity),
+                    ref components2.Ref<C2>(entity),
+                    ref components3.Ref<C3>(entity),
+                    ref components4.Ref<C4>(entity));
             }
         }
 
@@ -287,45 +287,45 @@ namespace Atom.ECS
                 return;
             if (!world.ExistsComponentContainer<C5>())
                 return;
-            var container0 = world.GetComponentContainer<C0>();
-            if (container0.Count() <= 0)
+            var components0 = new ComponentsOperator(world.GetComponents<C0>());
+            if (components0.Count() <= 0)
                 return;
-            var container1 = world.GetComponentContainer<C1>();
-            if (container1.Count() <= 0)
+            var components1 = new ComponentsOperator(world.GetComponents<C1>());
+            if (components1.Count() <= 0)
                 return;
-            var container2 = world.GetComponentContainer<C2>();
-            if (container2.Count() <= 0)
+            var components2 = new ComponentsOperator(world.GetComponents<C2>());
+            if (components2.Count() <= 0)
                 return;
-            var container3 = world.GetComponentContainer<C3>();
-            if (container3.Count() <= 0)
+            var components3 = new ComponentsOperator(world.GetComponents<C3>());
+            if (components3.Count() <= 0)
                 return;
-            var container4 = world.GetComponentContainer<C4>();
-            if (container4.Count() <= 0)
+            var components4 = new ComponentsOperator(world.GetComponents<C4>());
+            if (components4.Count() <= 0)
                 return;
-            var container5 = world.GetComponentContainer<C5>();
-            if (container5.Count() <= 0)
+            var components5 = new ComponentsOperator(world.GetComponents<C5>());
+            if (components5.Count() <= 0)
                 return;
             foreach (var entity in world.Entities.GetValueArray(Allocator.Temp))
             {
-                if (!container0.Contains(entity))
+                if (!components0.Contains(entity))
                     continue;
-                if (!container1.Contains(entity))
+                if (!components1.Contains(entity))
                     continue;
-                if (!container2.Contains(entity))
+                if (!components2.Contains(entity))
                     continue;
-                if (!container3.Contains(entity))
+                if (!components3.Contains(entity))
                     continue;
-                if (!container4.Contains(entity))
+                if (!components4.Contains(entity))
                     continue;
-                if (!container5.Contains(entity))
+                if (!components5.Contains(entity))
                     continue;
                 action.Execute(entity,
-                    ref container0.Ref<C0>(entity),
-                    ref container1.Ref<C1>(entity),
-                    ref container2.Ref<C2>(entity),
-                    ref container3.Ref<C3>(entity),
-                    ref container4.Ref<C4>(entity),
-                    ref container5.Ref<C5>(entity));
+                    ref components0.Ref<C0>(entity),
+                    ref components1.Ref<C1>(entity),
+                    ref components2.Ref<C2>(entity),
+                    ref components3.Ref<C3>(entity),
+                    ref components4.Ref<C4>(entity),
+                    ref components5.Ref<C5>(entity));
             }
         }
     }

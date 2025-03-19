@@ -146,4 +146,85 @@ namespace Atom.ECS
             components.Dispose();
         }
     }
+
+    public unsafe struct ComponentsOperator
+    {
+        public readonly TypeInfo typeInfo;
+        private UnsafeParallelHashMap<Entity, IntPtr> components;
+
+        public ComponentsOperator(ComponentsContainer componentsContainer)
+        {
+            this.typeInfo = componentsContainer.typeInfo;
+            components = componentsContainer.GetMap();
+        }
+
+        public bool Contains(Entity entity)
+        {
+            return components.ContainsKey(entity);
+        }
+
+        public ref T Ref<T>(Entity entity) where T : unmanaged, IComponent
+        {
+            return ref UnsafeUtil.AsRef<T>(components[entity]);
+        }
+
+        public T Get<T>(Entity entity) where T : unmanaged, IComponent
+        {
+            if (!components.ContainsKey(entity))
+            {
+                return default;
+            }
+
+            return *((T*)components[entity]);
+        }
+
+        public IntPtr GetPointer(Entity entity)
+        {
+            return components[entity];
+        }
+
+        public bool TryGet<T>(Entity entity, out T value) where T : unmanaged, IComponent
+        {
+            if (components.TryGetValue(entity, out var ptr))
+            {
+                value = *((T*)ptr);
+                return true;
+            }
+
+            value = default;
+            return false;
+        }
+
+        public void Set<T>(Entity entity, ref T component) where T : struct, IComponent
+        {
+            if (components.ContainsKey(entity))
+            {
+                var p = components[entity];
+                UnsafeUtil.CopyStructureToPtr(ref component, p.ToPointer());
+            }
+            else
+            {
+                var p = UnsafeUtil.Malloc(typeInfo.componentSize, 4, Allocator.Persistent);
+                UnsafeUtil.CopyStructureToPtr(ref component, p);
+                components[entity] = new IntPtr(p);
+            }
+        }
+
+        public void Del(Entity entity)
+        {
+            var ptr = (void*)components[entity];
+            UnsafeUtil.Free(ptr, Allocator.Persistent);
+            components.Remove(entity);
+        }
+
+        public NativeArray<Entity> GetEntities(Allocator allocator)
+        {
+            return components.GetKeyArray(allocator);
+        }
+
+        public int Count()
+        {
+            return components.Count();
+        }
+    }
 }

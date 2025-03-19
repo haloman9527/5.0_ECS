@@ -22,49 +22,34 @@ namespace Atom.ECS
 {
     public class ECSReferences
     {
-        private Dictionary<int, Dictionary<int, object>> map = new Dictionary<int, Dictionary<int, object>>();
+        private Dictionary<long, object> values = new Dictionary<long, object>();
 
         public void Set(int compnentId, int entityId, object data)
         {
-            if (!map.TryGetValue(compnentId, out var container))
-            {
-                map[compnentId] = container = new Dictionary<int, object>();
-            }
-
-            container[entityId] = data;
+            var refId = ((long)entityId) << 32 | (uint)compnentId;
+            values[refId] = data;
         }
 
         public object Get(int compnentId, int entityId)
         {
-            if (!map.TryGetValue(compnentId, out var container))
+            var refId = ((long)entityId) << 32 | (uint)compnentId;
+            if (values.TryGetValue(refId, out var value))
             {
-                return null;
+                return value;
             }
 
-            if (!container.TryGetValue(entityId, out var o))
-            {
-                return null;
-            }
-
-            return o;
+            return null;
         }
 
         public void Release(int compnentId, int entityId)
         {
-            if (!map.TryGetValue(compnentId, out var container))
-            {
-                return;
-            }
-
-            container.Remove(entityId);
+            var refId = ((long)entityId) << 32 | (uint)compnentId;
+            values.Remove(entityId);
         }
 
         public void Clear()
         {
-            foreach (var container in map.Values)
-            {
-                container.Clear();
-            }
+            values.Clear();
         }
     }
 }

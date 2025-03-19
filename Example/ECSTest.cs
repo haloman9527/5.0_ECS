@@ -53,7 +53,7 @@ namespace Atom.ECS.Examples
             world.SetComponent(ent, component);
             world.SetComponent(ent, component2, new B());
 
-            var container = world.GetComponentContainer<CustomComponent>();
+            var container = world.GetComponents<CustomComponent>();
 
             var sw = new Stopwatch();
             sw.Start();
