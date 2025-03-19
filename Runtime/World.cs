@@ -66,17 +66,17 @@ namespace Atom.ECS
                 {
                     if (s_AllWorlds[i] == null)
                     {
-                        this.Id = i + 1;
                         s_AllWorlds[i] = this;
+                        this.Id = i + 1;
+                        this.Singleton = this.CreateEntity();
                         return;
                     }
                 }
 
                 s_AllWorlds.Add(this);
                 this.Id = s_AllWorlds.Count;
+                this.Singleton = this.CreateEntity();
             }
-
-            this.Singleton = this.CreateEntity();
         }
 
         public virtual void Dispose()
