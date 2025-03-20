@@ -18,9 +18,9 @@ namespace Atom.ECS
 {
     public class IndexGenerator
     {
-        private int index = 1;
+        private uint index = 1;
 
-        public int Next()
+        public uint Next()
         {
             return index++;
         }

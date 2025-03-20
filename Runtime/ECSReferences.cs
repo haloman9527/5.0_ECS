@@ -22,18 +22,21 @@ namespace Atom.ECS
 {
     public class ECSReferences
     {
-        private Dictionary<long, object> values = new Dictionary<long, object>();
+        private Dictionary<ulong, object> values = new Dictionary<ulong, object>();
 
-        public void Set(int compnentId, int entityId, object data)
+        private ulong GetReferenceId(uint compnentId, uint entityId)
         {
-            var refId = ((long)entityId) << 32 | (uint)compnentId;
-            values[refId] = data;
+            return (ulong)entityId << 32 | compnentId;
+        }
+        
+        public void Set(uint compnentId, uint entityId, object data)
+        {
+            values[GetReferenceId(compnentId, entityId)] = data;
         }
 
-        public object Get(int compnentId, int entityId)
+        public object Get(uint compnentId, uint entityId)
         {
-            var refId = ((long)entityId) << 32 | (uint)compnentId;
-            if (values.TryGetValue(refId, out var value))
+            if (values.TryGetValue(GetReferenceId(compnentId, entityId), out var value))
             {
                 return value;
             }
@@ -41,10 +44,9 @@ namespace Atom.ECS
             return null;
         }
 
-        public void Release(int compnentId, int entityId)
+        public void Release(uint compnentId, uint entityId)
         {
-            var refId = ((long)entityId) << 32 | (uint)compnentId;
-            values.Remove(entityId);
+            values.Remove(GetReferenceId(compnentId, entityId));
         }
 
         public void Clear()

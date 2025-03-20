@@ -8,38 +8,43 @@ namespace Atom.ECS
     {
         #region Const
 
-        /// <summary>
-        /// 最大组件数量
-        /// </summary>
-        private const int MAXIMUN_TYPE_COUNT = 1024;
-
         private const int MAXIMUN_SUPPORTED_ALIGNMENT = 16;
 
         /// <summary>
-        /// 32位表示是否size为0.
+        /// 最大组件数量
         /// </summary>
-        public const int ZERO_SIZE_FLAG = 1 << 31;
-
+        private const int MAXIMUN_COMPONENTS = 1023;
+        
         /// <summary>
-        /// 31位表示是否时托管类型组件.
+        /// 组件Id位数
         /// </summary>
-        public const int MANAGED_COMPONENT_FLAG = 1 << 30;
-
-        /// <summary>
-        /// 标志位.
-        /// </summary>
-        public const int FLAG_MASK = int.MaxValue << (32 - 2);
+        private const int COMPONENT_LENGTH = 32;
 
         /// <summary>
         /// 下标位.
         /// </summary>
-        public const int INDEX_MASK = ~FLAG_MASK;
+        public const uint ID_MASK = uint.MaxValue >> 2;
+        
+        /// <summary>
+        /// 标志位.
+        /// </summary>
+        public const uint FLAG_MASK = ~ID_MASK;
+
+        /// <summary>
+        /// 32位表示是否size为0.
+        /// </summary>
+        public const uint ZERO_SIZE_FLAG = ((uint)1) << (COMPONENT_LENGTH - 1);
+
+        /// <summary>
+        /// 31位表示是否时托管类型组件.
+        /// </summary>
+        public const uint MANAGED_COMPONENT_FLAG = ((uint)1) << (COMPONENT_LENGTH - 2);
 
         #endregion
 
         private static bool s_Initialized;
         private static TypeInfo[] s_TypeInfos;
-        private static Dictionary<Type, int> s_ComponentTypeIdMap;
+        private static Dictionary<Type, uint> s_ComponentTypeIdMap;
         private static Dictionary<Type, Type> s_ManagedTypeMap;
         private static int s_TypeCount;
         private static List<Type> s_Types;
@@ -54,10 +59,10 @@ namespace Atom.ECS
             if (!force && s_Initialized)
                 return;
 
-            s_TypeInfos = new TypeInfo[MAXIMUN_TYPE_COUNT];
-            s_ComponentTypeIdMap = new Dictionary<Type, int>(MAXIMUN_TYPE_COUNT);
+            s_TypeInfos = new TypeInfo[MAXIMUN_COMPONENTS];
+            s_ComponentTypeIdMap = new Dictionary<Type, uint>(MAXIMUN_COMPONENTS);
             s_ManagedTypeMap = new Dictionary<Type, Type>();
-            s_Types = new List<Type>(MAXIMUN_TYPE_COUNT);
+            s_Types = new List<Type>(MAXIMUN_COMPONENTS);
 
             AddComponentType(typeof(Entity));
             for (int i = 0; i < TypesCache.AllTypes.Count; i++)
@@ -106,7 +111,7 @@ namespace Atom.ECS
             s_Types.Add(type);
 
             var typeIndex = s_TypeCount;
-            var typeId = s_TypeCount;
+            var typeId = (uint)(s_TypeCount + 1);
             var componentSize = UnsafeUtil.SizeOf(type);
             var alignInBytes = CalculateAlignmentInChunk(componentSize);
             var isZeroSize = componentSize == 0;
@@ -175,7 +180,7 @@ namespace Atom.ECS
 
 
             s_TypeInfos[s_TypeCount] = typeInfo;
-            s_ComponentTypeIdMap[type] = typeId;
+            s_ComponentTypeIdMap[type] = (uint)typeId;
             s_TypeCount++;
         }
 
@@ -193,31 +198,31 @@ namespace Atom.ECS
             return s_TypeCount;
         }
 
-        public static int GetTypeId(Type type)
+        public static uint GetTypeId(Type type)
         {
             if (s_ComponentTypeIdMap.TryGetValue(type, out var id))
                 return id;
-            return -1;
+            return 0;
         }
 
-        public static int GetTypeId<T>()
+        public static uint GetTypeId<T>()
         {
             if (s_ComponentTypeIdMap.TryGetValue(TypeCache<T>.TYPE, out var id))
             {
                 return id;
             }
 
-            return -1;
+            return 0;
         }
 
-        public static Type GetType(int typeId)
+        public static Type GetType(uint typeId)
         {
-            return s_Types[typeId & INDEX_MASK];
+            return s_Types[GetTypeIndex(typeId)];
         }
 
-        public static Type GetManagedType(int typeId)
+        public static Type GetManagedType(uint typeId)
         {
-            var t = s_Types[typeId & INDEX_MASK];
+            var t = s_Types[GetTypeIndex(typeId)];
             if (s_ManagedTypeMap.TryGetValue(t, out var type))
             {
                 return type;
@@ -226,21 +231,26 @@ namespace Atom.ECS
             return null;
         }
 
-        public static TypeInfo GetTypeInfo(int typeId)
+        public static TypeInfo GetTypeInfo(uint typeId)
         {
-            return s_TypeInfos[typeId & INDEX_MASK];
+            return s_TypeInfos[GetTypeIndex(typeId)];
         }
 
         public static TypeInfo GetTypeInfo<T>()
         {
             var typeId = GetTypeId<T>();
-            return s_TypeInfos[typeId & INDEX_MASK];
+            return s_TypeInfos[GetTypeIndex(typeId)];
         }
 
         public static TypeInfo GetTypeInfo(Type type)
         {
             var typeId = GetTypeId(type);
-            return s_TypeInfos[typeId & INDEX_MASK];
+            return s_TypeInfos[GetTypeIndex(typeId)];
+        }
+
+        public static int GetTypeIndex(uint typeId)
+        {
+            return ((int)(typeId & ID_MASK)) - 1;
         }
 
         private static bool IsPowerOfTwo(int value)

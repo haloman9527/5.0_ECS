@@ -23,7 +23,7 @@ namespace Atom.ECS
     public struct TypeInfo
     {
         public int index;
-        public int id;
+        public uint id;
         public int componentSize;
         public int alignInBytes;
         public bool isZeroSize;
@@ -46,14 +46,12 @@ namespace Atom.ECS
         public bool Equals(TypeInfo other) => id == other.id;
 
         public override bool Equals(object obj) => obj is TypeInfo && (TypeInfo)obj == this;
-
-        public override int GetHashCode() => id;
     }
 
     public class TypeInfo<TComponent>
     {
         public static readonly TypeInfo CachedTypeInfo;
-        public static readonly int Id;
+        public static readonly uint Id;
         public static readonly int Size;
         public static readonly bool IsZeroSize;
         public static readonly bool IsManagedType;

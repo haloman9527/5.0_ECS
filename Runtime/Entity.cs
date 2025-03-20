@@ -23,9 +23,9 @@ namespace Atom.ECS
     public struct Entity : IEquatable<Entity>, IComparable<Entity>
     {
         public readonly int worldId;
-        public readonly int id;
+        public readonly uint id;
 
-        internal Entity(int worldId, int id)
+        internal Entity(int worldId, uint id)
         {
             this.worldId = worldId;
             this.id = id;
@@ -58,11 +58,6 @@ namespace Atom.ECS
         public bool Equals(Entity other)
         {
             return this.worldId == other.worldId && this.id == other.id;
-        }
-
-        public override int GetHashCode()
-        {
-            return id;
         }
 
         public override string ToString()

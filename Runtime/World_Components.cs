@@ -25,8 +25,8 @@ namespace Atom.ECS
     {
         public readonly ECSReferences references = new ECSReferences();
 
-        private NativeParallelHashMap<int, ComponentsContainer> componentContainers =
-            new NativeParallelHashMap<int, ComponentsContainer>(128, Allocator.Persistent);
+        private NativeParallelHashMap<uint, ComponentsContainer> componentContainers =
+            new NativeParallelHashMap<uint, ComponentsContainer>(128, Allocator.Persistent);
 
         private IWorldOperationListener worldOperationListener;
 
@@ -35,7 +35,7 @@ namespace Atom.ECS
             this.worldOperationListener = worldOperationListener;
         }
 
-        public NativeParallelHashMap<int, ComponentsContainer> ComponentContainers => componentContainers;
+        public NativeParallelHashMap<uint, ComponentsContainer> ComponentContainers => componentContainers;
 
         private ComponentsContainer NewComponentContainer<T>(int capacity) where T : unmanaged, IComponent
         {
@@ -76,7 +76,7 @@ namespace Atom.ECS
 
         #region Has
 
-        public bool HasComponent(Entity entity, int componentTypeId)
+        public bool HasComponent(Entity entity, uint componentTypeId)
         {
             if (!componentContainers.TryGetValue(componentTypeId, out var components))
                 return false;

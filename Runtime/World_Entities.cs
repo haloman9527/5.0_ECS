@@ -22,16 +22,16 @@ namespace Atom.ECS
 {
     public partial class World
     {
-        private IndexGenerator entityIndexGenerator = new IndexGenerator();
-        private NativeParallelHashMap<int, Entity> entities = new NativeParallelHashMap<int, Entity>(256, Allocator.Persistent);
+        private IndexGenerator entityIdGenerator = new IndexGenerator();
+        private NativeParallelHashMap<uint, Entity> entities = new NativeParallelHashMap<uint, Entity>(256, Allocator.Persistent);
 
-        public NativeParallelHashMap<int, Entity> Entities => entities;
+        public NativeParallelHashMap<uint, Entity> Entities => entities;
 
         public Entity CreateEntity()
         {
-            var index = entityIndexGenerator.Next();
-            var entity = new Entity(this.Id, index);
-            entities.Add(index, entity);
+            var id = entityIdGenerator.Next();
+            var entity = new Entity(this.Id, id);
+            entities.Add(id, entity);
             worldOperationListener?.AfterCreateEntity(this, entity);
             return entity;
         }
@@ -41,7 +41,7 @@ namespace Atom.ECS
             return entity.worldId == this.Id && entities.ContainsKey(entity.id);
         }
 
-        public Entity GetEntity(int entityId)
+        public Entity GetEntity(uint entityId)
         {
             entities.TryGetValue(entityId, out var entity);
             return entity;
@@ -68,7 +68,7 @@ namespace Atom.ECS
             entities.Remove(entity.id);
         }
 
-        public void DestroyEntity(int entityId)
+        public void DestroyEntity(uint entityId)
         {
             if (!entities.TryGetValue(entityId, out var entity))
             {

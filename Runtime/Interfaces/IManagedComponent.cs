@@ -23,7 +23,7 @@ namespace Atom.ECS
     {
         int WorldId { get; set; }
 
-        int EntityId { get; set; }
+        uint EntityId { get; set; }
     }
 
     public interface IManagedComponent<V> : IManagedComponent where V : class

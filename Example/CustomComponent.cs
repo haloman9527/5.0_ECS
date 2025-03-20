@@ -29,7 +29,7 @@ namespace Atom.ECS.Examples
     public struct CustomComponent2 : IManagedComponent<B>
     {
         public int worldId;
-        public int entityId;
+        public uint entityId;
 
         public int WorldId
         {
@@ -37,7 +37,7 @@ namespace Atom.ECS.Examples
             set => worldId = value;
         }
 
-        public int EntityId
+        public uint EntityId
         {
             get => entityId;
             set => entityId = value;
