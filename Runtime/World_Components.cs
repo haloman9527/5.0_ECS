@@ -64,7 +64,7 @@ namespace Atom.ECS
             return componentContainers.ContainsKey(TypeManager.GetTypeId(componentType));
         }
 
-        public ComponentsContainer GetComponents<T>()
+        public ComponentsContainer GetComponents<T>() where T : unmanaged, IComponent
         {
             return componentContainers[TypeInfo<T>.Id];
         }

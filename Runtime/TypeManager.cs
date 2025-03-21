@@ -14,7 +14,7 @@ namespace Atom.ECS
         /// 最大组件数量
         /// </summary>
         private const int MAXIMUN_COMPONENTS = 1023;
-        
+
         /// <summary>
         /// 组件Id位数
         /// </summary>
@@ -24,7 +24,7 @@ namespace Atom.ECS
         /// 下标位.
         /// </summary>
         public const uint ID_MASK = uint.MaxValue >> 2;
-        
+
         /// <summary>
         /// 标志位.
         /// </summary>
@@ -180,7 +180,7 @@ namespace Atom.ECS
 
 
             s_TypeInfos[s_TypeCount] = typeInfo;
-            s_ComponentTypeIdMap[type] = (uint)typeId;
+            s_ComponentTypeIdMap[type] = typeId;
             s_TypeCount++;
         }
 
@@ -205,7 +205,7 @@ namespace Atom.ECS
             return 0;
         }
 
-        public static uint GetTypeId<T>()
+        public static uint GetTypeId<T>() where T : struct, IComponent
         {
             if (s_ComponentTypeIdMap.TryGetValue(TypeCache<T>.TYPE, out var id))
             {
@@ -236,7 +236,7 @@ namespace Atom.ECS
             return s_TypeInfos[GetTypeIndex(typeId)];
         }
 
-        public static TypeInfo GetTypeInfo<T>()
+        public static TypeInfo GetTypeInfo<T>() where T : struct, IComponent
         {
             var typeId = GetTypeId<T>();
             return s_TypeInfos[GetTypeIndex(typeId)];

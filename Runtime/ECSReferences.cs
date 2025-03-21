@@ -26,17 +26,19 @@ namespace Atom.ECS
 
         private ulong GetReferenceId(uint compnentId, uint entityId)
         {
-            return (ulong)entityId << 32 | compnentId;
+            return (ulong)compnentId << 32 | entityId;
         }
         
         public void Set(uint compnentId, uint entityId, object data)
         {
-            values[GetReferenceId(compnentId, entityId)] = data;
+            var referenceId = GetReferenceId(compnentId, entityId);
+            values[referenceId] = data;
         }
 
         public object Get(uint compnentId, uint entityId)
         {
-            if (values.TryGetValue(GetReferenceId(compnentId, entityId), out var value))
+            var referenceId = GetReferenceId(compnentId, entityId);
+            if (values.TryGetValue(referenceId, out var value))
             {
                 return value;
             }
@@ -46,7 +48,8 @@ namespace Atom.ECS
 
         public void Release(uint compnentId, uint entityId)
         {
-            values.Remove(GetReferenceId(compnentId, entityId));
+            var referenceId = GetReferenceId(compnentId, entityId);
+            values.Remove(referenceId);
         }
 
         public void Clear()

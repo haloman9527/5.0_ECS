@@ -48,7 +48,7 @@ namespace Atom.ECS
         public override bool Equals(object obj) => obj is TypeInfo && (TypeInfo)obj == this;
     }
 
-    public class TypeInfo<TComponent>
+    public static class TypeInfo<TComponent> where TComponent : struct, IComponent
     {
         public static readonly TypeInfo CachedTypeInfo;
         public static readonly uint Id;
@@ -59,7 +59,6 @@ namespace Atom.ECS
         static TypeInfo()
         {
             CachedTypeInfo = TypeManager.GetTypeInfo<TComponent>();
-
             Id = CachedTypeInfo.id;
             Size = CachedTypeInfo.componentSize;
             IsZeroSize = CachedTypeInfo.isZeroSize;
