@@ -22,7 +22,7 @@ namespace Atom.ECS
 {
     public partial class World
     {
-        private IndexGenerator entityIdGenerator = new IndexGenerator();
+        private IdGenerator entityIdGenerator = new IdGenerator();
         private NativeParallelHashMap<uint, Entity> entities = new NativeParallelHashMap<uint, Entity>(256, Allocator.Persistent);
 
         public NativeParallelHashMap<uint, Entity> Entities => entities;

@@ -14,20 +14,22 @@
  */
 #endregion
 
+using System.Threading;
+
 namespace Atom.ECS
 {
-    public class IndexGenerator
+    public class IdGenerator
     {
-        private uint index = 1;
+        private long index;
 
         public uint Next()
         {
-            return index++;
+            return (uint)Interlocked.Increment(ref index);
         }
         
         public void Reset()
         {
-            index = 1;
+            index = 0;
         }
     }
 }
