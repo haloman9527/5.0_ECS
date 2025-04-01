@@ -32,7 +32,7 @@ namespace Atom.ECS
             var id = entityIdGenerator.Next();
             var entity = new Entity(this.Id, id);
             entities.Add(id, entity);
-            worldOperationListener?.AfterCreateEntity(this, entity);
+            worldOperationListener?.OnCreateEntity(this, entity);
             return entity;
         }
 
@@ -53,17 +53,16 @@ namespace Atom.ECS
             {
                 return;
             }
-            worldOperationListener?.BeforeDestroyEntity(this, entity);
+            worldOperationListener?.OnDestroyEntity(this, entity);
             foreach (var components in componentContainers.GetValueArray(Allocator.Temp))
             {
-                worldOperationListener?.BeforeRemoveComponent(this, entity, components.typeInfo);
+                worldOperationListener?.OnComponentOperate(this, entity, components.typeInfo, ComponentOpoeration.Remove);
                 if (components.typeInfo.isManagedComponentType)
                 {
                     references.Release(components.typeInfo.id, entity.id);
                 }
 
                 components.Del(entity);
-                worldOperationListener?.AfterRemoveComponent(this, entity, components.typeInfo);
             }
             entities.Remove(entity.id);
         }
@@ -80,10 +79,8 @@ namespace Atom.ECS
 
         private void DisposeAllEntities()
         {
-            worldOperationListener?.BeforeWorldDispose(this);
             entities.Clear();
             entities.Dispose();
-            worldOperationListener?.AfterWorldDispose(this);
         }
     }
 }

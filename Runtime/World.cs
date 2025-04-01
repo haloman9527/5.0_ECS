@@ -84,6 +84,7 @@ namespace Atom.ECS
             s_AllWorlds[this.Id - 1] = null;
             DisposeAllEntities();
             RemoveAllComponents();
+            worldOperationListener?.OnWorldDispose(this);
             this.Id = 0;
         }
     }

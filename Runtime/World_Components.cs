@@ -161,17 +161,20 @@ namespace Atom.ECS
             if (!componentContainers.TryGetValue(typeInfo.id, out var components))
             {
                 components = NewComponentContainer<C>();
+                components.Set(entity, ref component);
+                worldOperationListener?.OnComponentOperate(this, entity, typeInfo, ComponentOpoeration.Added);
+            }
+            else if (!components.Contains(entity))
+            {
+                components.Set(entity, ref component);
+                worldOperationListener?.OnComponentOperate(this, entity, typeInfo, ComponentOpoeration.Added);
             }
             else
             {
-                if (components.Contains(entity))
-                {
-                    RemoveComponent<C>(entity);
-                }
+                RemoveComponent<C>(entity);
+                components.Set(entity, ref component);
+                worldOperationListener?.OnComponentOperate(this, entity, typeInfo, ComponentOpoeration.Changed);
             }
-
-            components.Set(entity, ref component);
-            worldOperationListener?.OnSetComponent(this, entity, typeInfo);
         }
 
         public void SetComponent<C, V>(Entity entity, C component, V refValue) where C : unmanaged, IManagedComponent<V> where V : class
@@ -183,15 +186,23 @@ namespace Atom.ECS
             if (!componentContainers.TryGetValue(typeInfo.id, out var components))
             {
                 components = NewComponentContainer<C>();
+                components.Set(entity, ref component);
+                references.Set(typeInfo.id, component.EntityId, refValue);
+                worldOperationListener?.OnComponentOperate(this, entity, typeInfo, ComponentOpoeration.Added);
             }
-            else if (components.Contains(entity))
+            else if (!components.Contains(entity))
+            {
+                components.Set(entity, ref component);
+                references.Set(typeInfo.id, component.EntityId, refValue);
+                worldOperationListener?.OnComponentOperate(this, entity, typeInfo, ComponentOpoeration.Added);
+            }
+            else
             {
                 RemoveComponent<C>(entity);
+                components.Set(entity, ref component);
+                references.Set(typeInfo.id, component.EntityId, refValue);
+                worldOperationListener?.OnComponentOperate(this, entity, typeInfo, ComponentOpoeration.Changed);
             }
-
-            components.Set(entity, ref component);
-            references.Set(typeInfo.id, component.EntityId, refValue);
-            worldOperationListener?.OnSetComponent(this, entity, typeInfo);
         }
 
         public void SetRefValue<C>(Entity entity, object refValue) where C : unmanaged, IManagedComponent
@@ -224,14 +235,13 @@ namespace Atom.ECS
             if (!componentContainers.TryGetValue(typeInfo.id, out var components))
                 return;
 
-            worldOperationListener?.BeforeRemoveComponent(this, entity, typeInfo);
+            worldOperationListener?.OnComponentOperate(this, entity, typeInfo, ComponentOpoeration.Remove);
             if (typeInfo.isManagedComponentType)
             {
                 references.Release(typeInfo.id, entity.id);
             }
 
             components.Del(entity);
-            worldOperationListener?.AfterRemoveComponent(this, entity, typeInfo);
         }
 
         public void RemoveComponent<T>(Entity entity) where T : unmanaged, IComponent
@@ -240,22 +250,19 @@ namespace Atom.ECS
             if (!componentContainers.TryGetValue(typeInfo.id, out var components))
                 return;
 
-            worldOperationListener?.BeforeRemoveComponent(this, entity, typeInfo);
+            worldOperationListener?.OnComponentOperate(this, entity, typeInfo, ComponentOpoeration.Remove);
             if (typeInfo.isManagedComponentType)
             {
                 references.Release(typeInfo.id, entity.id);
             }
 
             components.Del(entity);
-            worldOperationListener?.AfterRemoveComponent(this, entity, typeInfo);
         }
 
         #endregion
 
         private void RemoveAllComponents()
         {
-            worldOperationListener?.BeforeWorldDispose(this);
-
             foreach (var components in componentContainers.GetValueArray(Allocator.Temp))
             {
                 components.Dispose();
@@ -264,8 +271,6 @@ namespace Atom.ECS
             componentContainers.Clear();
             componentContainers.Dispose();
             references.Clear();
-
-            worldOperationListener?.AfterWorldDispose(this);
         }
     }
 }
