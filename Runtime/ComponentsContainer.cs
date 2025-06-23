@@ -17,7 +17,7 @@
 #endregion
 
 using System;
-using Atom.UnsafeEx;
+using Atom.LowLevel;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 

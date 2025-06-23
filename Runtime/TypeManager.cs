@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Atom.UnsafeEx;
+using Atom.LowLevel;
 
 namespace Atom.ECS
 {
